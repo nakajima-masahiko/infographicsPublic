@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AIエージェント導入による開発プロセス刷新 インフォグラフィック</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+    }
+    body {
+      margin: 0;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #1b1f2a;
+      min-height: 100vh;
+    }
+    .wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 32px 20px 60px;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 32px;
+      color: #ffffff;
+    }
+    header h1 {
+      font-size: 32px;
+      margin: 0 0 12px;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    }
+    header p {
+      margin: 0;
+      color: rgba(255,255,255,0.9);
+      font-size: 16px;
+    }
+    .main-container {
+      background: #ffffff;
+      border-radius: 24px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+      overflow: hidden;
+    }
+
+    /* Hero Section */
+    .hero {
+      background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 100%);
+      padding: 40px;
+      color: #ffffff;
+      text-align: center;
+    }
+    .hero h2 {
+      font-size: 28px;
+      margin: 0 0 16px;
+    }
+    .hero p {
+      font-size: 16px;
+      opacity: 0.9;
+      max-width: 800px;
+      margin: 0 auto;
+      line-height: 1.8;
+    }
+
+    /* Paradigm Shift Section */
+    .paradigm-section {
+      padding: 50px 40px;
+      background: #f8fafc;
+    }
+    .section-title {
+      text-align: center;
+      font-size: 24px;
+      color: #1e3a5f;
+      margin: 0 0 40px;
+      position: relative;
+    }
+    .section-title::after {
+      content: '';
+      display: block;
+      width: 80px;
+      height: 4px;
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      margin: 16px auto 0;
+      border-radius: 2px;
+    }
+
+    .shift-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 30px;
+      flex-wrap: wrap;
+    }
+    .shift-box {
+      background: #ffffff;
+      border-radius: 20px;
+      padding: 30px;
+      width: 280px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+      text-align: center;
+    }
+    .shift-box.old {
+      border: 3px solid #ef4444;
+    }
+    .shift-box.new {
+      border: 3px solid #22c55e;
+    }
+    .shift-box h3 {
+      font-size: 18px;
+      margin: 0 0 16px;
+    }
+    .shift-box.old h3 { color: #ef4444; }
+    .shift-box.new h3 { color: #22c55e; }
+    .shift-box .icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+    .shift-box p {
+      font-size: 14px;
+      color: #4b5563;
+      margin: 0;
+      line-height: 1.7;
+    }
+    .arrow-container {
+      font-size: 48px;
+      color: #667eea;
+    }
+
+    /* Comparison Table */
+    .comparison-section {
+      padding: 50px 40px;
+    }
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      font-size: 14px;
+    }
+    .comparison-table th {
+      background: linear-gradient(135deg, #1e3a5f, #2d5a87);
+      color: #ffffff;
+      padding: 16px;
+      text-align: left;
+    }
+    .comparison-table th:first-child {
+      border-radius: 12px 0 0 0;
+    }
+    .comparison-table th:last-child {
+      border-radius: 0 12px 0 0;
+    }
+    .comparison-table td {
+      padding: 16px;
+      border-bottom: 1px solid #e5e7eb;
+      vertical-align: top;
+    }
+    .comparison-table tr:nth-child(even) {
+      background: #f8fafc;
+    }
+    .comparison-table tr:last-child td:first-child {
+      border-radius: 0 0 0 12px;
+    }
+    .comparison-table tr:last-child td:last-child {
+      border-radius: 0 0 12px 0;
+    }
+    .old-cell { color: #dc2626; }
+    .new-cell { color: #16a34a; font-weight: 600; }
+
+    /* GitHub Flow Section */
+    .github-section {
+      padding: 50px 40px;
+      background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
+      color: #ffffff;
+    }
+    .github-section .section-title {
+      color: #ffffff;
+    }
+    .flow-container {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-top: 30px;
+    }
+    .flow-step {
+      background: rgba(255,255,255,0.1);
+      border-radius: 16px;
+      padding: 24px;
+      width: 180px;
+      text-align: center;
+      position: relative;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .flow-step::after {
+      content: '\2192';
+      position: absolute;
+      right: -20px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 24px;
+      color: #58a6ff;
+    }
+    .flow-step:last-child::after {
+      display: none;
+    }
+    .flow-step .step-num {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 12px;
+      font-weight: 700;
+      font-size: 18px;
+    }
+    .flow-step .step-icon {
+      font-size: 36px;
+      margin-bottom: 12px;
+    }
+    .flow-step h4 {
+      font-size: 14px;
+      margin: 0 0 8px;
+      color: #58a6ff;
+    }
+    .flow-step p {
+      font-size: 12px;
+      margin: 0;
+      color: rgba(255,255,255,0.7);
+      line-height: 1.5;
+    }
+
+    /* Slack Section */
+    .slack-section {
+      padding: 50px 40px;
+      background: #f8fafc;
+    }
+    .slack-flow {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-top: 30px;
+    }
+    .slack-item {
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 24px;
+      width: 200px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    }
+    .slack-item .icon {
+      font-size: 40px;
+      margin-bottom: 12px;
+    }
+    .slack-item h4 {
+      font-size: 14px;
+      color: #1e3a5f;
+      margin: 0 0 8px;
+    }
+    .slack-item p {
+      font-size: 12px;
+      color: #6b7280;
+      margin: 0;
+      line-height: 1.5;
+    }
+    .slack-arrow {
+      font-size: 32px;
+      color: #667eea;
+    }
+
+    /* Stats Section */
+    .stats-section {
+      padding: 50px 40px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #ffffff;
+    }
+    .stats-section .section-title {
+      color: #ffffff;
+    }
+    .stats-container {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      flex-wrap: wrap;
+      margin-top: 30px;
+    }
+    .stat-card {
+      background: rgba(255,255,255,0.15);
+      border-radius: 20px;
+      padding: 30px;
+      text-align: center;
+      width: 200px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    .stat-card .number {
+      font-size: 48px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .stat-card .label {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    /* Benefits Section */
+    .benefits-section {
+      padding: 50px 40px;
+    }
+    .benefits-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 24px;
+      margin-top: 30px;
+    }
+    .benefit-card {
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 28px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+      border-left: 4px solid;
+    }
+    .benefit-card:nth-child(1) { border-color: #667eea; }
+    .benefit-card:nth-child(2) { border-color: #22c55e; }
+    .benefit-card:nth-child(3) { border-color: #f59e0b; }
+    .benefit-card:nth-child(4) { border-color: #ef4444; }
+    .benefit-card .icon {
+      font-size: 36px;
+      margin-bottom: 12px;
+    }
+    .benefit-card h4 {
+      font-size: 16px;
+      color: #1e3a5f;
+      margin: 0 0 12px;
+    }
+    .benefit-card p {
+      font-size: 13px;
+      color: #4b5563;
+      margin: 0;
+      line-height: 1.7;
+    }
+
+    /* Time Comparison */
+    .time-section {
+      padding: 50px 40px;
+      background: #f8fafc;
+    }
+    .time-container {
+      display: flex;
+      justify-content: center;
+      gap: 60px;
+      flex-wrap: wrap;
+      margin-top: 30px;
+    }
+    .time-box {
+      text-align: center;
+    }
+    .time-box h4 {
+      font-size: 16px;
+      color: #1e3a5f;
+      margin: 0 0 20px;
+    }
+    .time-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .time-bar .label {
+      width: 100px;
+      text-align: right;
+      font-size: 13px;
+      color: #4b5563;
+    }
+    .time-bar .bar {
+      height: 24px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-right: 12px;
+      font-size: 12px;
+      color: #ffffff;
+      font-weight: 600;
+    }
+    .time-bar .bar.old {
+      background: linear-gradient(90deg, #fca5a5, #ef4444);
+    }
+    .time-bar .bar.new {
+      background: linear-gradient(90deg, #86efac, #22c55e);
+    }
+
+    /* Footer */
+    .footer {
+      padding: 30px 40px;
+      background: #1e3a5f;
+      color: #ffffff;
+      text-align: center;
+    }
+    .footer p {
+      margin: 0;
+      font-size: 14px;
+      opacity: 0.8;
+    }
+
+    @media (max-width: 768px) {
+      .shift-container {
+        flex-direction: column;
+      }
+      .arrow-container {
+        transform: rotate(90deg);
+      }
+      .flow-step::after {
+        display: none;
+      }
+      .slack-arrow {
+        transform: rotate(90deg);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>AIエージェント導入による開発プロセス刷新</h1>
+      <p>競争力強化のための次世代開発フロー提案</p>
+    </header>
+
+    <div class="main-container">
+      <!-- Hero Section -->
+      <section class="hero">
+        <h2>開発の未来を切り拓く</h2>
+        <p>
+          自律型AIエージェント（Claude Code等）を「脅威」ではなく「レバレッジ（てこ）」として捉え、
+          ソフトウェア開発プロセスを根本的に変革。人間エンジニアの作業をAIに委譲することで
+          生産性を飛躍的に向上させ、品質・速度・コスト効率の劇的な強化を実現します。
+        </p>
+      </section>
+
+      <!-- Paradigm Shift Section -->
+      <section class="paradigm-section">
+        <h3 class="section-title">開発パラダイムシフト</h3>
+        <div class="shift-container">
+          <div class="shift-box old">
+            <div class="icon">&#128104;&#8205;&#128187;</div>
+            <h3>従来型プロセス</h3>
+            <p>
+              <strong>人間がコードを書く</strong><br><br>
+              価値定義 20% / 作業 80%<br>
+              PGがコードを書き、PLがレビュー<br>
+              実装に数日〜数週間
+            </p>
+          </div>
+          <div class="arrow-container">&#10132;</div>
+          <div class="shift-box new">
+            <div class="icon">&#129302;</div>
+            <h3>次世代プロセス</h3>
+            <p>
+              <strong>AIがコードを書く</strong><br><br>
+              価値定義 80% / 作業 20%<br>
+              人間は設計と最終判断に特化<br>
+              実装は数分〜数時間
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Comparison Table -->
+      <section class="comparison-section">
+        <h3 class="section-title">現行 vs 次世代プロセス比較</h3>
+        <table class="comparison-table">
+          <tr>
+            <th>項目</th>
+            <th>現行プロセス（人間中心）</th>
+            <th>次世代プロセス（AI活用）</th>
+          </tr>
+          <tr>
+            <td><strong>工数</strong></td>
+            <td class="old-cell">コーディング・テストに多大な人間工数が必要<br>例：ライブラリ更新に数時間〜数日</td>
+            <td class="new-cell">コーディング作業の大部分をAIが担当<br>例：ライブラリ更新を数分で完了</td>
+          </tr>
+          <tr>
+            <td><strong>コスト</strong></td>
+            <td class="old-cell">人月ベースで工数増＝コスト増<br>人件費負担大</td>
+            <td class="new-cell">開発あたりの人件費を大幅削減<br>同じリソースで2倍以上の成果も可能</td>
+          </tr>
+          <tr>
+            <td><strong>スピード</strong></td>
+            <td class="old-cell">実装〜リリースに時間を要する<br>日〜週単位のリードタイム</td>
+            <td class="new-cell">リードタイム劇的短縮<br>日内にPR作成・数日でリリース</td>
+          </tr>
+          <tr>
+            <td><strong>人間の役割</strong></td>
+            <td class="old-cell">PGが詳細実装作業に追われる<br>PLはコードレビュー等で手一杯</td>
+            <td class="new-cell">設計と最終判断に特化<br>アーキテクチャ策定とビジネス適合性チェックに集中</td>
+          </tr>
+        </table>
+      </section>
+
+      <!-- GitHub Flow Section -->
+      <section class="github-section">
+        <h3 class="section-title">GitHubを中心とした自律型開発フロー</h3>
+        <div class="flow-container">
+          <div class="flow-step">
+            <div class="step-num">1</div>
+            <div class="step-icon">&#128203;</div>
+            <h4>Issue起票</h4>
+            <p>開発者・PM・顧客が要件を記述<br>AIへの指示書として機能</p>
+          </div>
+          <div class="flow-step">
+            <div class="step-num">2</div>
+            <div class="step-icon">&#129302;</div>
+            <h4>AI検知</h4>
+            <p>AIエージェントがIssueを検知<br>自動でブランチ作成</p>
+          </div>
+          <div class="flow-step">
+            <div class="step-num">3</div>
+            <div class="step-icon">&#128187;</div>
+            <h4>AI実装</h4>
+            <p>AIがコードを自動生成<br>テストコードも作成</p>
+          </div>
+          <div class="flow-step">
+            <div class="step-num">4</div>
+            <div class="step-icon">&#128230;</div>
+            <h4>PR作成</h4>
+            <p>自動でPR発行<br>GitHub Actionsで品質検証</p>
+          </div>
+          <div class="flow-step">
+            <div class="step-num">5</div>
+            <div class="step-icon">&#9989;</div>
+            <h4>人間承認</h4>
+            <p>PLが最終レビュー<br>マージして本番反映</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slack Section -->
+      <section class="slack-section">
+        <h3 class="section-title">Slack連携による開発の民主化</h3>
+        <p style="text-align: center; color: #4b5563; margin-top: -20px;">
+          エンジニア以外のメンバーも直接プロダクト改善に参加できる環境を構築
+        </p>
+        <div class="slack-flow">
+          <div class="slack-item">
+            <div class="icon">&#128172;</div>
+            <h4>Slack</h4>
+            <p>非エンジニアが要望・<br>バグ報告を送信</p>
+          </div>
+          <div class="slack-arrow">&#10132;</div>
+          <div class="slack-item">
+            <div class="icon">&#128203;</div>
+            <h4>GitHub</h4>
+            <p>自動でIssue起票<br>AIが要件整理</p>
+          </div>
+          <div class="slack-arrow">&#10132;</div>
+          <div class="slack-item">
+            <div class="icon">&#129302;</div>
+            <h4>AIエージェント</h4>
+            <p>コード実装<br>PR自動作成</p>
+          </div>
+          <div class="slack-arrow">&#10132;</div>
+          <div class="slack-item">
+            <div class="icon">&#127760;</div>
+            <h4>プレビュー</h4>
+            <p>URL自動発行<br>Slackで共有</p>
+          </div>
+          <div class="slack-arrow">&#10132;</div>
+          <div class="slack-item">
+            <div class="icon">&#9989;</div>
+            <h4>確認・承認</h4>
+            <p>依頼者が動作確認<br>PLが最終承認</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Stats Section -->
+      <section class="stats-section">
+        <h3 class="section-title">導入効果（実績値）</h3>
+        <div class="stats-container">
+          <div class="stat-card">
+            <div class="number">1.7x</div>
+            <div class="label">チーム生産性向上</div>
+          </div>
+          <div class="stat-card">
+            <div class="number">2.4x</div>
+            <div class="label">タスク処理量増加</div>
+          </div>
+          <div class="stat-card">
+            <div class="number">120x</div>
+            <div class="label">作業時間短縮<br><small style="font-size:11px">（2時間→1分）</small></div>
+          </div>
+          <div class="stat-card">
+            <div class="number">即日</div>
+            <div class="label">要望→PR作成</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Time Comparison -->
+      <section class="time-section">
+        <h3 class="section-title">時間配分の変化</h3>
+        <div class="time-container">
+          <div class="time-box">
+            <h4>従来型</h4>
+            <div class="time-bar">
+              <span class="label">価値定義</span>
+              <div class="bar old" style="width: 60px;">20%</div>
+            </div>
+            <div class="time-bar">
+              <span class="label">作業（実装）</span>
+              <div class="bar old" style="width: 240px;">80%</div>
+            </div>
+          </div>
+          <div class="time-box">
+            <h4>次世代型</h4>
+            <div class="time-bar">
+              <span class="label">価値定義</span>
+              <div class="bar new" style="width: 240px;">80%</div>
+            </div>
+            <div class="time-bar">
+              <span class="label">作業（実装）</span>
+              <div class="bar new" style="width: 60px;">20%</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Benefits Section -->
+      <section class="benefits-section">
+        <h3 class="section-title">期待される経営効果</h3>
+        <div class="benefits-grid">
+          <div class="benefit-card">
+            <div class="icon">&#128200;</div>
+            <h4>利益率の向上</h4>
+            <p>生産性向上により、より少ない工数で同じアウトプットを実現。固定費あたりのアウトプット増で利益率が大幅に向上します。</p>
+          </div>
+          <div class="benefit-card">
+            <div class="icon">&#9889;</div>
+            <h4>納期短縮</h4>
+            <p>リードタイムの劇的短縮により、納期遅延リスクが低減。市場投入までの時間短縮で競争優位を確立します。</p>
+          </div>
+          <div class="benefit-card">
+            <div class="icon">&#128161;</div>
+            <h4>創造的業務へのシフト</h4>
+            <p>エンジニアがクリエイティブな仕事に集中可能に。イノベーション創出と人材の仕事満足度向上に貢献します。</p>
+          </div>
+          <div class="benefit-card">
+            <div class="icon">&#128737;</div>
+            <h4>品質向上・リスク低減</h4>
+            <p>AIによる自動テスト・レビューでヒューマンエラーを削減。品質の底上げとセキュリティリスク低減を実現します。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <footer class="footer">
+        <p>AIエージェントとの協働開発体制で、持続的かつ高効率な価値創出エンジンへ</p>
+      </footer>
+    </div>
+  </div>
+</body>
+</html>
