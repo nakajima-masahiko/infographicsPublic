@@ -189,19 +189,20 @@
     /* Tool Cards on Matrix */
     .tool-card {
       position: absolute;
-      width: 180px;
+      width: 150px;
       background: #ffffff;
-      border-radius: 16px;
-      padding: 16px;
+      border-radius: 14px;
+      padding: 14px;
       box-shadow: 0 8px 24px rgba(0,0,0,0.15);
       text-align: center;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      transition: transform 0.3s ease, box-shadow 0.3s ease, z-index 0s;
       cursor: pointer;
       z-index: 10;
     }
     .tool-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 12px 32px rgba(0,0,0,0.2);
+      transform: translateY(-5px) scale(1.05);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.25);
+      z-index: 100;
     }
     .tool-card .icon {
       width: 50px;
@@ -226,8 +227,8 @@
 
     /* Bubble */
     .tool-card.bubble {
-      left: 65%;
-      top: 40%;
+      left: 58%;
+      top: 38%;
       border: 3px solid var(--bubble-color);
     }
     .tool-card.bubble .icon {
@@ -238,8 +239,8 @@
 
     /* v0 */
     .tool-card.v0 {
-      left: 55%;
-      top: 10%;
+      left: 42%;
+      top: 8%;
       border: 3px solid var(--v0-color);
     }
     .tool-card.v0 .icon {
@@ -250,8 +251,8 @@
 
     /* FlutterFlow */
     .tool-card.flutterflow {
-      left: 70%;
-      top: 65%;
+      left: 68%;
+      top: 62%;
       border: 3px solid var(--flutter-color);
     }
     .tool-card.flutterflow .icon {
@@ -262,8 +263,8 @@
 
     /* Glide */
     .tool-card.glide {
-      left: 15%;
-      top: 8%;
+      left: 8%;
+      top: 6%;
       border: 3px solid var(--glide-color);
     }
     .tool-card.glide .icon {
@@ -502,16 +503,27 @@
 
     @media (max-width: 768px) {
       .matrix-container {
-        height: 700px;
+        height: 750px;
       }
       .tool-card {
-        width: 140px;
-        padding: 12px;
+        width: 120px;
+        padding: 10px;
       }
-      .tool-card.bubble { left: 55%; top: 45%; }
-      .tool-card.v0 { left: 45%; top: 15%; }
-      .tool-card.flutterflow { left: 55%; top: 70%; }
-      .tool-card.glide { left: 10%; top: 10%; }
+      .tool-card .icon {
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+      }
+      .tool-card h4 {
+        font-size: 14px;
+      }
+      .tool-card .tagline {
+        font-size: 10px;
+      }
+      .tool-card.bubble { left: 50%; top: 42%; }
+      .tool-card.v0 { left: 48%; top: 8%; }
+      .tool-card.flutterflow { left: 52%; top: 72%; }
+      .tool-card.glide { left: 5%; top: 5%; }
       .axis-label.y-axis { left: -100px; }
     }
   </style>
