@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ノーコード&AIアプリビルダー比較 2026 インフォグラフィック</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+      --deep-blue: #1a365d;
+      --slate-gray: #64748b;
+      --mint-green: #10b981;
+      --light-mint: #d1fae5;
+      --bubble-color: #0066ff;
+      --v0-color: #8b5cf6;
+      --flutter-color: #02569b;
+      --glide-color: #f59e0b;
+    }
+    body {
+      margin: 0;
+      background: linear-gradient(135deg, #1a365d 0%, #334155 100%);
+      color: #1b1f2a;
+      min-height: 100vh;
+    }
+    .wrap {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 32px 20px 60px;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 32px;
+      color: #ffffff;
+    }
+    header h1 {
+      font-size: 36px;
+      margin: 0 0 12px;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    }
+    header p {
+      margin: 0;
+      color: rgba(255,255,255,0.9);
+      font-size: 16px;
+    }
+    .main-container {
+      background: #ffffff;
+      border-radius: 24px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      overflow: hidden;
+    }
+
+    /* Hero Section */
+    .hero {
+      background: linear-gradient(135deg, var(--deep-blue) 0%, #2d4a6f 100%);
+      padding: 40px;
+      color: #ffffff;
+      text-align: center;
+    }
+    .hero h2 {
+      font-size: 28px;
+      margin: 0 0 16px;
+    }
+    .hero p {
+      font-size: 16px;
+      opacity: 0.9;
+      max-width: 900px;
+      margin: 0 auto;
+      line-height: 1.8;
+    }
+
+    /* Section Title */
+    .section-title {
+      text-align: center;
+      font-size: 24px;
+      color: var(--deep-blue);
+      margin: 0 0 40px;
+      position: relative;
+    }
+    .section-title::after {
+      content: '';
+      display: block;
+      width: 80px;
+      height: 4px;
+      background: linear-gradient(90deg, var(--mint-green), #34d399);
+      margin: 16px auto 0;
+      border-radius: 2px;
+    }
+
+    /* Matrix Section */
+    .matrix-section {
+      padding: 50px 40px;
+      background: #f8fafc;
+    }
+    .matrix-container {
+      position: relative;
+      max-width: 1000px;
+      margin: 0 auto;
+      height: 600px;
+      background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+      border-radius: 20px;
+      border: 2px solid #cbd5e1;
+    }
+    .axis-label {
+      position: absolute;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--slate-gray);
+    }
+    .axis-label.y-axis {
+      left: -120px;
+      top: 50%;
+      transform: rotate(-90deg) translateX(50%);
+      white-space: nowrap;
+    }
+    .axis-label.x-axis {
+      bottom: -40px;
+      left: 50%;
+      transform: translateX(-50%);
+      white-space: nowrap;
+    }
+    .axis-arrow {
+      position: absolute;
+      color: var(--slate-gray);
+    }
+    .axis-arrow.y {
+      left: 20px;
+      top: 20px;
+      bottom: 20px;
+      width: 2px;
+      background: linear-gradient(to top, #cbd5e1, var(--slate-gray));
+    }
+    .axis-arrow.y::after {
+      content: '';
+      position: absolute;
+      top: -8px;
+      left: -6px;
+      border-left: 7px solid transparent;
+      border-right: 7px solid transparent;
+      border-bottom: 12px solid var(--slate-gray);
+    }
+    .axis-arrow.x {
+      left: 20px;
+      bottom: 20px;
+      right: 20px;
+      height: 2px;
+      background: linear-gradient(to right, #cbd5e1, var(--slate-gray));
+    }
+    .axis-arrow.x::after {
+      content: '';
+      position: absolute;
+      right: -8px;
+      top: -6px;
+      border-top: 7px solid transparent;
+      border-bottom: 7px solid transparent;
+      border-left: 12px solid var(--slate-gray);
+    }
+    .grid-lines {
+      position: absolute;
+      left: 40px;
+      right: 40px;
+      top: 40px;
+      bottom: 40px;
+    }
+    .grid-line {
+      position: absolute;
+      background: rgba(148, 163, 184, 0.3);
+    }
+    .grid-line.horizontal {
+      left: 0;
+      right: 0;
+      height: 1px;
+    }
+    .grid-line.vertical {
+      top: 0;
+      bottom: 0;
+      width: 1px;
+    }
+    .quadrant-label {
+      position: absolute;
+      font-size: 11px;
+      color: var(--slate-gray);
+      opacity: 0.7;
+      padding: 8px;
+      border-radius: 6px;
+      background: rgba(255,255,255,0.5);
+    }
+
+    /* Tool Cards on Matrix */
+    .tool-card {
+      position: absolute;
+      width: 180px;
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+      text-align: center;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      cursor: pointer;
+      z-index: 10;
+    }
+    .tool-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.2);
+    }
+    .tool-card .icon {
+      width: 50px;
+      height: 50px;
+      margin: 0 auto 10px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+    .tool-card h4 {
+      margin: 0 0 6px;
+      font-size: 16px;
+    }
+    .tool-card .tagline {
+      font-size: 11px;
+      color: var(--slate-gray);
+      margin: 0;
+      line-height: 1.4;
+    }
+
+    /* Bubble */
+    .tool-card.bubble {
+      left: 65%;
+      top: 40%;
+      border: 3px solid var(--bubble-color);
+    }
+    .tool-card.bubble .icon {
+      background: linear-gradient(135deg, #0066ff, #0052cc);
+      color: white;
+    }
+    .tool-card.bubble h4 { color: var(--bubble-color); }
+
+    /* v0 */
+    .tool-card.v0 {
+      left: 55%;
+      top: 10%;
+      border: 3px solid var(--v0-color);
+    }
+    .tool-card.v0 .icon {
+      background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+      color: white;
+    }
+    .tool-card.v0 h4 { color: var(--v0-color); }
+
+    /* FlutterFlow */
+    .tool-card.flutterflow {
+      left: 70%;
+      top: 65%;
+      border: 3px solid var(--flutter-color);
+    }
+    .tool-card.flutterflow .icon {
+      background: linear-gradient(135deg, #02569b, #0175c2);
+      color: white;
+    }
+    .tool-card.flutterflow h4 { color: var(--flutter-color); }
+
+    /* Glide */
+    .tool-card.glide {
+      left: 15%;
+      top: 8%;
+      border: 3px solid var(--glide-color);
+    }
+    .tool-card.glide .icon {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: white;
+    }
+    .tool-card.glide h4 { color: var(--glide-color); }
+
+    /* Detail Cards Section */
+    .details-section {
+      padding: 50px 40px;
+    }
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+      margin-top: 30px;
+    }
+    .detail-card {
+      background: #ffffff;
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+      border-top: 4px solid;
+    }
+    .detail-card.bubble { border-color: var(--bubble-color); }
+    .detail-card.v0 { border-color: var(--v0-color); }
+    .detail-card.flutterflow { border-color: var(--flutter-color); }
+    .detail-card.glide { border-color: var(--glide-color); }
+
+    .detail-card .header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .detail-card .header .icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      color: white;
+    }
+    .detail-card.bubble .header .icon { background: linear-gradient(135deg, #0066ff, #0052cc); }
+    .detail-card.v0 .header .icon { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+    .detail-card.flutterflow .header .icon { background: linear-gradient(135deg, #02569b, #0175c2); }
+    .detail-card.glide .header .icon { background: linear-gradient(135deg, #f59e0b, #d97706); }
+
+    .detail-card .header h3 {
+      margin: 0;
+      font-size: 20px;
+    }
+    .detail-card.bubble .header h3 { color: var(--bubble-color); }
+    .detail-card.v0 .header h3 { color: var(--v0-color); }
+    .detail-card.flutterflow .header h3 { color: var(--flutter-color); }
+    .detail-card.glide .header h3 { color: var(--glide-color); }
+
+    .detail-card .header .position {
+      font-size: 12px;
+      color: var(--slate-gray);
+      margin-top: 4px;
+    }
+    .detail-card .features {
+      margin-bottom: 20px;
+    }
+    .detail-card .features li {
+      font-size: 13px;
+      color: #374151;
+      margin-bottom: 8px;
+      line-height: 1.5;
+    }
+
+    /* Radar Chart */
+    .radar-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .radar-chart {
+      width: 160px;
+      height: 160px;
+      position: relative;
+    }
+    .radar-chart svg {
+      width: 100%;
+      height: 100%;
+    }
+    .radar-labels {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+    }
+    .radar-label {
+      position: absolute;
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--slate-gray);
+    }
+    .radar-label.top { top: 0; left: 50%; transform: translateX(-50%); }
+    .radar-label.right { top: 50%; right: -5px; transform: translateY(-50%); }
+    .radar-label.bottom { bottom: 0; left: 50%; transform: translateX(-50%); }
+    .radar-label.left { top: 50%; left: -5px; transform: translateY(-50%); }
+
+    /* Legend Section */
+    .legend-section {
+      padding: 40px;
+      background: #f8fafc;
+    }
+    .legend-grid {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      flex-wrap: wrap;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .legend-dot {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+    }
+    .legend-dot.logic { background: var(--mint-green); }
+    .legend-dot.design { background: var(--v0-color); }
+    .legend-dot.cost { background: var(--glide-color); }
+    .legend-dot.portability { background: var(--bubble-color); }
+    .legend-text {
+      font-size: 14px;
+      color: var(--slate-gray);
+    }
+
+    /* Use Cases Section */
+    .usecases-section {
+      padding: 50px 40px;
+      background: linear-gradient(135deg, var(--deep-blue) 0%, #2d4a6f 100%);
+      color: white;
+    }
+    .usecases-section .section-title {
+      color: white;
+    }
+    .usecases-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      margin-top: 30px;
+    }
+    .usecase-card {
+      background: rgba(255,255,255,0.1);
+      border-radius: 16px;
+      padding: 24px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.15);
+    }
+    .usecase-card h4 {
+      font-size: 16px;
+      margin: 0 0 8px;
+      color: var(--mint-green);
+    }
+    .usecase-card p {
+      font-size: 13px;
+      margin: 0 0 12px;
+      opacity: 0.9;
+      line-height: 1.6;
+    }
+    .usecase-card .tool-tag {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .usecase-card .tool-tag.bubble { background: var(--bubble-color); }
+    .usecase-card .tool-tag.v0 { background: var(--v0-color); }
+    .usecase-card .tool-tag.flutterflow { background: var(--flutter-color); }
+    .usecase-card .tool-tag.glide { background: var(--glide-color); }
+
+    /* Summary Section */
+    .summary-section {
+      padding: 50px 40px;
+    }
+    .summary-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      font-size: 14px;
+    }
+    .summary-table th {
+      background: linear-gradient(135deg, var(--deep-blue), #2d4a6f);
+      color: #ffffff;
+      padding: 16px;
+      text-align: left;
+    }
+    .summary-table th:first-child { border-radius: 12px 0 0 0; }
+    .summary-table th:last-child { border-radius: 0 12px 0 0; }
+    .summary-table td {
+      padding: 14px 16px;
+      border-bottom: 1px solid #e5e7eb;
+      vertical-align: middle;
+    }
+    .summary-table tr:nth-child(even) { background: #f8fafc; }
+    .summary-table tr:last-child td:first-child { border-radius: 0 0 0 12px; }
+    .summary-table tr:last-child td:last-child { border-radius: 0 0 12px 0; }
+    .score-bar {
+      height: 8px;
+      border-radius: 4px;
+      background: #e5e7eb;
+      overflow: hidden;
+    }
+    .score-bar .fill {
+      height: 100%;
+      border-radius: 4px;
+    }
+    .score-bar .fill.high { background: var(--mint-green); }
+    .score-bar .fill.medium { background: var(--glide-color); }
+    .score-bar .fill.low { background: #ef4444; }
+
+    /* Footer */
+    .footer {
+      padding: 30px 40px;
+      background: var(--deep-blue);
+      color: #ffffff;
+      text-align: center;
+    }
+    .footer p {
+      margin: 0;
+      font-size: 14px;
+      opacity: 0.8;
+    }
+
+    @media (max-width: 768px) {
+      .matrix-container {
+        height: 700px;
+      }
+      .tool-card {
+        width: 140px;
+        padding: 12px;
+      }
+      .tool-card.bubble { left: 55%; top: 45%; }
+      .tool-card.v0 { left: 45%; top: 15%; }
+      .tool-card.flutterflow { left: 55%; top: 70%; }
+      .tool-card.glide { left: 10%; top: 10%; }
+      .axis-label.y-axis { left: -100px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>ノーコード&AIアプリビルダー比較 2026</h1>
+      <p>主要4ツールのポジショニングと特徴を徹底比較</p>
+    </header>
+
+    <div class="main-container">
+      <!-- Hero Section -->
+      <section class="hero">
+        <h2>最適なノーコードツールを選ぶために</h2>
+        <p>
+          2026年のノーコード・AIアプリビルダー市場は急速に進化しています。
+          Bubble、v0、FlutterFlow、Glideの4つの主要ツールを
+          「開発スピード・使いやすさ」と「カスタマイズ性・ロジック複雑度」の2軸で比較し、
+          プロジェクトに最適なツール選定をサポートします。
+        </p>
+      </section>
+
+      <!-- Matrix Section -->
+      <section class="matrix-section">
+        <h3 class="section-title">ポジショニングマトリクス</h3>
+        <div style="display: flex; justify-content: center;">
+          <div style="position: relative; padding-left: 140px; padding-bottom: 60px;">
+            <span class="axis-label y-axis">開発スピード & 使いやすさ &#8593;</span>
+            <span class="axis-label x-axis">カスタマイズ性 & ロジック複雑度 &#8594;</span>
+            <div class="matrix-container">
+              <!-- Grid Lines -->
+              <div class="grid-lines">
+                <div class="grid-line horizontal" style="top: 33%;"></div>
+                <div class="grid-line horizontal" style="top: 66%;"></div>
+                <div class="grid-line vertical" style="left: 33%;"></div>
+                <div class="grid-line vertical" style="left: 66%;"></div>
+              </div>
+
+              <!-- Axis Arrows -->
+              <div class="axis-arrow y"></div>
+              <div class="axis-arrow x"></div>
+
+              <!-- Quadrant Labels -->
+              <div class="quadrant-label" style="top: 50px; left: 50px;">高速・シンプル</div>
+              <div class="quadrant-label" style="top: 50px; right: 50px;">高速・高機能</div>
+              <div class="quadrant-label" style="bottom: 50px; left: 50px;">低速・シンプル</div>
+              <div class="quadrant-label" style="bottom: 50px; right: 50px;">堅牢・複雑</div>
+
+              <!-- Tool Cards -->
+              <div class="tool-card glide">
+                <div class="icon">&#9889;</div>
+                <h4>Glide</h4>
+                <p class="tagline">超高速開発<br>シンプルデータ特化</p>
+              </div>
+
+              <div class="tool-card v0">
+                <div class="icon">&#10024;</div>
+                <h4>v0</h4>
+                <p class="tagline">高速デザイン<br>AI駆動コード生成</p>
+              </div>
+
+              <div class="tool-card bubble">
+                <div class="icon">&#9881;</div>
+                <h4>Bubble</h4>
+                <p class="tagline">高度なロジック<br>堅牢なエンジン</p>
+              </div>
+
+              <div class="tool-card flutterflow">
+                <div class="icon">&#128241;</div>
+                <h4>FlutterFlow</h4>
+                <p class="tagline">高カスタマイズ<br>モバイル特化</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Details Section -->
+      <section class="details-section">
+        <h3 class="section-title">各ツール詳細比較</h3>
+        <div class="tools-grid">
+          <!-- Bubble -->
+          <div class="detail-card bubble">
+            <div class="header">
+              <div class="icon">&#9881;</div>
+              <div>
+                <h3>Bubble</h3>
+                <p class="position">高ロジック / 中速度</p>
+              </div>
+            </div>
+            <ul class="features">
+              <li>複雑なワークフローとビジネスロジックの構築が可能</li>
+              <li>豊富なプラグインエコシステム</li>
+              <li>データベース設計の自由度が高い</li>
+              <li>エンタープライズ向け機能が充実</li>
+            </ul>
+            <div class="radar-container">
+              <div class="radar-chart">
+                <svg viewBox="0 0 100 100">
+                  <!-- Background -->
+                  <polygon points="50,10 90,35 90,75 50,100 10,75 10,35" fill="none" stroke="#e5e7eb" stroke-width="1"/>
+                  <polygon points="50,20 80,38 80,72 50,90 20,72 20,38" fill="none" stroke="#e5e7eb" stroke-width="1"/>
+                  <polygon points="50,30 70,42 70,68 50,80 30,68 30,42" fill="none" stroke="#e5e7eb" stroke-width="1"/>
+                  <!-- Data -->
+                  <polygon points="50,15 85,40 70,70 50,85 25,55 30,35" fill="rgba(0,102,255,0.2)" stroke="#0066ff" stroke-width="2"/>
+                </svg>
+                <div class="radar-labels">
+                  <span class="radar-label top">ロジック</span>
+                  <span class="radar-label right">デザイン</span>
+                  <span class="radar-label bottom">コスト</span>
+                  <span class="radar-label left">移植性</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- v0 -->
+          <div class="detail-card v0">
+            <div class="header">
+              <div class="icon">&#10024;</div>
+              <div>
+                <h3>v0</h3>
+                <p class="position">高速度 / 高デザイン</p>
+              </div>
+            </div>
+            <ul class="features">
+              <li>AIによる自然言語からのUI生成</li>
+              <li>モダンなReactコンポーネント出力</li>
+              <li>デザインシステムとの親和性が高い</li>
+              <li>プロトタイピングに最適</li>
+            </ul>
+            <div class="radar-container">
+              <div class="radar-chart">
+                <svg viewBox="0 0 100 100">
+                  <!-- Background -->
+                  <polygon points="50,10 90,35 90,75 50,100 10,75 10,35" fill="none" stroke="#e5e7eb" stroke-width="1"/>
+                  <polygon points="50,20 80,38 80,72 50,90 20,72 20,38" fill="none" stroke="#e5e7eb" stroke-width="1"/>
+                  <polygon points="50,30 70,42 70,68 50,80 30,68 30,42" fill="none" stroke="#e5e7eb" stroke-width="1"/>
+                  <!-- Data -->
+                  <polygon points="50,30 88,32 60,72 50,70 35,60 20,40" fill="rgba(139,92,246,0.2)" stroke="#8b5cf6" stroke-width="2"/>
+                </svg>
+                <div class="radar-labels">
+                  <span class="radar-label top">ロジック</span>
+                  <span class="radar-label right">デザイン</span>
+                  <span class="radar-label bottom">コスト</span>
+                  <span class="radar-label left">移植性</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- FlutterFlow -->
+          <div class="detail-card flutterflow">
+            <div class="header">
+              <div class="icon">&#128241;</div>
+              <div>
+                <h3>FlutterFlow</h3>
+                <p class="position">高カスタマイズ / モバイル特化</p>
+              </div>
+            </div>
+            <ul class="features">
+              <li>ネイティブモバイルアプリを生成</li>
+              <li>Flutterコードをエクスポート可能</li>
+              <li>Firebase連携が容易</li>
+              <li>カスタムコード挿入に対応</li>
+            </ul>
+            <div class="radar-container">
+              <div class="radar-chart">
+                <svg viewBox="0 0 100 100">
+                  <!-- Background -->
+                  <polygon points="50,10 90,35 90,75 50,100 10,75 10,35" fill="none" stroke="#e5e7eb" stroke-width="1"/>
+                  <polygon points="50,20 80,38 80,72 50,90 20,72 20,38" fill="none" stroke="#e5e7eb" stroke-width="1"/>
+                  <polygon points="50,30 70,42 70,68 50,80 30,68 30,42" fill="none" stroke="#e5e7eb" stroke-width="1"/>
+                  <!-- Data -->
+                  <polygon points="50,22 75,45 65,75 50,75 15,60 25,38" fill="rgba(2,86,155,0.2)" stroke="#02569b" stroke-width="2"/>
+                </svg>
+                <div class="radar-labels">
+                  <span class="radar-label top">ロジック</span>
+                  <span class="radar-label right">デザイン</span>
+                  <span class="radar-label bottom">コスト</span>
+                  <span class="radar-label left">移植性</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Glide -->
+          <div class="detail-card glide">
+            <div class="header">
+              <div class="icon">&#9889;</div>
+              <div>
+                <h3>Glide</h3>
+                <p class="position">超高速 / シンプルデータ</p>
+              </div>
+            </div>
+            <ul class="features">
+              <li>スプレッドシートからアプリを即座に生成</li>
+              <li>学習コストが極めて低い</li>
+              <li>社内ツールに最適</li>
+              <li>無料プランが充実</li>
+            </ul>
+            <div class="radar-container">
+              <div class="radar-chart">
+                <svg viewBox="0 0 100 100">
+                  <!-- Background -->
+                  <polygon points="50,10 90,35 90,75 50,100 10,75 10,35" fill="none" stroke="#e5e7eb" stroke-width="1"/>
+                  <polygon points="50,20 80,38 80,72 50,90 20,72 20,38" fill="none" stroke="#e5e7eb" stroke-width="1"/>
+                  <polygon points="50,30 70,42 70,68 50,80 30,68 30,42" fill="none" stroke="#e5e7eb" stroke-width="1"/>
+                  <!-- Data -->
+                  <polygon points="50,40 65,50 80,68 50,75 25,68 22,45" fill="rgba(245,158,11,0.2)" stroke="#f59e0b" stroke-width="2"/>
+                </svg>
+                <div class="radar-labels">
+                  <span class="radar-label top">ロジック</span>
+                  <span class="radar-label right">デザイン</span>
+                  <span class="radar-label bottom">コスト</span>
+                  <span class="radar-label left">移植性</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Use Cases Section -->
+      <section class="usecases-section">
+        <h3 class="section-title">ユースケース別おすすめ</h3>
+        <div class="usecases-grid">
+          <div class="usecase-card">
+            <h4>&#128188; エンタープライズSaaS</h4>
+            <p>複雑なワークフローや多層的な権限管理が必要なB2Bアプリケーション</p>
+            <span class="tool-tag bubble">Bubble</span>
+          </div>
+          <div class="usecase-card">
+            <h4>&#127912; プロトタイプ・MVP</h4>
+            <p>デザイン重視の高品質なプロトタイプを素早く作成したい場合</p>
+            <span class="tool-tag v0">v0</span>
+          </div>
+          <div class="usecase-card">
+            <h4>&#128241; モバイルアプリ</h4>
+            <p>iOS/Android両対応のネイティブアプリを開発したい場合</p>
+            <span class="tool-tag flutterflow">FlutterFlow</span>
+          </div>
+          <div class="usecase-card">
+            <h4>&#128202; 社内業務ツール</h4>
+            <p>スプレッドシートベースの社内管理アプリを即座に構築</p>
+            <span class="tool-tag glide">Glide</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Summary Table Section -->
+      <section class="summary-section">
+        <h3 class="section-title">スコア比較サマリー</h3>
+        <table class="summary-table">
+          <tr>
+            <th>ツール</th>
+            <th>ロジック</th>
+            <th>デザイン</th>
+            <th>コスト効率</th>
+            <th>移植性</th>
+            <th>学習曲線</th>
+          </tr>
+          <tr>
+            <td><strong style="color: var(--bubble-color);">Bubble</strong></td>
+            <td>
+              <div class="score-bar"><div class="fill high" style="width: 95%;"></div></div>
+            </td>
+            <td>
+              <div class="score-bar"><div class="fill medium" style="width: 70%;"></div></div>
+            </td>
+            <td>
+              <div class="score-bar"><div class="fill medium" style="width: 50%;"></div></div>
+            </td>
+            <td>
+              <div class="score-bar"><div class="fill low" style="width: 30%;"></div></div>
+            </td>
+            <td>
+              <div class="score-bar"><div class="fill low" style="width: 40%;"></div></div>
+            </td>
+          </tr>
+          <tr>
+            <td><strong style="color: var(--v0-color);">v0</strong></td>
+            <td>
+              <div class="score-bar"><div class="fill medium" style="width: 50%;"></div></div>
+            </td>
+            <td>
+              <div class="score-bar"><div class="fill high" style="width: 95%;"></div></div>
+            </td>
+            <td>
+              <div class="score-bar"><div class="fill high" style="width: 80%;"></div></div>
+            </td>
+            <td>
+              <div class="score-bar"><div class="fill high" style="width: 90%;"></div></div>
+            </td>
+            <td>
+              <div class="score-bar"><div class="fill high" style="width: 85%;"></div></div>
+            </td>
+          </tr>
+          <tr>
+            <td><strong style="color: var(--flutter-color);">FlutterFlow</strong></td>
+            <td>
+              <div class="score-bar"><div class="fill high" style="width: 80%;"></div></div>
+            </td>
+            <td>
+              <div class="score-bar"><div class="fill high" style="width: 85%;"></div></div>
+            </td>
+            <td>
+              <div class="score-bar"><div class="fill medium" style="width: 60%;"></div></div>
+            </td>
+            <td>
+              <div class="score-bar"><div class="fill high" style="width: 95%;"></div></div>
+            </td>
+            <td>
+              <div class="score-bar"><div class="fill medium" style="width: 55%;"></div></div>
+            </td>
+          </tr>
+          <tr>
+            <td><strong style="color: var(--glide-color);">Glide</strong></td>
+            <td>
+              <div class="score-bar"><div class="fill low" style="width: 35%;"></div></div>
+            </td>
+            <td>
+              <div class="score-bar"><div class="fill medium" style="width: 60%;"></div></div>
+            </td>
+            <td>
+              <div class="score-bar"><div class="fill high" style="width: 95%;"></div></div>
+            </td>
+            <td>
+              <div class="score-bar"><div class="fill low" style="width: 25%;"></div></div>
+            </td>
+            <td>
+              <div class="score-bar"><div class="fill high" style="width: 95%;"></div></div>
+            </td>
+          </tr>
+        </table>
+      </section>
+
+      <!-- Footer -->
+      <footer class="footer">
+        <p>ノーコード&AIアプリビルダー比較 2026 | プロジェクト要件に最適なツールを選択しましょう</p>
+      </footer>
+    </div>
+  </div>
+</body>
+</html>
