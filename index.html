@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>インフォグラフィック一覧</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #1b1f2a;
+      min-height: 100vh;
+    }
+    .wrap {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 40px 20px 60px;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+      color: #ffffff;
+    }
+    header h1 {
+      font-size: 36px;
+      margin: 0 0 12px;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    }
+    header p {
+      margin: 0;
+      color: rgba(255,255,255,0.9);
+      font-size: 16px;
+    }
+    .main-container {
+      background: #ffffff;
+      border-radius: 24px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+      padding: 40px;
+    }
+    .category {
+      margin-bottom: 36px;
+    }
+    .category:last-child {
+      margin-bottom: 0;
+    }
+    .category-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #e5e7eb;
+    }
+    .category-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+    .category-icon.github {
+      background: linear-gradient(135deg, #24292e 0%, #586069 100%);
+    }
+    .category-icon.nocode {
+      background: linear-gradient(135deg, #1a365d 0%, #334155 100%);
+    }
+    .category-icon.passkey {
+      background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+    }
+    .category-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: #1f2937;
+      margin: 0;
+    }
+    .card-list {
+      display: grid;
+      gap: 16px;
+    }
+    .card {
+      display: block;
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 20px 24px;
+      text-decoration: none;
+      color: inherit;
+      transition: all 0.2s ease;
+    }
+    .card:hover {
+      background: #f3f4f6;
+      border-color: #667eea;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.15);
+    }
+    .card-title {
+      font-size: 17px;
+      font-weight: 600;
+      color: #1f2937;
+      margin: 0 0 8px;
+    }
+    .card-path {
+      font-size: 13px;
+      color: #6b7280;
+      margin: 0;
+      font-family: monospace;
+    }
+    footer {
+      text-align: center;
+      margin-top: 40px;
+      color: rgba(255,255,255,0.7);
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>📊 インフォグラフィック一覧</h1>
+      <p>各種技術トピックをビジュアルでわかりやすく解説</p>
+    </header>
+
+    <div class="main-container">
+      <!-- GitHub カテゴリ -->
+      <section class="category">
+        <div class="category-header">
+          <div class="category-icon github">🐙</div>
+          <h2 class="category-title">GitHub / AI開発</h2>
+        </div>
+        <div class="card-list">
+          <a href="GitHub/ai_agent_development_infographic.html" class="card">
+            <p class="card-title">AIエージェント導入による開発プロセス刷新</p>
+            <p class="card-path">GitHub/ai_agent_development_infographic.html</p>
+          </a>
+          <a href="GitHub/codex_github_infographic.html" class="card">
+            <p class="card-title">ChatGPT Codex × GitHub 連動フロー</p>
+            <p class="card-path">GitHub/codex_github_infographic.html</p>
+          </a>
+        </div>
+      </section>
+
+      <!-- ノーコード カテゴリ -->
+      <section class="category">
+        <div class="category-header">
+          <div class="category-icon nocode">🛠️</div>
+          <h2 class="category-title">ノーコード / ローコード</h2>
+        </div>
+        <div class="card-list">
+          <a href="nocode/nocode_ai_builders_comparison_2026.html" class="card">
+            <p class="card-title">ノーコード&AIアプリビルダー比較 2026</p>
+            <p class="card-path">nocode/nocode_ai_builders_comparison_2026.html</p>
+          </a>
+        </div>
+      </section>
+
+      <!-- パスキー カテゴリ -->
+      <section class="category">
+        <div class="category-header">
+          <div class="category-icon passkey">🔐</div>
+          <h2 class="category-title">パスキー / 認証</h2>
+        </div>
+        <div class="card-list">
+          <a href="passkey/PasskeyAAGUIDExplanation.html" class="card">
+            <p class="card-title">パスキーとAAGUIDの仕組み</p>
+            <p class="card-path">passkey/PasskeyAAGUIDExplanation.html</p>
+          </a>
+          <a href="passkey/PasskeyBootstrappingReauth.html" class="card">
+            <p class="card-title">パスキーのブートストラッピングと再認証</p>
+            <p class="card-path">passkey/PasskeyBootstrappingReauth.html</p>
+          </a>
+        </div>
+      </section>
+    </div>
+
+    <footer>
+      <p>© 2026 Infographics Collection</p>
+    </footer>
+  </div>
+</body>
+</html>
