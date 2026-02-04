@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Grok ツール一覧 - 機能と引数リファレンス</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+      --grok-primary: #1d9bf0;
+      --grok-dark: #0f1419;
+      --grok-gray: #536471;
+      --grok-light: #eff3f4;
+      --code-bg: #f7f9fa;
+      --web-color: #10b981;
+      --x-color: #1d9bf0;
+      --media-color: #f59e0b;
+      --file-color: #8b5cf6;
+      --chat-color: #ec4899;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      background: linear-gradient(135deg, #0f1419 0%, #1a2634 100%);
+      color: #e7e9ea;
+      min-height: 100vh;
+    }
+    .wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 32px 20px 60px;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 32px;
+      color: #ffffff;
+    }
+    header h1 {
+      font-size: 36px;
+      margin: 0 0 12px;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+    header h1 .logo {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, var(--grok-primary), #0066cc);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+    }
+    header p {
+      margin: 0;
+      color: rgba(255,255,255,0.8);
+      font-size: 16px;
+    }
+    .main-container {
+      background: #ffffff;
+      border-radius: 24px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+      overflow: hidden;
+    }
+
+    /* Hero Section */
+    .hero {
+      background: linear-gradient(135deg, var(--grok-dark) 0%, #2d3640 100%);
+      padding: 40px;
+      color: #ffffff;
+      text-align: center;
+    }
+    .hero h2 {
+      font-size: 26px;
+      margin: 0 0 16px;
+      color: var(--grok-primary);
+    }
+    .hero p {
+      font-size: 15px;
+      opacity: 0.9;
+      max-width: 800px;
+      margin: 0 auto;
+      line-height: 1.8;
+    }
+
+    /* Category Stats */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 16px;
+      margin-top: 30px;
+    }
+    .stat-card {
+      background: rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      backdrop-filter: blur(10px);
+    }
+    .stat-card .icon {
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+    .stat-card .number {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--grok-primary);
+    }
+    .stat-card .label {
+      font-size: 12px;
+      opacity: 0.8;
+      margin-top: 4px;
+    }
+
+    /* Section Title */
+    .section-title {
+      text-align: center;
+      font-size: 24px;
+      color: var(--grok-dark);
+      margin: 0 0 32px;
+      position: relative;
+    }
+    .section-title::after {
+      content: '';
+      display: block;
+      width: 80px;
+      height: 4px;
+      background: linear-gradient(90deg, var(--grok-primary), #0066cc);
+      margin: 16px auto 0;
+      border-radius: 2px;
+    }
+
+    /* Tools Section */
+    .tools-section {
+      padding: 50px 40px;
+      background: #f7f9fa;
+    }
+    .category-group {
+      margin-bottom: 40px;
+    }
+    .category-group:last-child {
+      margin-bottom: 0;
+    }
+    .category-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #e1e8ed;
+    }
+    .category-badge {
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 600;
+      color: white;
+    }
+    .category-badge.code { background: var(--grok-primary); }
+    .category-badge.web { background: var(--web-color); }
+    .category-badge.x { background: var(--x-color); }
+    .category-badge.media { background: var(--media-color); }
+    .category-badge.file { background: var(--file-color); }
+    .category-badge.chat { background: var(--chat-color); }
+
+    .tools-grid {
+      display: grid;
+      gap: 20px;
+    }
+
+    /* Tool Card */
+    .tool-card {
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      border-left: 4px solid var(--grok-primary);
+      transition: all 0.3s ease;
+    }
+    .tool-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+    }
+    .tool-card.code { border-left-color: var(--grok-primary); }
+    .tool-card.web { border-left-color: var(--web-color); }
+    .tool-card.x { border-left-color: var(--x-color); }
+    .tool-card.media { border-left-color: var(--media-color); }
+    .tool-card.file { border-left-color: var(--file-color); }
+    .tool-card.chat { border-left-color: var(--chat-color); }
+
+    .tool-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    .tool-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      color: white;
+      flex-shrink: 0;
+    }
+    .tool-icon.code { background: linear-gradient(135deg, var(--grok-primary), #0066cc); }
+    .tool-icon.web { background: linear-gradient(135deg, var(--web-color), #059669); }
+    .tool-icon.x { background: linear-gradient(135deg, var(--x-color), #0066cc); }
+    .tool-icon.media { background: linear-gradient(135deg, var(--media-color), #d97706); }
+    .tool-icon.file { background: linear-gradient(135deg, var(--file-color), #7c3aed); }
+    .tool-icon.chat { background: linear-gradient(135deg, var(--chat-color), #db2777); }
+
+    .tool-info {
+      flex: 1;
+    }
+    .tool-name {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--grok-dark);
+      margin: 0 0 4px;
+    }
+    .tool-action {
+      display: inline-block;
+      background: var(--code-bg);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-family: monospace;
+      font-size: 13px;
+      color: var(--grok-primary);
+      border: 1px solid #e1e8ed;
+    }
+    .tool-description {
+      font-size: 14px;
+      color: var(--grok-gray);
+      line-height: 1.7;
+      margin-bottom: 16px;
+    }
+
+    /* Arguments */
+    .args-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--grok-dark);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .args-list {
+      background: var(--code-bg);
+      border-radius: 10px;
+      padding: 16px;
+      border: 1px solid #e1e8ed;
+    }
+    .arg-item {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 10px;
+      font-size: 13px;
+    }
+    .arg-item:last-child {
+      margin-bottom: 0;
+    }
+    .arg-name {
+      font-family: monospace;
+      background: #ffffff;
+      padding: 3px 8px;
+      border-radius: 4px;
+      color: #d73a49;
+      border: 1px solid #e1e8ed;
+      font-weight: 600;
+    }
+    .arg-type {
+      font-family: monospace;
+      color: var(--file-color);
+      font-size: 12px;
+    }
+    .arg-required {
+      background: #fef2f2;
+      color: #dc2626;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .arg-optional {
+      background: #f0fdf4;
+      color: #16a34a;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .arg-desc {
+      width: 100%;
+      color: var(--grok-gray);
+      padding-left: 16px;
+      border-left: 2px solid #e1e8ed;
+      margin-top: 4px;
+    }
+
+    /* Footer */
+    .footer {
+      padding: 30px 40px;
+      background: var(--grok-dark);
+      color: #ffffff;
+      text-align: center;
+    }
+    .footer p {
+      margin: 0;
+      font-size: 14px;
+      opacity: 0.8;
+    }
+
+    @media (max-width: 768px) {
+      header h1 {
+        font-size: 28px;
+      }
+      .tools-section {
+        padding: 30px 20px;
+      }
+      .tool-card {
+        padding: 20px;
+      }
+      .tool-header {
+        flex-direction: column;
+        gap: 12px;
+      }
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>
+        <span class="logo">&#129302;</span>
+        Grok ツール一覧
+      </h1>
+      <p>Grokで利用可能な全13ツールの機能と引数リファレンス</p>
+    </header>
+
+    <div class="main-container">
+      <!-- Hero Section -->
+      <section class="hero">
+        <h2>Grokの強力なツールセット</h2>
+        <p>
+          Grokはコード実行、Web検索、X（旧Twitter）連携、画像・動画処理、PDF操作など、
+          多様なタスクをサポートする13のツールを提供しています。
+          各ツールのアクション名と引数を正確に理解して、効果的に活用しましょう。
+        </p>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="icon">&#128187;</div>
+            <div class="number">1</div>
+            <div class="label">コード実行</div>
+          </div>
+          <div class="stat-card">
+            <div class="icon">&#127760;</div>
+            <div class="number">2</div>
+            <div class="label">Web検索</div>
+          </div>
+          <div class="stat-card">
+            <div class="icon">&#120143;</div>
+            <div class="number">5</div>
+            <div class="label">X連携</div>
+          </div>
+          <div class="stat-card">
+            <div class="icon">&#128247;</div>
+            <div class="number">3</div>
+            <div class="label">メディア</div>
+          </div>
+          <div class="stat-card">
+            <div class="icon">&#128196;</div>
+            <div class="number">2</div>
+            <div class="label">PDF操作</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tools Section -->
+      <section class="tools-section">
+        <h3 class="section-title">ツール詳細リファレンス</h3>
+
+        <!-- Code Execution -->
+        <div class="category-group">
+          <div class="category-header">
+            <span class="category-badge code">&#128187; コード実行</span>
+          </div>
+          <div class="tools-grid">
+            <div class="tool-card code">
+              <div class="tool-header">
+                <div class="tool-icon code">&#128187;</div>
+                <div class="tool-info">
+                  <h4 class="tool-name">1. Code Execution</h4>
+                  <code class="tool-action">code_execution</code>
+                </div>
+              </div>
+              <p class="tool-description">
+                ステートフルなコードインタープリタで、コードを実行して出力を確認できます。
+                REPL環境なので、前の実行結果が保持されます。アタッチメントのファイルにアクセス可能で、
+                ファイル名を直接コードで参照します（例: open('test.txt', 'r')）。
+                デフォルトのPython 3.12.3環境で、基本ライブラリやSTEM関連ライブラリ（numpy, sympy, rdkitなど）が利用可能。
+                インターネットアクセスはpolygonとcoingeckoのみで、追加パッケージのインストールは不可。
+              </p>
+              <div class="args-title">&#128221; 引数</div>
+              <div class="args-list">
+                <div class="arg-item">
+                  <span class="arg-name">code</span>
+                  <span class="arg-type">string</span>
+                  <span class="arg-required">必須</span>
+                  <div class="arg-desc">実行するコード</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Web Tools -->
+        <div class="category-group">
+          <div class="category-header">
+            <span class="category-badge web">&#127760; Web検索・閲覧</span>
+          </div>
+          <div class="tools-grid">
+            <div class="tool-card web">
+              <div class="tool-header">
+                <div class="tool-icon web">&#128463;</div>
+                <div class="tool-info">
+                  <h4 class="tool-name">2. Browse Page</h4>
+                  <code class="tool-action">browse_page</code>
+                </div>
+              </div>
+              <p class="tool-description">
+                指定したウェブサイトのURLからコンテンツを取得します。
+                LLMサマライザーを使用して、提供された指示に基づいて抽出/要約します。
+              </p>
+              <div class="args-title">&#128221; 引数</div>
+              <div class="args-list">
+                <div class="arg-item">
+                  <span class="arg-name">url</span>
+                  <span class="arg-type">string</span>
+                  <span class="arg-required">必須</span>
+                  <div class="arg-desc">閲覧するウェブページのURL</div>
+                </div>
+                <div class="arg-item">
+                  <span class="arg-name">instructions</span>
+                  <span class="arg-type">string</span>
+                  <span class="arg-required">必須</span>
+                  <div class="arg-desc">サマライザーへの指示。明確で自己完結したものにし、広範な概要や特定の詳細を指定</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="tool-card web">
+              <div class="tool-header">
+                <div class="tool-icon web">&#128269;</div>
+                <div class="tool-info">
+                  <h4 class="tool-name">3. Web Search</h4>
+                  <code class="tool-action">web_search</code>
+                </div>
+              </div>
+              <p class="tool-description">
+                ウェブを検索します。site:reddit.comなどの検索演算子を使用可能。
+              </p>
+              <div class="args-title">&#128221; 引数</div>
+              <div class="args-list">
+                <div class="arg-item">
+                  <span class="arg-name">query</span>
+                  <span class="arg-type">string</span>
+                  <span class="arg-required">必須</span>
+                  <div class="arg-desc">検索クエリ</div>
+                </div>
+                <div class="arg-item">
+                  <span class="arg-name">num_results</span>
+                  <span class="arg-type">integer</span>
+                  <span class="arg-optional">オプション</span>
+                  <div class="arg-desc">結果数（デフォルト10、最大30）</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- X Tools -->
+        <div class="category-group">
+          <div class="category-header">
+            <span class="category-badge x">&#120143; X（旧Twitter）連携</span>
+          </div>
+          <div class="tools-grid">
+            <div class="tool-card x">
+              <div class="tool-header">
+                <div class="tool-icon x">&#128270;</div>
+                <div class="tool-info">
+                  <h4 class="tool-name">4. X Keyword Search</h4>
+                  <code class="tool-action">x_keyword_search</code>
+                </div>
+              </div>
+              <p class="tool-description">
+                Xの投稿を高度に検索するツール。
+              </p>
+              <div class="args-title">&#128221; 引数</div>
+              <div class="args-list">
+                <div class="arg-item">
+                  <span class="arg-name">query</span>
+                  <span class="arg-type">string</span>
+                  <span class="arg-required">必須</span>
+                  <div class="arg-desc">Xの高度検索クエリ文字列。すべての高度演算子をサポート（例: (puppy OR kitten) filter:images）</div>
+                </div>
+                <div class="arg-item">
+                  <span class="arg-name">limit</span>
+                  <span class="arg-type">integer</span>
+                  <span class="arg-optional">オプション</span>
+                  <div class="arg-desc">返却する投稿数（デフォルト3）</div>
+                </div>
+                <div class="arg-item">
+                  <span class="arg-name">mode</span>
+                  <span class="arg-type">string</span>
+                  <span class="arg-optional">オプション</span>
+                  <div class="arg-desc">ソートモード：TopまたはLatest（デフォルトTop）</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="tool-card x">
+              <div class="tool-header">
+                <div class="tool-icon x">&#128301;</div>
+                <div class="tool-info">
+                  <h4 class="tool-name">5. X Semantic Search</h4>
+                  <code class="tool-action">x_semantic_search</code>
+                </div>
+              </div>
+              <p class="tool-description">
+                意味検索クエリに関連するXの投稿を取得。
+              </p>
+              <div class="args-title">&#128221; 引数</div>
+              <div class="args-list">
+                <div class="arg-item">
+                  <span class="arg-name">query</span>
+                  <span class="arg-type">string</span>
+                  <span class="arg-required">必須</span>
+                  <div class="arg-desc">意味検索クエリ</div>
+                </div>
+                <div class="arg-item">
+                  <span class="arg-name">limit</span>
+                  <span class="arg-type">integer</span>
+                  <span class="arg-optional">オプション</span>
+                  <div class="arg-desc">返却する投稿数（デフォルト3）</div>
+                </div>
+                <div class="arg-item">
+                  <span class="arg-name">from_date</span>
+                  <span class="arg-type">string | null</span>
+                  <span class="arg-optional">オプション</span>
+                  <div class="arg-desc">開始日（YYYY-MM-DD、デフォルトNone）</div>
+                </div>
+                <div class="arg-item">
+                  <span class="arg-name">to_date</span>
+                  <span class="arg-type">string | null</span>
+                  <span class="arg-optional">オプション</span>
+                  <div class="arg-desc">終了日（YYYY-MM-DD、デフォルトNone）</div>
+                </div>
+                <div class="arg-item">
+                  <span class="arg-name">exclude_usernames</span>
+                  <span class="arg-type">array | null</span>
+                  <span class="arg-optional">オプション</span>
+                  <div class="arg-desc">除外ユーザー名（デフォルトNone）</div>
+                </div>
+                <div class="arg-item">
+                  <span class="arg-name">usernames</span>
+                  <span class="arg-type">array | null</span>
+                  <span class="arg-optional">オプション</span>
+                  <div class="arg-desc">含むユーザー名（デフォルトNone）</div>
+                </div>
+                <div class="arg-item">
+                  <span class="arg-name">min_score_threshold</span>
+                  <span class="arg-type">number</span>
+                  <span class="arg-optional">オプション</span>
+                  <div class="arg-desc">最小関連スコア（デフォルト0.18）</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="tool-card x">
+              <div class="tool-header">
+                <div class="tool-icon x">&#128100;</div>
+                <div class="tool-info">
+                  <h4 class="tool-name">6. X User Search</h4>
+                  <code class="tool-action">x_user_search</code>
+                </div>
+              </div>
+              <p class="tool-description">
+                検索クエリに基づいてXユーザーを検索。
+              </p>
+              <div class="args-title">&#128221; 引数</div>
+              <div class="args-list">
+                <div class="arg-item">
+                  <span class="arg-name">query</span>
+                  <span class="arg-type">string</span>
+                  <span class="arg-required">必須</span>
+                  <div class="arg-desc">検索する名前またはアカウント</div>
+                </div>
+                <div class="arg-item">
+                  <span class="arg-name">count</span>
+                  <span class="arg-type">integer</span>
+                  <span class="arg-optional">オプション</span>
+                  <div class="arg-desc">返却するユーザー数（デフォルト3）</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="tool-card x">
+              <div class="tool-header">
+                <div class="tool-icon x">&#128172;</div>
+                <div class="tool-info">
+                  <h4 class="tool-name">7. X Thread Fetch</h4>
+                  <code class="tool-action">x_thread_fetch</code>
+                </div>
+              </div>
+              <p class="tool-description">
+                X投稿とそのコンテキスト（親やリプライ）を取得。
+              </p>
+              <div class="args-title">&#128221; 引数</div>
+              <div class="args-list">
+                <div class="arg-item">
+                  <span class="arg-name">post_id</span>
+                  <span class="arg-type">integer</span>
+                  <span class="arg-required">必須</span>
+                  <div class="arg-desc">投稿ID</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Media Tools -->
+        <div class="category-group">
+          <div class="category-header">
+            <span class="category-badge media">&#128247; メディア</span>
+          </div>
+          <div class="tools-grid">
+            <div class="tool-card media">
+              <div class="tool-header">
+                <div class="tool-icon media">&#128444;</div>
+                <div class="tool-info">
+                  <h4 class="tool-name">8. View Image</h4>
+                  <code class="tool-action">view_image</code>
+                </div>
+              </div>
+              <p class="tool-description">
+                指定したURLまたはIDの画像を表示。
+              </p>
+              <div class="args-title">&#128221; 引数</div>
+              <div class="args-list">
+                <div class="arg-item">
+                  <span class="arg-name">image_url</span>
+                  <span class="arg-type">string | null</span>
+                  <span class="arg-optional">オプション</span>
+                  <div class="arg-desc">画像URL（デフォルトNone）</div>
+                </div>
+                <div class="arg-item">
+                  <span class="arg-name">image_id</span>
+                  <span class="arg-type">integer | null</span>
+                  <span class="arg-optional">オプション</span>
+                  <div class="arg-desc">画像ID（デフォルトNone）</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="tool-card media">
+              <div class="tool-header">
+                <div class="tool-icon media">&#127909;</div>
+                <div class="tool-info">
+                  <h4 class="tool-name">9. View X Video</h4>
+                  <code class="tool-action">view_x_video</code>
+                </div>
+              </div>
+              <p class="tool-description">
+                X上のビデオのフレームと字幕を表示。URLはXホストのビデオに直接リンク。
+              </p>
+              <div class="args-title">&#128221; 引数</div>
+              <div class="args-list">
+                <div class="arg-item">
+                  <span class="arg-name">video_url</span>
+                  <span class="arg-type">string</span>
+                  <span class="arg-required">必須</span>
+                  <div class="arg-desc">ビデオURL</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="tool-card media">
+              <div class="tool-header">
+                <div class="tool-icon media">&#128269;</div>
+                <div class="tool-info">
+                  <h4 class="tool-name">12. Search Images</h4>
+                  <code class="tool-action">search_images</code>
+                </div>
+              </div>
+              <p class="tool-description">
+                説明に基づいて画像を検索。視覚的な文脈を追加する場合に使用。
+              </p>
+              <div class="args-title">&#128221; 引数</div>
+              <div class="args-list">
+                <div class="arg-item">
+                  <span class="arg-name">image_description</span>
+                  <span class="arg-type">string</span>
+                  <span class="arg-required">必須</span>
+                  <div class="arg-desc">画像の説明</div>
+                </div>
+                <div class="arg-item">
+                  <span class="arg-name">number_of_images</span>
+                  <span class="arg-type">integer</span>
+                  <span class="arg-optional">オプション</span>
+                  <div class="arg-desc">画像数（デフォルト3）</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PDF Tools -->
+        <div class="category-group">
+          <div class="category-header">
+            <span class="category-badge file">&#128196; PDF操作</span>
+          </div>
+          <div class="tools-grid">
+            <div class="tool-card file">
+              <div class="tool-header">
+                <div class="tool-icon file">&#128270;</div>
+                <div class="tool-info">
+                  <h4 class="tool-name">10. Search Pdf Attachment</h4>
+                  <code class="tool-action">search_pdf_attachment</code>
+                </div>
+              </div>
+              <p class="tool-description">
+                PDFファイルで検索クエリに関連するページを検索。ページ番号とテキストスニペットを返却。
+              </p>
+              <div class="args-title">&#128221; 引数</div>
+              <div class="args-list">
+                <div class="arg-item">
+                  <span class="arg-name">file_name</span>
+                  <span class="arg-type">string</span>
+                  <span class="arg-required">必須</span>
+                  <div class="arg-desc">PDFファイル名</div>
+                </div>
+                <div class="arg-item">
+                  <span class="arg-name">query</span>
+                  <span class="arg-type">string</span>
+                  <span class="arg-required">必須</span>
+                  <div class="arg-desc">検索クエリ</div>
+                </div>
+                <div class="arg-item">
+                  <span class="arg-name">mode</span>
+                  <span class="arg-type">string</span>
+                  <span class="arg-required">必須</span>
+                  <div class="arg-desc">検索モード：keywordまたはregex</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="tool-card file">
+              <div class="tool-header">
+                <div class="tool-icon file">&#128462;</div>
+                <div class="tool-info">
+                  <h4 class="tool-name">11. Browse Pdf Attachment</h4>
+                  <code class="tool-action">browse_pdf_attachment</code>
+                </div>
+              </div>
+              <p class="tool-description">
+                PDFファイルを閲覧。指定ページのテキストとスクリーンショットを返却。
+              </p>
+              <div class="args-title">&#128221; 引数</div>
+              <div class="args-list">
+                <div class="arg-item">
+                  <span class="arg-name">file_name</span>
+                  <span class="arg-type">string</span>
+                  <span class="arg-required">必須</span>
+                  <div class="arg-desc">PDFファイル名</div>
+                </div>
+                <div class="arg-item">
+                  <span class="arg-name">pages</span>
+                  <span class="arg-type">string</span>
+                  <span class="arg-required">必須</span>
+                  <div class="arg-desc">ページ番号（カンマ区切り、1-indexed、例: '1,3,5-7'）</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Conversation Tool -->
+        <div class="category-group">
+          <div class="category-header">
+            <span class="category-badge chat">&#128172; 会話履歴</span>
+          </div>
+          <div class="tools-grid">
+            <div class="tool-card chat">
+              <div class="tool-header">
+                <div class="tool-icon chat">&#128173;</div>
+                <div class="tool-info">
+                  <h4 class="tool-name">13. Conversation Search</h4>
+                  <code class="tool-action">conversation_search</code>
+                </div>
+              </div>
+              <p class="tool-description">
+                意味検索クエリに関連する過去の会話を取得。
+              </p>
+              <div class="args-title">&#128221; 引数</div>
+              <div class="args-list">
+                <div class="arg-item">
+                  <span class="arg-name">query</span>
+                  <span class="arg-type">string</span>
+                  <span class="arg-required">必須</span>
+                  <div class="arg-desc">意味検索クエリ</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- Footer -->
+      <footer class="footer">
+        <p>Grok ツール一覧 | 全13ツールの機能と引数リファレンス</p>
+      </footer>
+    </div>
+  </div>
+</body>
+</html>
