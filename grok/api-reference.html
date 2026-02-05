@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>xAI API リファレンス - 完全ガイド</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+      --xai-primary: #1d9bf0;
+      --xai-dark: #0f1419;
+      --xai-gray: #536471;
+      --xai-light: #eff3f4;
+      --code-bg: #f7f9fa;
+      --auth-color: #10b981;
+      --model-color: #8b5cf6;
+      --endpoint-color: #f59e0b;
+      --tool-color: #ec4899;
+      --sdk-color: #06b6d4;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      background: linear-gradient(135deg, #0f1419 0%, #1a2634 100%);
+      color: #e7e9ea;
+      min-height: 100vh;
+    }
+    .wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 32px 20px 60px;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 32px;
+      color: #ffffff;
+    }
+    header h1 {
+      font-size: 36px;
+      margin: 0 0 12px;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+    header h1 .logo {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, var(--xai-primary), #0066cc);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+    }
+    header p {
+      margin: 0;
+      color: rgba(255,255,255,0.8);
+      font-size: 16px;
+    }
+    .main-container {
+      background: #ffffff;
+      border-radius: 24px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+      overflow: hidden;
+    }
+
+    /* Hero Section */
+    .hero {
+      background: linear-gradient(135deg, var(--xai-dark) 0%, #2d3640 100%);
+      padding: 40px;
+      color: #ffffff;
+      text-align: center;
+    }
+    .hero h2 {
+      font-size: 26px;
+      margin: 0 0 16px;
+      color: var(--xai-primary);
+    }
+    .hero p {
+      font-size: 15px;
+      opacity: 0.9;
+      max-width: 800px;
+      margin: 0 auto;
+      line-height: 1.8;
+    }
+
+    /* Quick Info Grid */
+    .quick-info {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-top: 30px;
+    }
+    .info-card {
+      background: rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 20px;
+      backdrop-filter: blur(10px);
+    }
+    .info-card .label {
+      font-size: 12px;
+      opacity: 0.7;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .info-card .value {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--xai-primary);
+      font-family: monospace;
+      word-break: break-all;
+    }
+
+    /* Section Title */
+    .section-title {
+      text-align: center;
+      font-size: 24px;
+      color: var(--xai-dark);
+      margin: 0 0 32px;
+      position: relative;
+    }
+    .section-title::after {
+      content: '';
+      display: block;
+      width: 80px;
+      height: 4px;
+      background: linear-gradient(90deg, var(--xai-primary), #0066cc);
+      margin: 16px auto 0;
+      border-radius: 2px;
+    }
+
+    /* Content Section */
+    .content-section {
+      padding: 50px 40px;
+      background: #f7f9fa;
+    }
+    .category-group {
+      margin-bottom: 40px;
+    }
+    .category-group:last-child {
+      margin-bottom: 0;
+    }
+    .category-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #e1e8ed;
+    }
+    .category-badge {
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 600;
+      color: white;
+    }
+    .category-badge.auth { background: var(--auth-color); }
+    .category-badge.model { background: var(--model-color); }
+    .category-badge.endpoint { background: var(--endpoint-color); }
+    .category-badge.tool { background: var(--tool-color); }
+    .category-badge.sdk { background: var(--sdk-color); }
+
+    .content-grid {
+      display: grid;
+      gap: 20px;
+    }
+
+    /* Content Card */
+    .content-card {
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      border-left: 4px solid var(--xai-primary);
+      transition: all 0.3s ease;
+    }
+    .content-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+    }
+    .content-card.auth { border-left-color: var(--auth-color); }
+    .content-card.model { border-left-color: var(--model-color); }
+    .content-card.endpoint { border-left-color: var(--endpoint-color); }
+    .content-card.tool { border-left-color: var(--tool-color); }
+    .content-card.sdk { border-left-color: var(--sdk-color); }
+
+    .card-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    .card-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      color: white;
+      flex-shrink: 0;
+    }
+    .card-icon.auth { background: linear-gradient(135deg, var(--auth-color), #059669); }
+    .card-icon.model { background: linear-gradient(135deg, var(--model-color), #7c3aed); }
+    .card-icon.endpoint { background: linear-gradient(135deg, var(--endpoint-color), #d97706); }
+    .card-icon.tool { background: linear-gradient(135deg, var(--tool-color), #db2777); }
+    .card-icon.sdk { background: linear-gradient(135deg, var(--sdk-color), #0891b2); }
+
+    .card-info {
+      flex: 1;
+    }
+    .card-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--xai-dark);
+      margin: 0 0 4px;
+    }
+    .card-subtitle {
+      display: inline-block;
+      background: var(--code-bg);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-family: monospace;
+      font-size: 13px;
+      color: var(--xai-primary);
+      border: 1px solid #e1e8ed;
+    }
+    .card-description {
+      font-size: 14px;
+      color: var(--xai-gray);
+      line-height: 1.7;
+      margin-bottom: 16px;
+    }
+
+    /* Code Block */
+    .code-block {
+      background: #1e293b;
+      border-radius: 10px;
+      padding: 16px;
+      overflow-x: auto;
+      margin: 12px 0;
+    }
+    .code-block code {
+      font-family: 'Fira Code', 'Consolas', monospace;
+      font-size: 13px;
+      color: #e2e8f0;
+      line-height: 1.6;
+      white-space: pre;
+    }
+    .code-block .comment { color: #64748b; }
+    .code-block .string { color: #a5d6ff; }
+    .code-block .keyword { color: #ff7b72; }
+    .code-block .property { color: #79c0ff; }
+
+    /* Parameters */
+    .params-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--xai-dark);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .params-list {
+      background: var(--code-bg);
+      border-radius: 10px;
+      padding: 16px;
+      border: 1px solid #e1e8ed;
+    }
+    .param-item {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 10px;
+      font-size: 13px;
+    }
+    .param-item:last-child {
+      margin-bottom: 0;
+    }
+    .param-name {
+      font-family: monospace;
+      background: #ffffff;
+      padding: 3px 8px;
+      border-radius: 4px;
+      color: #d73a49;
+      border: 1px solid #e1e8ed;
+      font-weight: 600;
+    }
+    .param-type {
+      font-family: monospace;
+      color: var(--model-color);
+      font-size: 12px;
+    }
+    .param-required {
+      background: #fef2f2;
+      color: #dc2626;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .param-optional {
+      background: #f0fdf4;
+      color: #16a34a;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .param-desc {
+      width: 100%;
+      color: var(--xai-gray);
+      padding-left: 16px;
+      border-left: 2px solid #e1e8ed;
+      margin-top: 4px;
+    }
+
+    /* Model Cards */
+    .model-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+    .model-card {
+      background: var(--code-bg);
+      border-radius: 12px;
+      padding: 16px;
+      border: 1px solid #e1e8ed;
+    }
+    .model-name {
+      font-family: monospace;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--model-color);
+      margin-bottom: 8px;
+    }
+    .model-desc {
+      font-size: 13px;
+      color: var(--xai-gray);
+      line-height: 1.6;
+    }
+    .model-tag {
+      display: inline-block;
+      background: var(--model-color);
+      color: white;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 600;
+      margin-top: 8px;
+    }
+    .model-tag.reasoning { background: #f59e0b; }
+    .model-tag.fast { background: #10b981; }
+    .model-tag.deprecated { background: #6b7280; }
+
+    /* Feature List */
+    .feature-list {
+      list-style: none;
+      padding: 0;
+      margin: 12px 0 0;
+    }
+    .feature-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 10px;
+      font-size: 14px;
+      color: var(--xai-gray);
+    }
+    .feature-list li::before {
+      content: '&#10003;';
+      color: var(--auth-color);
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+
+    /* Notice Box */
+    .notice {
+      background: #fef3c7;
+      border: 1px solid #f59e0b;
+      border-radius: 10px;
+      padding: 16px;
+      margin: 16px 0;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+    .notice.info {
+      background: #dbeafe;
+      border-color: #3b82f6;
+    }
+    .notice.warning {
+      background: #fef3c7;
+      border-color: #f59e0b;
+    }
+    .notice.deprecated {
+      background: #f3f4f6;
+      border-color: #6b7280;
+    }
+    .notice-icon {
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+    .notice-text {
+      font-size: 13px;
+      color: var(--xai-dark);
+      line-height: 1.6;
+    }
+
+    /* Footer */
+    .footer {
+      padding: 30px 40px;
+      background: var(--xai-dark);
+      color: #ffffff;
+      text-align: center;
+    }
+    .footer p {
+      margin: 0;
+      font-size: 14px;
+      opacity: 0.8;
+    }
+    .footer a {
+      color: var(--xai-primary);
+      text-decoration: none;
+    }
+    .footer a:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 768px) {
+      header h1 {
+        font-size: 28px;
+      }
+      .content-section {
+        padding: 30px 20px;
+      }
+      .content-card {
+        padding: 20px;
+      }
+      .card-header {
+        flex-direction: column;
+        gap: 12px;
+      }
+      .quick-info {
+        grid-template-columns: 1fr;
+      }
+      .model-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>
+        <span class="logo">&#129302;</span>
+        xAI API リファレンス
+      </h1>
+      <p>Grok APIの完全ガイド - 認証からエンドポイントまで</p>
+    </header>
+
+    <div class="main-container">
+      <!-- Hero Section -->
+      <section class="hero">
+        <h2>xAI Enterprise API</h2>
+        <p>
+          xAI Enterprise APIは、高性能なRESTfulインターフェースを提供し、
+          既存システムへのシームレスな統合を実現します。
+          OpenAI REST APIとの完全な互換性を持ち、簡単に移行が可能です。
+        </p>
+        <div class="quick-info">
+          <div class="info-card">
+            <div class="label">Base URL</div>
+            <div class="value">https://api.x.ai</div>
+          </div>
+          <div class="info-card">
+            <div class="label">API Version</div>
+            <div class="value">v1</div>
+          </div>
+          <div class="info-card">
+            <div class="label">認証方式</div>
+            <div class="value">Bearer Token</div>
+          </div>
+          <div class="info-card">
+            <div class="label">データ保持期間</div>
+            <div class="value">30日間</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Content Section -->
+      <section class="content-section">
+        <h3 class="section-title">API詳細リファレンス</h3>
+
+        <!-- Authentication -->
+        <div class="category-group">
+          <div class="category-header">
+            <span class="category-badge auth">&#128274; 認証</span>
+          </div>
+          <div class="content-grid">
+            <div class="content-card auth">
+              <div class="card-header">
+                <div class="card-icon auth">&#128273;</div>
+                <div class="card-info">
+                  <h4 class="card-title">APIキー認証</h4>
+                  <code class="card-subtitle">Authorization: Bearer &lt;API_KEY&gt;</code>
+                </div>
+              </div>
+              <p class="card-description">
+                すべてのAPIリクエストにはAuthorizationヘッダーが必要です。
+                APIキーはxAI Consoleで作成でき、通常「xai-」で始まります。
+                環境変数または.envファイルに保存することを推奨します。
+              </p>
+              <div class="code-block">
+                <code><span class="comment"># 環境変数の設定</span>
+<span class="keyword">export</span> XAI_API_KEY=<span class="string">"xai-your-api-key-here"</span>
+
+<span class="comment"># curlでのリクエスト例</span>
+curl https://api.x.ai/v1/chat/completions \
+  -H <span class="string">"Authorization: Bearer $XAI_API_KEY"</span> \
+  -H <span class="string">"Content-Type: application/json"</span></code>
+              </div>
+              <div class="notice info">
+                <span class="notice-icon">&#128161;</span>
+                <span class="notice-text">APIキーは安全に保管し、公開リポジトリにコミットしないでください。</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Models -->
+        <div class="category-group">
+          <div class="category-header">
+            <span class="category-badge model">&#129504; モデル</span>
+          </div>
+          <div class="content-grid">
+            <div class="content-card model">
+              <div class="card-header">
+                <div class="card-icon model">&#128640;</div>
+                <div class="card-info">
+                  <h4 class="card-title">利用可能なモデル</h4>
+                  <code class="card-subtitle">Knowledge cutoff: 2024年11月</code>
+                </div>
+              </div>
+              <p class="card-description">
+                xAIは複数のGrokモデルを提供しています。用途に応じて最適なモデルを選択してください。
+                モデルエイリアスを使用すると、自動的に最新の安定版に移行できます。
+              </p>
+              <div class="model-grid">
+                <div class="model-card">
+                  <div class="model-name">grok-4</div>
+                  <div class="model-desc">最高性能のフラグシップモデル。推論モードのみで動作し、複雑なタスクに最適。</div>
+                  <span class="model-tag reasoning">Reasoning</span>
+                </div>
+                <div class="model-card">
+                  <div class="model-name">grok-4.1-fast-reasoning</div>
+                  <div class="model-desc">エージェント向けに最適化。2Mトークンのコンテキストウィンドウ。最高の知性。</div>
+                  <span class="model-tag reasoning">Reasoning</span>
+                  <span class="model-tag fast">Fast</span>
+                </div>
+                <div class="model-card">
+                  <div class="model-name">grok-4.1-fast-non-reasoning</div>
+                  <div class="model-desc">即座のレスポンスが必要な場合に最適。2Mコンテキスト対応。</div>
+                  <span class="model-tag fast">Fast</span>
+                </div>
+                <div class="model-card">
+                  <div class="model-name">grok-3-beta</div>
+                  <div class="model-desc">安定した高性能モデル。幅広いタスクに対応。</div>
+                </div>
+                <div class="model-card">
+                  <div class="model-name">grok-3-mini-beta</div>
+                  <div class="model-desc">軽量で高速なモデル。コスト効率を重視する場合に最適。</div>
+                  <span class="model-tag fast">Fast</span>
+                </div>
+                <div class="model-card">
+                  <div class="model-name">grok-code-fast-1</div>
+                  <div class="model-desc">コーディングタスクに特化したモデル。</div>
+                  <span class="model-tag fast">Fast</span>
+                </div>
+              </div>
+              <div class="notice warning">
+                <span class="notice-icon">&#9888;</span>
+                <span class="notice-text">Grok 4などの推論モデルでは、presencePenalty、frequencyPenalty、stopパラメータはサポートされていません。</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Responses API -->
+        <div class="category-group">
+          <div class="category-header">
+            <span class="category-badge endpoint">&#128640; Responses API（推奨）</span>
+          </div>
+          <div class="content-grid">
+            <div class="content-card endpoint">
+              <div class="card-header">
+                <div class="card-icon endpoint">&#128172;</div>
+                <div class="card-info">
+                  <h4 class="card-title">Responses API</h4>
+                  <code class="card-subtitle">POST /v1/responses</code>
+                </div>
+              </div>
+              <p class="card-description">
+                xAIモデルとのインタラクションに推奨される方法です。
+                ステートフルな会話が可能で、以前のプロンプト、推論内容、モデルの応答がxAIサーバーに保存されます。
+                response_idを使用して会話を継続できます（30日間有効）。
+              </p>
+              <div class="code-block">
+                <code><span class="comment">// Responses APIの基本リクエスト</span>
+{
+  <span class="property">"model"</span>: <span class="string">"grok-4"</span>,
+  <span class="property">"messages"</span>: [
+    {
+      <span class="property">"role"</span>: <span class="string">"user"</span>,
+      <span class="property">"content"</span>: <span class="string">"こんにちは、Grok!"</span>
+    }
+  ],
+  <span class="property">"stream"</span>: <span class="keyword">false</span>,
+  <span class="property">"store"</span>: <span class="keyword">true</span>  <span class="comment">// デフォルトtrue</span>
+}</code>
+              </div>
+              <div class="params-title">&#128221; 主要パラメータ</div>
+              <div class="params-list">
+                <div class="param-item">
+                  <span class="param-name">model</span>
+                  <span class="param-type">string</span>
+                  <span class="param-required">必須</span>
+                  <div class="param-desc">使用するモデルID（例: grok-4, grok-3-beta）</div>
+                </div>
+                <div class="param-item">
+                  <span class="param-name">messages</span>
+                  <span class="param-type">array</span>
+                  <span class="param-required">必須</span>
+                  <div class="param-desc">メッセージオブジェクトの配列（role: user/assistant/system, content: string）</div>
+                </div>
+                <div class="param-item">
+                  <span class="param-name">stream</span>
+                  <span class="param-type">boolean</span>
+                  <span class="param-optional">オプション</span>
+                  <div class="param-desc">ストリーミングレスポンスを有効化（デフォルト: false）</div>
+                </div>
+                <div class="param-item">
+                  <span class="param-name">temperature</span>
+                  <span class="param-type">number</span>
+                  <span class="param-optional">オプション</span>
+                  <div class="param-desc">出力のランダム性を制御（0-2、デフォルト: 1）</div>
+                </div>
+                <div class="param-item">
+                  <span class="param-name">max_tokens</span>
+                  <span class="param-type">integer</span>
+                  <span class="param-optional">オプション</span>
+                  <div class="param-desc">生成する最大トークン数</div>
+                </div>
+                <div class="param-item">
+                  <span class="param-name">store</span>
+                  <span class="param-type">boolean</span>
+                  <span class="param-optional">オプション</span>
+                  <div class="param-desc">会話をサーバーに保存（デフォルト: true）。falseで無効化</div>
+                </div>
+                <div class="param-item">
+                  <span class="param-name">previous_response_id</span>
+                  <span class="param-type">string</span>
+                  <span class="param-optional">オプション</span>
+                  <div class="param-desc">以前のresponse_idを指定して会話を継続</div>
+                </div>
+              </div>
+              <div class="notice info">
+                <span class="notice-icon">&#128161;</span>
+                <span class="notice-text">Chat Completions APIとの主な違い：Responses APIではresponse_idを使用して会話を継続でき、全メッセージを再送信する必要がありません。</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chat Completions API -->
+        <div class="category-group">
+          <div class="category-header">
+            <span class="category-badge endpoint" style="background: #6b7280;">&#128172; Chat Completions API（非推奨）</span>
+          </div>
+          <div class="content-grid">
+            <div class="content-card" style="border-left-color: #6b7280;">
+              <div class="card-header">
+                <div class="card-icon" style="background: linear-gradient(135deg, #6b7280, #4b5563);">&#128172;</div>
+                <div class="card-info">
+                  <h4 class="card-title">Chat Completions API</h4>
+                  <code class="card-subtitle">POST /v1/chat/completions</code>
+                </div>
+              </div>
+              <p class="card-description">
+                OpenAI互換のChat Completions APIです。ステートレスで、各リクエストに全会話履歴を含める必要があります。
+                新規プロジェクトではResponses APIの使用を推奨します。
+              </p>
+              <div class="code-block">
+                <code><span class="comment">// Chat Completions APIリクエスト</span>
+{
+  <span class="property">"model"</span>: <span class="string">"grok-3-beta"</span>,
+  <span class="property">"messages"</span>: [
+    {
+      <span class="property">"role"</span>: <span class="string">"system"</span>,
+      <span class="property">"content"</span>: <span class="string">"あなたは親切なアシスタントです。"</span>
+    },
+    {
+      <span class="property">"role"</span>: <span class="string">"user"</span>,
+      <span class="property">"content"</span>: <span class="string">"東京の天気について教えて"</span>
+    }
+  ],
+  <span class="property">"temperature"</span>: <span class="keyword">0.7</span>
+}</code>
+              </div>
+              <div class="notice deprecated">
+                <span class="notice-icon">&#9888;</span>
+                <span class="notice-text">Anthropic SDK互換機能は完全に廃止されました。Responses APIまたはgRPCへの移行を推奨します。</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Server-Side Tools -->
+        <div class="category-group">
+          <div class="category-header">
+            <span class="category-badge tool">&#128295; サーバーサイドツール</span>
+          </div>
+          <div class="content-grid">
+            <div class="content-card tool">
+              <div class="card-header">
+                <div class="card-icon tool">&#129520;</div>
+                <div class="card-info">
+                  <h4 class="card-title">Agent Tools API</h4>
+                  <code class="card-subtitle">Responses API内で利用可能</code>
+                </div>
+              </div>
+              <p class="card-description">
+                Responses APIでは、モデルが推論プロセス中に自律的に実行できるサーバーサイドツールを提供しています。
+                これにより、リアルタイム情報の取得やコード実行が可能になります。
+              </p>
+              <ul class="feature-list">
+                <li><strong>web_search</strong> - リアルタイムのWeb検索とページ閲覧。Live Searchではストリーミングレスポンスで引用が含まれます。</li>
+                <li><strong>x_search</strong> - Xの投稿、ユーザー、スレッドの検索。</li>
+                <li><strong>code_execution</strong> - 安全なサンドボックス環境でPythonコードを実行。計算やデータ分析に最適。</li>
+                <li><strong>document_search</strong> - アップロードされたファイルからインテリジェントな文書検索・取得（引用付き）。</li>
+                <li><strong>MCP接続</strong> - 外部MCPサーバーに接続してカスタムサードパーティツールを利用。</li>
+              </ul>
+              <div class="code-block">
+                <code><span class="comment">// ツールを有効にしたリクエスト</span>
+{
+  <span class="property">"model"</span>: <span class="string">"grok-4.1-fast-reasoning"</span>,
+  <span class="property">"messages"</span>: [...],
+  <span class="property">"tools"</span>: [
+    { <span class="property">"type"</span>: <span class="string">"web_search"</span> },
+    { <span class="property">"type"</span>: <span class="string">"code_execution"</span> }
+  ]
+}</code>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Streaming -->
+        <div class="category-group">
+          <div class="category-header">
+            <span class="category-badge sdk">&#9889; ストリーミング</span>
+          </div>
+          <div class="content-grid">
+            <div class="content-card sdk">
+              <div class="card-header">
+                <div class="card-icon sdk">&#128259;</div>
+                <div class="card-info">
+                  <h4 class="card-title">リアルタイムストリーミング</h4>
+                  <code class="card-subtitle">stream: true</code>
+                </div>
+              </div>
+              <p class="card-description">
+                ストリーミングを有効にすると、レスポンスがトークンごとにリアルタイムで送信されます。
+                インタラクティブなアプリケーションに最適で、ユーザー体験を向上させます。
+                Live Searchを使用する場合、引用はストリーム完了時に含まれます。
+              </p>
+              <div class="code-block">
+                <code><span class="comment"># Python SDKでのストリーミング例</span>
+<span class="keyword">from</span> xai_sdk <span class="keyword">import</span> Client
+
+client = Client()
+
+<span class="keyword">for</span> chunk <span class="keyword">in</span> client.chat.completions.create(
+    model=<span class="string">"grok-4"</span>,
+    messages=[{<span class="string">"role"</span>: <span class="string">"user"</span>, <span class="string">"content"</span>: <span class="string">"Hello"</span>}],
+    stream=<span class="keyword">True</span>
+):
+    <span class="keyword">print</span>(chunk.choices[0].delta.content, end=<span class="string">""</span>)</code>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SDK Compatibility -->
+        <div class="category-group">
+          <div class="category-header">
+            <span class="category-badge sdk">&#128230; SDK互換性</span>
+          </div>
+          <div class="content-grid">
+            <div class="content-card sdk">
+              <div class="card-header">
+                <div class="card-icon sdk">&#128187;</div>
+                <div class="card-info">
+                  <h4 class="card-title">SDK & ライブラリ</h4>
+                  <code class="card-subtitle">pip install xai-sdk</code>
+                </div>
+              </div>
+              <p class="card-description">
+                xAI APIはOpenAI SDKと完全互換です。既存のコードをわずかな変更で移行できます。
+                また、ネイティブのxAI Python SDKも提供しています。
+              </p>
+              <div class="model-grid">
+                <div class="model-card">
+                  <div class="model-name">xAI Python SDK</div>
+                  <div class="model-desc">ネイティブSDK。<code>pip install xai-sdk</code>でインストール。全機能に対応。</div>
+                </div>
+                <div class="model-card">
+                  <div class="model-name">OpenAI SDK互換</div>
+                  <div class="model-desc">base_urlを変更するだけで移行可能。既存コードをそのまま活用。</div>
+                </div>
+                <div class="model-card">
+                  <div class="model-name">gRPC</div>
+                  <div class="model-desc">高性能が必要な場合に最適。低レイテンシーでの通信が可能。</div>
+                </div>
+              </div>
+              <div class="code-block">
+                <code><span class="comment"># OpenAI SDKからの移行例</span>
+<span class="keyword">from</span> openai <span class="keyword">import</span> OpenAI
+
+client = OpenAI(
+    api_key=<span class="string">"xai-your-api-key"</span>,
+    base_url=<span class="string">"https://api.x.ai/v1"</span>  <span class="comment"># これだけ変更</span>
+)
+
+response = client.chat.completions.create(
+    model=<span class="string">"grok-4"</span>,
+    messages=[{<span class="string">"role"</span>: <span class="string">"user"</span>, <span class="string">"content"</span>: <span class="string">"Hello"</span>}]
+)</code>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- Footer -->
+      <footer class="footer">
+        <p>xAI API リファレンス | 公式ドキュメント: <a href="https://docs.x.ai" target="_blank">docs.x.ai</a></p>
+      </footer>
+    </div>
+  </div>
+</body>
+</html>
