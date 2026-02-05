@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Grok リアルタイムセンチメント分析 - X投稿のAI感情分析</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+      --grok-primary: #1d9bf0;
+      --grok-dark: #0f1419;
+      --grok-gray: #536471;
+      --grok-light: #eff3f4;
+      --code-bg: #f7f9fa;
+      --positive-color: #10b981;
+      --negative-color: #ef4444;
+      --neutral-color: #6b7280;
+      --api-color: #8b5cf6;
+      --stream-color: #f59e0b;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      background: linear-gradient(135deg, #0f1419 0%, #1a2634 100%);
+      color: #e7e9ea;
+      min-height: 100vh;
+    }
+    .wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 32px 20px 60px;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 32px;
+      color: #ffffff;
+    }
+    header h1 {
+      font-size: 32px;
+      margin: 0 0 12px;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    header h1 .logo {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, var(--grok-primary), #0066cc);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+    }
+    header p {
+      margin: 0;
+      color: rgba(255,255,255,0.8);
+      font-size: 16px;
+    }
+    .main-container {
+      background: #ffffff;
+      border-radius: 24px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+      overflow: hidden;
+    }
+
+    /* Hero Section */
+    .hero {
+      background: linear-gradient(135deg, var(--grok-dark) 0%, #2d3640 100%);
+      padding: 40px;
+      color: #ffffff;
+      text-align: center;
+    }
+    .hero h2 {
+      font-size: 26px;
+      margin: 0 0 16px;
+      color: var(--grok-primary);
+    }
+    .hero p {
+      font-size: 15px;
+      opacity: 0.9;
+      max-width: 800px;
+      margin: 0 auto;
+      line-height: 1.8;
+    }
+
+    /* Sentiment Gauge */
+    .sentiment-gauge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 30px;
+      flex-wrap: wrap;
+    }
+    .gauge-item {
+      background: rgba(255,255,255,0.1);
+      border-radius: 16px;
+      padding: 20px 30px;
+      text-align: center;
+      backdrop-filter: blur(10px);
+      min-width: 140px;
+    }
+    .gauge-item .score {
+      font-size: 36px;
+      font-weight: 700;
+    }
+    .gauge-item.negative .score { color: var(--negative-color); }
+    .gauge-item.neutral .score { color: var(--neutral-color); }
+    .gauge-item.positive .score { color: var(--positive-color); }
+    .gauge-item .label {
+      font-size: 14px;
+      opacity: 0.8;
+      margin-top: 8px;
+    }
+    .gauge-arrow {
+      font-size: 24px;
+      color: rgba(255,255,255,0.5);
+    }
+
+    /* Section Title */
+    .section-title {
+      text-align: center;
+      font-size: 24px;
+      color: var(--grok-dark);
+      margin: 0 0 32px;
+      position: relative;
+    }
+    .section-title::after {
+      content: '';
+      display: block;
+      width: 80px;
+      height: 4px;
+      background: linear-gradient(90deg, var(--grok-primary), #0066cc);
+      margin: 16px auto 0;
+      border-radius: 2px;
+    }
+
+    /* Content Section */
+    .content-section {
+      padding: 50px 40px;
+      background: #f7f9fa;
+    }
+    .content-section:nth-child(even) {
+      background: #ffffff;
+    }
+
+    /* Architecture Flow */
+    .architecture-flow {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+    .flow-step {
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 24px;
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      position: relative;
+      border-top: 4px solid var(--grok-primary);
+    }
+    .flow-step.stream { border-top-color: var(--stream-color); }
+    .flow-step.filter { border-top-color: var(--api-color); }
+    .flow-step.score { border-top-color: var(--positive-color); }
+    .flow-step .step-number {
+      position: absolute;
+      top: -16px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--grok-primary);
+      color: white;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 14px;
+    }
+    .flow-step.stream .step-number { background: var(--stream-color); }
+    .flow-step.filter .step-number { background: var(--api-color); }
+    .flow-step.score .step-number { background: var(--positive-color); }
+    .flow-step .icon {
+      font-size: 40px;
+      margin-bottom: 12px;
+    }
+    .flow-step h4 {
+      margin: 0 0 8px;
+      color: var(--grok-dark);
+      font-size: 16px;
+    }
+    .flow-step p {
+      margin: 0;
+      font-size: 13px;
+      color: var(--grok-gray);
+      line-height: 1.6;
+    }
+
+    /* Info Cards */
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+    }
+    .info-card {
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 28px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      border-left: 4px solid var(--grok-primary);
+    }
+    .info-card.api { border-left-color: var(--api-color); }
+    .info-card.model { border-left-color: var(--stream-color); }
+    .info-card h4 {
+      margin: 0 0 16px;
+      color: var(--grok-dark);
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .info-card h4 .badge {
+      font-size: 24px;
+    }
+    .info-card ul {
+      margin: 0;
+      padding-left: 20px;
+      color: var(--grok-gray);
+      line-height: 1.8;
+    }
+    .info-card li {
+      margin-bottom: 8px;
+    }
+    .info-card code {
+      background: var(--code-bg);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 13px;
+      color: var(--api-color);
+      border: 1px solid #e1e8ed;
+    }
+
+    /* Code Block */
+    .code-block {
+      background: var(--grok-dark);
+      border-radius: 12px;
+      padding: 24px;
+      overflow-x: auto;
+      margin: 20px 0;
+    }
+    .code-block pre {
+      margin: 0;
+      color: #e7e9ea;
+      font-family: 'Monaco', 'Menlo', monospace;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    .code-block .comment { color: #6b7280; }
+    .code-block .keyword { color: #c084fc; }
+    .code-block .string { color: #34d399; }
+    .code-block .function { color: #60a5fa; }
+    .code-block .number { color: #f59e0b; }
+
+    /* Model Comparison */
+    .model-comparison {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      margin-top: 30px;
+    }
+    .model-card {
+      background: rgba(255,255,255,0.1);
+      border-radius: 16px;
+      padding: 24px;
+      text-align: center;
+      backdrop-filter: blur(10px);
+    }
+    .model-card .model-name {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--grok-primary);
+      margin-bottom: 12px;
+    }
+    .model-card .model-role {
+      font-size: 14px;
+      opacity: 0.8;
+      margin-bottom: 16px;
+    }
+    .model-card .model-features {
+      text-align: left;
+      font-size: 13px;
+      line-height: 1.8;
+    }
+    .model-card .model-features li {
+      margin-bottom: 6px;
+    }
+
+    /* Limitations */
+    .limitations-list {
+      display: grid;
+      gap: 16px;
+    }
+    .limitation-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      background: #fff5f5;
+      border-radius: 12px;
+      padding: 20px;
+      border-left: 4px solid var(--negative-color);
+    }
+    .limitation-item .icon {
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+    .limitation-item .text {
+      color: var(--grok-dark);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+    .limitation-item .text strong {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--negative-color);
+    }
+
+    /* Tips */
+    .tips-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 16px;
+    }
+    .tip-card {
+      background: #f0fdf4;
+      border-radius: 12px;
+      padding: 20px;
+      border-left: 4px solid var(--positive-color);
+    }
+    .tip-card h5 {
+      margin: 0 0 8px;
+      color: var(--positive-color);
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .tip-card p {
+      margin: 0;
+      font-size: 13px;
+      color: var(--grok-gray);
+      line-height: 1.6;
+    }
+
+    /* Footer */
+    .footer {
+      padding: 30px 40px;
+      background: var(--grok-dark);
+      color: #ffffff;
+      text-align: center;
+    }
+    .footer p {
+      margin: 0;
+      font-size: 14px;
+      opacity: 0.8;
+    }
+    .footer a {
+      color: var(--grok-primary);
+      text-decoration: none;
+    }
+    .footer a:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 768px) {
+      header h1 {
+        font-size: 24px;
+      }
+      .content-section {
+        padding: 30px 20px;
+      }
+      .hero {
+        padding: 30px 20px;
+      }
+      .sentiment-gauge {
+        flex-direction: column;
+      }
+      .gauge-arrow {
+        transform: rotate(90deg);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>
+        <span class="logo">&#129302;</span>
+        Grok リアルタイムセンチメント分析
+      </h1>
+      <p>X投稿をリアルタイムでAI感情分析 - xAI Cookbook解説</p>
+    </header>
+
+    <div class="main-container">
+      <!-- Hero Section -->
+      <section class="hero">
+        <h2>X Filtered Stream + Grok で市場感情を捕捉</h2>
+        <p>
+          X（旧Twitter）はリアルタイムの世論の宝庫です。Grokを活用することで、
+          投資家、企業、研究者は効率的かつ正確にセンチメント分析を実行できます。
+          この手法は、Filtered Stream APIでリアルタイム投稿を取得し、
+          Grokモデルで高シグナル投稿をフィルタリング、最終的にセンチメントスコアを算出します。
+        </p>
+
+        <div class="sentiment-gauge">
+          <div class="gauge-item negative">
+            <div class="score">-1</div>
+            <div class="label">Bearish<br>(弱気)</div>
+          </div>
+          <div class="gauge-arrow">&#8594;</div>
+          <div class="gauge-item neutral">
+            <div class="score">0</div>
+            <div class="label">Neutral<br>(中立)</div>
+          </div>
+          <div class="gauge-arrow">&#8594;</div>
+          <div class="gauge-item positive">
+            <div class="score">+1</div>
+            <div class="label">Bullish<br>(強気)</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Architecture Section -->
+      <section class="content-section">
+        <h3 class="section-title">アーキテクチャ概要</h3>
+
+        <div class="architecture-flow">
+          <div class="flow-step stream">
+            <div class="step-number">1</div>
+            <div class="icon">&#128752;</div>
+            <h4>Filtered Stream API</h4>
+            <p>Xのリアルタイムエンドポイントで、定義したルールに基づいて投稿をストリーミング取得</p>
+          </div>
+          <div class="flow-step">
+            <div class="step-number">2</div>
+            <div class="icon">&#128230;</div>
+            <h4>バッチ収集</h4>
+            <p>ルールにマッチした投稿を5件ずつバッチ化（例: ビットコイン関連投稿）</p>
+          </div>
+          <div class="flow-step filter">
+            <div class="step-number">3</div>
+            <div class="icon">&#129302;</div>
+            <h4>grok-3 フィルタリング</h4>
+            <p>高シグナル投稿を素早く分類。スコアリングに値する投稿を選別</p>
+          </div>
+          <div class="flow-step score">
+            <div class="step-number">4</div>
+            <div class="icon">&#128200;</div>
+            <h4>grok-3-mini スコアリング</h4>
+            <p>フィルタ済み5件をgrok-3-miniに渡し、-1〜+1のセンチメントスコアを算出</p>
+          </div>
+        </div>
+
+        <div class="info-grid">
+          <div class="info-card api">
+            <h4><span class="badge">&#128268;</span>X Filtered Stream API</h4>
+            <ul>
+              <li>リアルタイムで投稿を配信するエンドポイント</li>
+              <li>ストリームルールを設定して関連投稿をキャプチャ</li>
+              <li>ルールにマッチした投稿にはタグが付与される</li>
+              <li><code>GET /2/tweets/search/stream</code></li>
+              <li>WebSocket接続でインスタント更新</li>
+            </ul>
+          </div>
+          <div class="info-card model">
+            <h4><span class="badge">&#9881;</span>処理パイプライン</h4>
+            <ul>
+              <li>5件バッチでgrok-3に送信（フィルタリング用）</li>
+              <li>高シグナル判定された投稿のみを次段へ</li>
+              <li>5件の高シグナル投稿をgrok-3-miniに送信</li>
+              <li>集約されたセンチメントスコアを出力</li>
+              <li>ダッシュボード等でリアルタイム表示</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Models Section -->
+      <section class="hero">
+        <h2>使用するGrokモデル</h2>
+        <p>
+          タスクの性質に応じて最適なモデルを選択します。
+          フィルタリングには高速なgrok-3を、スコアリングにはコスト効率の良いgrok-3-miniを使用します。
+        </p>
+
+        <div class="model-comparison">
+          <div class="model-card">
+            <div class="model-name">grok-3 / grok-3-fast</div>
+            <div class="model-role">軽量フィルタリング用</div>
+            <ul class="model-features">
+              <li>高速なレスポンス</li>
+              <li>シグナル/ノイズの分類に最適</li>
+              <li>大量投稿の一次スクリーニング</li>
+              <li>バッチ投稿の品質判定</li>
+            </ul>
+          </div>
+          <div class="model-card">
+            <div class="model-name">grok-3-mini</div>
+            <div class="model-role">センチメントスコアリング用</div>
+            <ul class="model-features">
+              <li>コスト効率が高い</li>
+              <li>数値スコア(-1〜+1)の生成</li>
+              <li>フィルタ済み投稿の詳細分析</li>
+              <li>信頼度スコアの付与</li>
+            </ul>
+          </div>
+          <div class="model-card">
+            <div class="model-name">grok-4-1-fast</div>
+            <div class="model-role">高精度分析用(最新)</div>
+            <ul class="model-features">
+              <li>最大200万トークン対応</li>
+              <li>構造化JSON出力</li>
+              <li>高精度なニュアンス理解</li>
+              <li>複雑なコンテキスト分析</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Code Example Section -->
+      <section class="content-section">
+        <h3 class="section-title">実装コード例</h3>
+
+        <div class="info-card" style="margin-bottom: 24px;">
+          <h4><span class="badge">&#128187;</span>API接続設定</h4>
+          <p style="color: var(--grok-gray); margin-bottom: 16px;">
+            xAI APIはOpenAI互換のクライアントライブラリで接続できます。
+            エンドポイントを <code>https://api.x.ai/v1</code> に設定するだけです。
+          </p>
+        </div>
+
+        <div class="code-block">
+          <pre><span class="keyword">from</span> openai <span class="keyword">import</span> OpenAI
+
+<span class="comment"># xAI APIクライアントの初期化</span>
+client = OpenAI(
+    api_key=<span class="string">"your-xai-api-key"</span>,
+    base_url=<span class="string">"https://api.x.ai/v1"</span>
+)
+
+<span class="keyword">def</span> <span class="function">analyze_sentiment</span>(posts: list[str]) -> dict:
+    <span class="string">"""投稿リストのセンチメントを分析"""</span>
+
+    prompt = <span class="string">f"""以下のX投稿のセンチメントを分析してください。
+
+投稿:
+{chr(10).join(f'- {p}' for p in posts)}
+
+JSON形式で回答:
+{{
+  "score": -1から1の数値,
+  "confidence": 0から1の信頼度,
+  "reasoning": "判断理由"
+}}"""</span>
+
+    response = client.chat.completions.create(
+        model=<span class="string">"grok-3-mini"</span>,
+        messages=[{<span class="string">"role"</span>: <span class="string">"user"</span>, <span class="string">"content"</span>: prompt}],
+        response_format={<span class="string">"type"</span>: <span class="string">"json_object"</span>}
+    )
+
+    <span class="keyword">return</span> json.loads(response.choices[<span class="number">0</span>].message.content)</pre>
+        </div>
+
+        <div class="code-block">
+          <pre><span class="comment"># 高シグナル投稿のフィルタリング（grok-3使用）</span>
+<span class="keyword">def</span> <span class="function">filter_high_signal</span>(posts: list[str]) -> list[str]:
+    <span class="string">"""ノイズを除去し、分析価値のある投稿を抽出"""</span>
+
+    prompt = <span class="string">f"""以下の投稿から、市場センチメント分析に価値のある
+高シグナル投稿のみを選択してください。
+スパム、無関係な投稿、単純なリツイートは除外。
+
+投稿:
+{chr(10).join(f'{i+1}. {p}' for i, p in enumerate(posts))}
+
+価値のある投稿番号をカンマ区切りで回答:"""</span>
+
+    response = client.chat.completions.create(
+        model=<span class="string">"grok-3-fast"</span>,
+        messages=[{<span class="string">"role"</span>: <span class="string">"user"</span>, <span class="string">"content"</span>: prompt}]
+    )
+
+    indices = [int(i.strip())-<span class="number">1</span> <span class="keyword">for</span> i <span class="keyword">in</span> response.choices[<span class="number">0</span>].message.content.split(<span class="string">","</span>)]
+    <span class="keyword">return</span> [posts[i] <span class="keyword">for</span> i <span class="keyword">in</span> indices <span class="keyword">if</span> <span class="number">0</span> <= i < len(posts)]</pre>
+        </div>
+      </section>
+
+      <!-- Limitations Section -->
+      <section class="content-section" style="background: #ffffff;">
+        <h3 class="section-title">注意点と制限事項</h3>
+
+        <div class="limitations-list">
+          <div class="limitation-item">
+            <div class="icon">&#9888;</div>
+            <div class="text">
+              <strong>皮肉・アイロニーの誤認識</strong>
+              集約センチメントでは効果的ですが、高度な皮肉やアイロニーを含む投稿を
+              誤ってラベル付けする可能性があります。信頼度スコアの要求やサンプルサイズの
+              増加で精度を改善できます。
+            </div>
+          </div>
+          <div class="limitation-item">
+            <div class="icon">&#128274;</div>
+            <div class="text">
+              <strong>公開コンテンツのみアクセス可能</strong>
+              Grok AIは公開投稿のみにアクセスできます。非公開アカウントや
+              ダイレクトメッセージの内容は取得できません。
+            </div>
+          </div>
+          <div class="limitation-item">
+            <div class="icon">&#128176;</div>
+            <div class="text">
+              <strong>APIコストの考慮</strong>
+              リアルタイムストリーミングで大量の投稿を処理する場合、
+              APIコストに注意が必要です。フィルタリング層で効率的に
+              ノイズを除去することでコストを最適化できます。
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tips Section -->
+      <section class="content-section">
+        <h3 class="section-title">精度向上のヒント</h3>
+
+        <div class="tips-grid">
+          <div class="tip-card">
+            <h5>&#128200; サンプルサイズを増やす</h5>
+            <p>分析対象の投稿数を増やすことで、個別の誤分類の影響を軽減し、全体的な精度を向上させます。</p>
+          </div>
+          <div class="tip-card">
+            <h5>&#127919; 信頼度スコアを要求</h5>
+            <p>センチメントスコアと共に信頼度を出力させ、低信頼度の結果をフィルタリングまたは再分析します。</p>
+          </div>
+          <div class="tip-card">
+            <h5>&#128338; 時間帯を考慮</h5>
+            <p>市場時間、ニュースイベント、地域の時間帯によってセンチメントパターンが変化することを考慮します。</p>
+          </div>
+          <div class="tip-card">
+            <h5>&#128101; インフルエンサー重み付け</h5>
+            <p>フォロワー数やエンゲージメント率に基づいて、投稿に重み付けを行うことで精度を向上させます。</p>
+          </div>
+          <div class="tip-card">
+            <h5>&#128736; 継続的なモニタリング</h5>
+            <p>スコアの時系列変化を追跡し、急激な変動をアラートとして検出するダッシュボードを構築します。</p>
+          </div>
+          <div class="tip-card">
+            <h5>&#127757; 多言語対応</h5>
+            <p>Grokは多言語に対応しているため、グローバルなセンチメント分析が可能です。言語フィルターを適切に設定します。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Use Cases Section -->
+      <section class="content-section" style="background: #ffffff;">
+        <h3 class="section-title">主なユースケース</h3>
+
+        <div class="info-grid">
+          <div class="info-card">
+            <h4><span class="badge">&#128200;</span>金融・投資分析</h4>
+            <ul>
+              <li>暗号資産（ビットコイン等）の市場センチメント</li>
+              <li>個別銘柄への投資家心理の把握</li>
+              <li>マクロ経済イベントへの反応分析</li>
+              <li>アルゴリズムトレーディングのシグナル</li>
+            </ul>
+          </div>
+          <div class="info-card">
+            <h4><span class="badge">&#127970;</span>ブランドモニタリング</h4>
+            <ul>
+              <li>製品・サービスへのリアルタイム反応</li>
+              <li>PR危機の早期検出</li>
+              <li>キャンペーン効果の測定</li>
+              <li>競合他社との比較分析</li>
+            </ul>
+          </div>
+          <div class="info-card">
+            <h4><span class="badge">&#128218;</span>学術研究</h4>
+            <ul>
+              <li>社会的トレンドの定量分析</li>
+              <li>世論形成プロセスの研究</li>
+              <li>情報拡散パターンの解析</li>
+              <li>感情伝播モデルの検証</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <footer class="footer">
+        <p>
+          Grok リアルタイムセンチメント分析ガイド |
+          <a href="https://docs.x.ai/cookbook/examples/sentiment_analysis_on_x" target="_blank">xAI Cookbook 原文</a> |
+          <a href="https://docs.x.ai/docs/overview" target="_blank">xAI API ドキュメント</a>
+        </p>
+      </footer>
+    </div>
+  </div>
+</body>
+</html>
