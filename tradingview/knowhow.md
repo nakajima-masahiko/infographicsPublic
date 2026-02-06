@@ -174,3 +174,48 @@ app.use((req, res, next) => {
 - [ ] supported_resolutionsがデータソースと一致しているか
 - [ ] /historyのレスポンスで配列の長さが揃っているか
 - [ ] エラー時に適切なレスポンス（`{"s": "error"}`等）を返しているか
+
+## 9. Datafeed APIの要点（JS API）
+
+### Datafeed APIとは
+
+Charting Library がデータを取得するための JavaScript インターフェース。UDF のような HTTP プロトコルではなく、**フロントエンドが直接 datafeed オブジェクトのメソッドを呼び出す**方式。
+
+### 基本の呼び出しフロー
+
+1. **onReady** で datafeed の機能一覧（`supports_*`）と対応時間足を返す
+2. **resolveSymbol** でシンボル情報（`SymbolInfo`）を返す
+3. **getBars** で履歴データ（OHLCV）を返す
+4. **subscribeBars / unsubscribeBars** でリアルタイム更新
+
+### 必須メソッドの役割
+
+| メソッド | 役割 | 重要ポイント |
+|---|---|---|
+| `onReady(callback)` | 初期化時に設定を返す | `supports_search` や `supported_resolutions` を正確に |
+| `resolveSymbol(symbolName, onResolve, onError)` | 銘柄情報の解決 | `pricescale`, `session`, `timezone` を正しく設定 |
+| `getBars(symbolInfo, resolution, periodParams, onHistory, onError)` | 過去データ取得 | `periodParams.from/to` は UNIX 秒、`noData` を返せる |
+| `subscribeBars(symbolInfo, resolution, onRealtime, subscriberUID, onResetCache)` | リアルタイム購読 | 価格更新のタイミングを一定にする |
+| `unsubscribeBars(subscriberUID)` | リアルタイム購読解除 | `subscriberUID` をキーに解除 |
+
+※ `searchSymbols` や `getServerTime` は要件に応じて実装。
+
+### 実装の勘所
+
+- **時間の単位は必ず秒**：ミリ秒だとチャートが崩れる
+- **バー配列の長さを揃える**：`t/o/h/l/c/v` の要素数は完全一致
+- **noData を活用**：データがない場合は `onHistory([], { noData: true })`
+- **supports_* の整合性**：未実装の機能は false にする
+- **キャッシュのリセット**：銘柄切替や再購読時は `onResetCache` を適切に呼ぶ
+
+### エラー時の振る舞い
+
+- `onError` にメッセージを渡す（例: "Symbol not found"）
+- 一時的なエラーはリトライ戦略を検討
+- Charting Library 側の挙動はコンソールログで確認
+
+### 公式ドキュメントの読み解き方
+
+- **Datafeed API** は JS API の最重要ページ
+- `SymbolInfo` と `HistoryData` の型定義を把握すると理解が進む
+- 公式サンプルの datafeed 実装を読むと全体像が掴める

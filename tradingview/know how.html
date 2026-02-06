@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TradingView チャートライブラリ理解のためのノウハウ</title>
+  <style>
+    body {
+      font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+      line-height: 1.7;
+      margin: 24px;
+      color: #1f2933;
+    }
+    h1, h2, h3 {
+      color: #0f172a;
+    }
+    code {
+      background: #f5f5f5;
+      padding: 2px 4px;
+      border-radius: 4px;
+    }
+    pre {
+      background: #f5f5f5;
+      padding: 12px;
+      border-radius: 6px;
+      overflow-x: auto;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 12px 0;
+    }
+    th, td {
+      border: 1px solid #cbd5e1;
+      padding: 8px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      background: #e2e8f0;
+    }
+  </style>
+</head>
+<body>
+  <h1>TradingView チャートライブラリ理解のためのノウハウ</h1>
+
+  <h2>1. 全体像を理解する</h2>
+
+  <h3>チャートライブラリの構成要素</h3>
+  <p>TradingViewチャートライブラリは主に以下の3つのコンポーネントで構成されています：</p>
+  <ol>
+    <li><strong>チャートライブラリ本体</strong> - JavaScript/TypeScriptで書かれたフロントエンドライブラリ</li>
+    <li><strong>Datafeed API</strong> - データソースとの通信インターフェース</li>
+    <li><strong>Widget API</strong> - チャートを操作するためのプログラマティックAPI</li>
+  </ol>
+
+  <h3>データ取得の2つの方法</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>方法</th>
+        <th>説明</th>
+        <th>適用場面</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>UDF (Universal Data Feed)</strong></td>
+        <td>HTTPベースのシンプルなプロトコル</td>
+        <td>小〜中規模、シンプルな実装</td>
+      </tr>
+      <tr>
+        <td><strong>JS API</strong></td>
+        <td>JavaScriptで直接Datafeed APIを実装</td>
+        <td>複雑な要件、WebSocket対応など</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>2. UDF実装のステップバイステップ</h2>
+
+  <h3>Step 1: 最小構成から始める</h3>
+  <p>まずは以下の3エンドポイントだけで動かしてみる：</p>
+  <pre>
+GET /config          → サーバー設定を返す
+GET /symbols?symbol= → シンボル情報を返す
+GET /history         → OHLCVデータを返す
+  </pre>
+
+  <h3>Step 2: レスポンス形式を正確に</h3>
+  <p>特に <code>/history</code> のレスポンスは配列形式に注意：</p>
+  <pre>
+{
+  "s": "ok",
+  "t": [1640995200, 1641081600],  // タイムスタンプ配列
+  "o": [100.0, 101.0],            // 始値配列
+  "h": [105.0, 103.0],            // 高値配列
+  "l": [99.0, 100.5],             // 安値配列
+  "c": [103.0, 102.0],            // 終値配列
+  "v": [10000, 8000]              // 出来高配列
+}
+  </pre>
+
+  <h3>Step 3: よくあるエラーと対処法</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>症状</th>
+        <th>原因</th>
+        <th>対処</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>チャートが真っ白</td>
+        <td>CORSエラー</td>
+        <td><code>Access-Control-Allow-Origin: *</code> を追加</td>
+      </tr>
+      <tr>
+        <td>データが表示されない</td>
+        <td>タイムスタンプがミリ秒</td>
+        <td>秒単位に変換（÷1000）</td>
+      </tr>
+      <tr>
+        <td>価格表示がおかしい</td>
+        <td>pricescaleの設定ミス</td>
+        <td>シンボルの小数桁数に合わせる</td>
+      </tr>
+      <tr>
+        <td>時間軸がずれる</td>
+        <td>timezone設定ミス</td>
+        <td>正しいIANAタイムゾーンを指定</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>3. デバッグのコツ</h2>
+
+  <h3>ブラウザのネットワークタブを活用</h3>
+  <ol>
+    <li>DevTools &gt; Network を開く</li>
+    <li>XHR/Fetchでフィルタ</li>
+    <li>各リクエストのURLとレスポンスを確認</li>
+  </ol>
+
+  <h3>ログ出力を仕込む</h3>
+  <p>
+    バックエンド側で各エンドポイントへのリクエストをログ出力すると、
+    チャートライブラリがどのような順序で何を要求しているかがわかる。
+  </p>
+  <pre>
+app.use((req, res, next) => {
+  console.log(`[UDF] ${req.method} ${req.url}`);
+  next();
+});
+  </pre>
+
+  <h2>4. 公式ドキュメントの読み方</h2>
+
+  <h3>重要なページ</h3>
+  <ol>
+    <li><strong><a href="https://www.tradingview.com/charting-library-docs/latest/connecting_data/">Connecting Data</a></strong>
+      - データ接続の概要</li>
+    <li><strong><a href="https://www.tradingview.com/charting-library-docs/latest/connecting_data/UDF/">UDF</a></strong>
+      - UDFプロトコルの詳細仕様</li>
+    <li><strong><a href="https://www.tradingview.com/charting-library-docs/latest/connecting_data/Datafeed-API/">Datafeed API</a></strong>
+      - JS APIの詳細</li>
+    <li><strong><a href="https://www.tradingview.com/charting-library-docs/latest/core_concepts/Symbol-Info/">Symbol Info</a></strong>
+      - シンボル情報のフィールド詳細</li>
+  </ol>
+
+  <h3>読解のポイント</h3>
+  <ul>
+    <li><code>SymbolInfo</code> オブジェクトの各フィールドの意味を把握する</li>
+    <li><code>supports_*</code> フラグで機能の有効/無効を制御できる</li>
+    <li>サンプル実装（GitHubで公開されているもの）を参照する</li>
+  </ul>
+
+  <h2>5. 実装パターン</h2>
+
+  <h3>パターン1: 静的データ（ヒストリカルのみ）</h3>
+  <ul>
+    <li>リアルタイム更新不要</li>
+    <li>/history でデータベースから取得</li>
+    <li>シンプルだが、最新価格の反映に再読み込みが必要</li>
+  </ul>
+
+  <h3>パターン2: ポーリング更新</h3>
+  <ul>
+    <li>setIntervalでフロントエンドから定期的にリクエスト</li>
+    <li>実装は簡単だがサーバー負荷が高い</li>
+    <li>UDFでも実現可能</li>
+  </ul>
+
+  <h3>パターン3: WebSocket + JS API</h3>
+  <ul>
+    <li>リアルタイム更新が必要な場合</li>
+    <li>UDFではなくJS APIを直接実装</li>
+    <li><code>subscribeBars</code> / <code>unsubscribeBars</code> を実装</li>
+  </ul>
+
+  <h2>6. よくある質問（FAQ）</h2>
+
+  <h3>Q: UDFとJS APIどちらを使うべき？</h3>
+  <p><strong>A:</strong> 以下の基準で判断：</p>
+  <ul>
+    <li>リアルタイム更新が必要 → JS API</li>
+    <li>シンプルに始めたい → UDF</li>
+    <li>既存のREST APIがある → UDF</li>
+    <li>複雑なデータ変換が必要 → JS API</li>
+  </ul>
+
+  <h3>Q: supported_resolutionsは何を指定すべき？</h3>
+  <p><strong>A:</strong> データソースが実際に持っている時間足のみを指定。
+    例えば日足データしかない場合は <code>["D"]</code> のみ。</p>
+
+  <h3>Q: timezoneはどう設定する？</h3>
+  <p><strong>A:</strong> データソースのタイムゾーンを指定。</p>
+  <ul>
+    <li>東京証券取引所 → <code>"Asia/Tokyo"</code></li>
+    <li>NYSE → <code>"America/New_York"</code></li>
+    <li>暗号通貨（UTC） → <code>"Etc/UTC"</code></li>
+  </ul>
+
+  <h3>Q: セッション（session）のフォーマットは？</h3>
+  <p><strong>A:</strong> <code>"HHMM-HHMM"</code> 形式。複数セッションは <code>,</code> で区切る。</p>
+  <ul>
+    <li>日本株: <code>"0900-1130,1230-1500"</code></li>
+    <li>米国株: <code>"0930-1600"</code></li>
+    <li>24時間: <code>"24x7"</code></li>
+  </ul>
+
+  <h2>7. 参考リソース</h2>
+
+  <h3>公式</h3>
+  <ul>
+    <li><a href="https://www.tradingview.com/charting-library-docs/">TradingView Charting Library Documentation</a></li>
+    <li><a href="https://github.com/tradingview">TradingView GitHub Examples</a></li>
+  </ul>
+
+  <h3>コミュニティ実装例</h3>
+  <ul>
+    <li><a href="https://github.com/bergusman/tradingview-udf-binance-node">tradingview-udf-binance-node</a> - Binance用UDF実装</li>
+    <li><a href="https://github.com/Marfusios/tradingview-udf-provider">tradingview-udf-provider</a> - C#/ASP.NET Core用</li>
+  </ul>
+
+  <h3>デバッグツール</h3>
+  <ul>
+    <li>ブラウザのDevTools（Network, Console）</li>
+    <li>Postman/Insomnia（APIテスト）</li>
+    <li><a href="https://jsonlint.com/">JSONLint</a>（レスポンス検証）</li>
+  </ul>
+
+  <h2>8. チェックリスト</h2>
+  <ul>
+    <li>[ ] CORSヘッダーが正しく設定されているか</li>
+    <li>[ ] タイムスタンプが秒単位になっているか</li>
+    <li>[ ] pricescaleが適切に設定されているか</li>
+    <li>[ ] timezoneがIANA形式で正しいか</li>
+    <li>[ ] supported_resolutionsがデータソースと一致しているか</li>
+    <li>[ ] /historyのレスポンスで配列の長さが揃っているか</li>
+    <li>[ ] エラー時に適切なレスポンス（<code>{"s": "error"}</code>等）を返しているか</li>
+  </ul>
+
+  <h2>9. Datafeed APIの要点（JS API）</h2>
+
+  <h3>Datafeed APIとは</h3>
+  <p>
+    Charting Library がデータを取得するための JavaScript インターフェース。UDF のような HTTP プロトコルではなく、
+    <strong>フロントエンドが直接 datafeed オブジェクトのメソッドを呼び出す</strong>方式。
+  </p>
+
+  <h3>基本の呼び出しフロー</h3>
+  <ol>
+    <li><strong>onReady</strong> で datafeed の機能一覧（<code>supports_*</code>）と対応時間足を返す</li>
+    <li><strong>resolveSymbol</strong> でシンボル情報（<code>SymbolInfo</code>）を返す</li>
+    <li><strong>getBars</strong> で履歴データ（OHLCV）を返す</li>
+    <li><strong>subscribeBars / unsubscribeBars</strong> でリアルタイム更新</li>
+  </ol>
+
+  <h3>必須メソッドの役割</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>メソッド</th>
+        <th>役割</th>
+        <th>重要ポイント</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>onReady(callback)</code></td>
+        <td>初期化時に設定を返す</td>
+        <td><code>supports_search</code> や <code>supported_resolutions</code> を正確に</td>
+      </tr>
+      <tr>
+        <td><code>resolveSymbol(symbolName, onResolve, onError)</code></td>
+        <td>銘柄情報の解決</td>
+        <td><code>pricescale</code>, <code>session</code>, <code>timezone</code> を正しく設定</td>
+      </tr>
+      <tr>
+        <td><code>getBars(symbolInfo, resolution, periodParams, onHistory, onError)</code></td>
+        <td>過去データ取得</td>
+        <td><code>periodParams.from/to</code> は UNIX 秒、<code>noData</code> を返せる</td>
+      </tr>
+      <tr>
+        <td><code>subscribeBars(symbolInfo, resolution, onRealtime, subscriberUID, onResetCache)</code></td>
+        <td>リアルタイム購読</td>
+        <td>価格更新のタイミングを一定にする</td>
+      </tr>
+      <tr>
+        <td><code>unsubscribeBars(subscriberUID)</code></td>
+        <td>リアルタイム購読解除</td>
+        <td><code>subscriberUID</code> をキーに解除</td>
+      </tr>
+    </tbody>
+  </table>
+  <p>※ <code>searchSymbols</code> や <code>getServerTime</code> は要件に応じて実装。</p>
+
+  <h3>実装の勘所</h3>
+  <ul>
+    <li><strong>時間の単位は必ず秒</strong>：ミリ秒だとチャートが崩れる</li>
+    <li><strong>バー配列の長さを揃える</strong>：<code>t/o/h/l/c/v</code> の要素数は完全一致</li>
+    <li><strong>noData を活用</strong>：データがない場合は <code>onHistory([], { noData: true })</code></li>
+    <li><strong>supports_* の整合性</strong>：未実装の機能は false にする</li>
+    <li><strong>キャッシュのリセット</strong>：銘柄切替や再購読時は <code>onResetCache</code> を適切に呼ぶ</li>
+  </ul>
+
+  <h3>エラー時の振る舞い</h3>
+  <ul>
+    <li><code>onError</code> にメッセージを渡す（例: "Symbol not found"）</li>
+    <li>一時的なエラーはリトライ戦略を検討</li>
+    <li>Charting Library 側の挙動はコンソールログで確認</li>
+  </ul>
+
+  <h3>公式ドキュメントの読み解き方</h3>
+  <ul>
+    <li><strong>Datafeed API</strong> は JS API の最重要ページ</li>
+    <li><code>SymbolInfo</code> と <code>HistoryData</code> の型定義を把握すると理解が進む</li>
+    <li>公式サンプルの datafeed 実装を読むと全体像が掴める</li>
+  </ul>
+</body>
+</html>
