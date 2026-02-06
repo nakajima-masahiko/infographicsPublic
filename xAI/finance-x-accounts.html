@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>金融・投資系 X(旧Twitter)アカウント インフォグラフィック</title>
+  <style>
+    :root {
+      --bg-dark: #0f1419;
+      --bg-card: #16202a;
+      --bg-card-hover: #1c2b3a;
+      --accent-blue: #1d9bf0;
+      --accent-gold: #f7b731;
+      --accent-green: #00c853;
+      --accent-red: #ff6b6b;
+      --accent-purple: #a855f7;
+      --accent-cyan: #22d3ee;
+      --text-primary: #e7e9ea;
+      --text-secondary: #8b98a5;
+      --text-muted: #6e7a86;
+      --border: #2f3336;
+      font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg-dark);
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    /* Hero */
+    .hero {
+      background: linear-gradient(135deg, #0f1419 0%, #1a1a2e 30%, #16213e 60%, #0f1419 100%);
+      padding: 60px 20px 50px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      border-bottom: 1px solid var(--border);
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle at 30% 50%, rgba(29,155,240,0.08) 0%, transparent 50%),
+                  radial-gradient(circle at 70% 30%, rgba(247,183,49,0.06) 0%, transparent 50%);
+      pointer-events: none;
+    }
+    .hero-content { position: relative; z-index: 1; max-width: 800px; margin: 0 auto; }
+    .hero h1 {
+      font-size: 32px;
+      font-weight: 900;
+      margin-bottom: 12px;
+      background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero .subtitle {
+      font-size: 16px;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+    .hero-stats {
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      flex-wrap: wrap;
+    }
+    .hero-stat {
+      text-align: center;
+    }
+    .hero-stat .num {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--accent-gold);
+    }
+    .hero-stat .label {
+      font-size: 12px;
+      color: var(--text-muted);
+      display: block;
+      margin-top: 2px;
+    }
+
+    /* Container */
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    /* Section */
+    .section {
+      padding: 48px 0 24px;
+    }
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 28px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .section-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+    .section-icon.media { background: linear-gradient(135deg, #1d9bf0, #0e76b8); }
+    .section-icon.stock { background: linear-gradient(135deg, #00c853, #009624); }
+    .section-icon.fx { background: linear-gradient(135deg, #f7b731, #e09400); }
+    .section-icon.crypto { background: linear-gradient(135deg, #a855f7, #7c3aed); }
+    .section-title-group { flex: 1; }
+    .section-title {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text-primary);
+    }
+    .section-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* Cards Grid */
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 16px;
+    }
+
+    /* Account Card */
+    .account-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      transition: all 0.25s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .account-card:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--accent-blue);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 30px rgba(29,155,240,0.12);
+    }
+    .card-top {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      font-weight: 800;
+      flex-shrink: 0;
+      color: #fff;
+    }
+    .avatar.blue { background: linear-gradient(135deg, #1d9bf0, #0e76b8); }
+    .avatar.gold { background: linear-gradient(135deg, #f7b731, #e09400); }
+    .avatar.green { background: linear-gradient(135deg, #00c853, #009624); }
+    .avatar.red { background: linear-gradient(135deg, #ff6b6b, #ee5a24); }
+    .avatar.purple { background: linear-gradient(135deg, #a855f7, #7c3aed); }
+    .avatar.cyan { background: linear-gradient(135deg, #22d3ee, #06b6d4); }
+    .avatar.dark { background: linear-gradient(135deg, #374151, #1f2937); }
+    .card-info { flex: 1; min-width: 0; }
+    .card-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .card-handle {
+      font-size: 13px;
+      color: var(--accent-blue);
+      font-weight: 500;
+    }
+    .card-followers {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+    .card-followers strong {
+      color: var(--accent-gold);
+      font-weight: 700;
+    }
+    .card-desc {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.65;
+    }
+    .card-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .tag {
+      font-size: 11px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-weight: 600;
+      border: 1px solid;
+    }
+    .tag.macro { background: rgba(29,155,240,0.1); color: #1d9bf0; border-color: rgba(29,155,240,0.25); }
+    .tag.stock { background: rgba(0,200,83,0.1); color: #00c853; border-color: rgba(0,200,83,0.25); }
+    .tag.fx { background: rgba(247,183,49,0.1); color: #f7b731; border-color: rgba(247,183,49,0.25); }
+    .tag.crypto { background: rgba(168,85,247,0.1); color: #a855f7; border-color: rgba(168,85,247,0.25); }
+    .tag.official { background: rgba(255,255,255,0.06); color: var(--text-secondary); border-color: rgba(255,255,255,0.12); }
+    .tag.okuribito { background: rgba(247,183,49,0.15); color: #f7b731; border-color: rgba(247,183,49,0.3); }
+
+    /* Achievement Badge */
+    .achievement {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      color: var(--accent-gold);
+      font-weight: 700;
+      background: rgba(247,183,49,0.1);
+      padding: 2px 8px;
+      border-radius: 6px;
+      margin-left: 8px;
+    }
+
+    /* Disclaimer */
+    .disclaimer {
+      margin: 40px 0;
+      padding: 20px 24px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.8;
+    }
+    .disclaimer strong {
+      color: var(--text-secondary);
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 32px 20px;
+      border-top: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* Back link */
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--accent-blue);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      transition: opacity 0.2s;
+    }
+    .back-link:hover { opacity: 0.75; }
+
+    @media (max-width: 700px) {
+      .hero h1 { font-size: 24px; }
+      .cards { grid-template-columns: 1fr; }
+      .hero-stats { gap: 20px; }
+      .hero-stat .num { font-size: 22px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Hero Section -->
+  <div class="hero">
+    <div class="hero-content">
+      <h1>金融・投資系 X アカウント ガイド</h1>
+      <p class="subtitle">マーケット情報・経済指標の発信者と億り人トレーダーの厳選アカウント集</p>
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <div class="num">20</div>
+          <span class="label">厳選アカウント</span>
+        </div>
+        <div class="hero-stat">
+          <div class="num">4</div>
+          <span class="label">カテゴリ</span>
+        </div>
+        <div class="hero-stat">
+          <div class="num">800万+</div>
+          <span class="label">合計フォロワー</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="section" style="padding-top:32px;">
+      <a href="../index.html" class="back-link">&larr; 一覧に戻る</a>
+    </div>
+
+    <!-- ===== SECTION 1: メディア・経済指標 ===== -->
+    <section class="section">
+      <div class="section-header">
+        <div class="section-icon media">&#x1F4F0;</div>
+        <div class="section-title-group">
+          <h2 class="section-title">メディア・経済ジャーナリスト</h2>
+          <p class="section-desc">マーケット情報・経済指標・解説を発信する大手メディア&個人ジャーナリスト</p>
+        </div>
+      </div>
+      <div class="cards">
+        <!-- Nikkei -->
+        <div class="account-card">
+          <div class="card-top">
+            <div class="avatar blue">N</div>
+            <div class="card-info">
+              <div class="card-name">日本経済新聞 電子版</div>
+              <div class="card-handle">@nikkei</div>
+              <div class="card-followers">フォロワー: <strong>約390万</strong></div>
+            </div>
+          </div>
+          <div class="card-desc">日経の公式アカウント。企業決算、政策、マーケット動向を網羅的に速報配信。日本語圏で最大のフォロワー数を誇る金融メディア。</div>
+          <div class="card-tags">
+            <span class="tag macro">マクロ経済</span>
+            <span class="tag stock">株式</span>
+            <span class="tag official">公式メディア</span>
+          </div>
+        </div>
+        <!-- Reuters Japan -->
+        <div class="account-card">
+          <div class="card-top">
+            <div class="avatar dark">R</div>
+            <div class="card-info">
+              <div class="card-name">ロイター (Reuters Japan)</div>
+              <div class="card-handle">@ReutersJapan</div>
+              <div class="card-followers">フォロワー: <strong>約110万</strong></div>
+            </div>
+          </div>
+          <div class="card-desc">ロイター日本語版。国際・国内の経済、政治、金融市場ニュースを速報。グローバルな視点からの分析が強み。</div>
+          <div class="card-tags">
+            <span class="tag macro">マクロ経済</span>
+            <span class="tag fx">為替</span>
+            <span class="tag official">公式メディア</span>
+          </div>
+        </div>
+        <!-- Bloomberg Japan -->
+        <div class="account-card">
+          <div class="card-top">
+            <div class="avatar blue">B</div>
+            <div class="card-info">
+              <div class="card-name">ブルームバーグニュース</div>
+              <div class="card-handle">@BloombergJapan</div>
+              <div class="card-followers">フォロワー: <strong>約62万</strong></div>
+            </div>
+          </div>
+          <div class="card-desc">Bloomberg日本語版。世界の市場動向、中央銀行の政策、企業ニュース、金融分析を配信。プロ向けの深い分析に定評。</div>
+          <div class="card-tags">
+            <span class="tag macro">マクロ経済</span>
+            <span class="tag stock">株式</span>
+            <span class="tag official">公式メディア</span>
+          </div>
+        </div>
+        <!-- Goto Tatsuya -->
+        <div class="account-card">
+          <div class="card-top">
+            <div class="avatar cyan">後</div>
+            <div class="card-info">
+              <div class="card-name">後藤達也</div>
+              <div class="card-handle">@goto_finance</div>
+              <div class="card-followers">フォロワー: <strong>約76万</strong></div>
+            </div>
+          </div>
+          <div class="card-desc">元日経記者の独立経済ジャーナリスト。日銀政策、米経済指標、為替・株式市場の動きを平易かつ正確に解説。日本で最も影響力のある個人経済コメンテーターの一人。</div>
+          <div class="card-tags">
+            <span class="tag macro">マクロ経済</span>
+            <span class="tag fx">為替</span>
+            <span class="tag stock">株式</span>
+          </div>
+        </div>
+        <!-- Emin Yurumazu -->
+        <div class="account-card">
+          <div class="card-top">
+            <div class="avatar gold">E</div>
+            <div class="card-info">
+              <div class="card-name">エミン・ユルマズ</div>
+              <div class="card-handle">@yurumazu</div>
+              <div class="card-followers">フォロワー: <strong>約48万</strong></div>
+            </div>
+          </div>
+          <div class="card-desc">トルコ出身のエコノミスト・グローバルストラテジスト。元野村證券。データに裏付けられた市場解説と、地政学リスクを踏まえた独自の国際視点が特徴。</div>
+          <div class="card-tags">
+            <span class="tag macro">マクロ経済</span>
+            <span class="tag stock">株式</span>
+          </div>
+        </div>
+        <!-- BOJ -->
+        <div class="account-card">
+          <div class="card-top">
+            <div class="avatar dark">日</div>
+            <div class="card-info">
+              <div class="card-name">日本銀行</div>
+              <div class="card-handle">@Bank_of_Japan_j</div>
+              <div class="card-followers">フォロワー: <strong>約20万</strong></div>
+            </div>
+          </div>
+          <div class="card-desc">日本銀行の公式アカウント。金融政策決定会合の結果、短観、各種統計データを公式発表。金融政策の一次ソースとして必須。</div>
+          <div class="card-tags">
+            <span class="tag macro">金融政策</span>
+            <span class="tag official">公式機関</span>
+          </div>
+        </div>
+        <!-- CoinPost -->
+        <div class="account-card">
+          <div class="card-top">
+            <div class="avatar purple">C</div>
+            <div class="card-info">
+              <div class="card-name">CoinPost</div>
+              <div class="card-handle">@coin_post</div>
+              <div class="card-followers">フォロワー: <strong>約20万+</strong></div>
+            </div>
+          </div>
+          <div class="card-desc">日本最大の暗号資産・ブロックチェーンニュースメディア。仮想通貨市場の速報、規制変更、プロジェクト情報を配信。世界第3位のアクセス数を誇る。</div>
+          <div class="card-tags">
+            <span class="tag crypto">暗号資産</span>
+            <span class="tag official">公式メディア</span>
+          </div>
+        </div>
+        <!-- Hitsujikai FX -->
+        <div class="account-card">
+          <div class="card-top">
+            <div class="avatar gold">羊</div>
+            <div class="card-info">
+              <div class="card-name">羊飼いFX</div>
+              <div class="card-handle">@hitsuzikai</div>
+              <div class="card-followers">フォロワー: <strong>数万</strong></div>
+            </div>
+          </div>
+          <div class="card-desc">2001年から活動するFXブロガーの先駆者。毎朝6時までにFX市場の見通しを配信。経済指標の発表予定と解説に定評があり、著書累計40万部超。</div>
+          <div class="card-tags">
+            <span class="tag fx">為替</span>
+            <span class="tag macro">経済指標</span>
+          </div>
+        </div>
+        <!-- ZaiFX Iguchi -->
+        <div class="account-card">
+          <div class="card-top">
+            <div class="avatar blue">Z</div>
+            <div class="card-info">
+              <div class="card-name">井口稔 (ザイFX!)</div>
+              <div class="card-handle">@Neko_Iguchi</div>
+              <div class="card-followers">フォロワー: <strong>数万</strong></div>
+            </div>
+          </div>
+          <div class="card-desc">ダイヤモンド社「ザイFX!」編集部。プロ水準のFX市場分析と経済指標の解説を発信。専門誌ならではの深い知見が強み。</div>
+          <div class="card-tags">
+            <span class="tag fx">為替</span>
+            <span class="tag macro">経済指標</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== SECTION 2: 株式 億り人 ===== -->
+    <section class="section">
+      <div class="section-header">
+        <div class="section-icon stock">&#x1F4C8;</div>
+        <div class="section-title-group">
+          <h2 class="section-title">株式 億り人トレーダー</h2>
+          <p class="section-desc">株式投資で億超えの資産を築いた著名個人投資家</p>
+        </div>
+      </div>
+      <div class="cards">
+        <!-- cis -->
+        <div class="account-card">
+          <div class="card-top">
+            <div class="avatar red">cis</div>
+            <div class="card-info">
+              <div class="card-name">cis (シス)<span class="achievement">&#x1F451; 230億円</span></div>
+              <div class="card-handle">@cissan_9984</div>
+              <div class="card-followers">フォロワー: <strong>約14万</strong></div>
+            </div>
+          </div>
+          <div class="card-desc">日本最有名の個人トレーダー。2000年に300万円で投資を始め、推定資産230億円に。ポジション公開時に市場全体が反応するほどの影響力。著書『一人の力で日経平均を動かせる男の投資哲学』はベストセラー。</div>
+          <div class="card-tags">
+            <span class="tag okuribito">億り人</span>
+            <span class="tag stock">株式</span>
+            <span class="tag fx">先物・FX</span>
+          </div>
+        </div>
+        <!-- Tesuta -->
+        <div class="account-card">
+          <div class="card-top">
+            <div class="avatar green">T</div>
+            <div class="card-info">
+              <div class="card-name">テスタ<span class="achievement">&#x1F451; 100億円+</span></div>
+              <div class="card-handle">@tesuta001</div>
+              <div class="card-followers">フォロワー: <strong>約5.8万</strong></div>
+            </div>
+          </div>
+          <div class="card-desc">2005年にデイトレードを開始し、確定利益100億円超を達成。スキャルピングから高配当株の中長期投資へ拡大。年間配当収入は1.5億円超。投資詐欺撲滅活動にも積極的。</div>
+          <div class="card-tags">
+            <span class="tag okuribito">億り人</span>
+            <span class="tag stock">デイトレ</span>
+            <span class="tag stock">高配当株</span>
+          </div>
+        </div>
+        <!-- Imura -->
+        <div class="account-card">
+          <div class="card-top">
+            <div class="avatar cyan">井</div>
+            <div class="card-info">
+              <div class="card-name">井村俊哉<span class="achievement">&#x1F451; 80億円+</span></div>
+              <div class="card-handle">@imuvill</div>
+              <div class="card-followers">フォロワー: <strong>数万</strong></div>
+            </div>
+          </div>
+          <div class="card-desc">元芸人から転身した株式投資家。100万円を80億円超に成長。企業のファンダメンタルズを徹底分析し、集中投資で高リターンを実現。Zeppy株式会社CEO、中小企業診断士。</div>
+          <div class="card-tags">
+            <span class="tag okuribito">億り人</span>
+            <span class="tag stock">ファンダメンタルズ</span>
+            <span class="tag stock">集中投資</span>
+          </div>
+        </div>
+        <!-- Katayama / Gogatsu -->
+        <div class="account-card">
+          <div class="card-top">
+            <div class="avatar gold">五</div>
+            <div class="card-info">
+              <div class="card-name">片山晃 (五月)<span class="achievement">&#x1F451; 150億円</span></div>
+              <div class="card-handle">@hakureifarm</div>
+              <div class="card-followers">フォロワー: <strong>数万</strong></div>
+            </div>
+          </div>
+          <div class="card-desc">アルバイトで貯めた65万円を150億円に成長させた伝説的投資家。成長株投資とベンチャー投資を手掛け、株分析アプリ「Kaview」も運営。競走馬オーナーとしても知られる。</div>
+          <div class="card-tags">
+            <span class="tag okuribito">億り人</span>
+            <span class="tag stock">成長株</span>
+            <span class="tag stock">ベンチャー</span>
+          </div>
+        </div>
+        <!-- DAIBOUCHOU -->
+        <div class="account-card">
+          <div class="card-top">
+            <div class="avatar purple">D</div>
+            <div class="card-info">
+              <div class="card-name">DAIBOUCHOU<span class="achievement">&#x1F451; 10億円+</span></div>
+              <div class="card-handle">@DAIBOUCHO</div>
+              <div class="card-followers">フォロワー: <strong>数万</strong></div>
+            </div>
+          </div>
+          <div class="card-desc">2000年に200万円で投資を開始、6年で10億円を達成。日本の小型バリュー株に超分散投資し、不動産投資も併用。緻密な財務諸表分析で割安成長企業を発掘。</div>
+          <div class="card-tags">
+            <span class="tag okuribito">億り人</span>
+            <span class="tag stock">小型バリュー</span>
+            <span class="tag stock">超分散</span>
+          </div>
+        </div>
+        <!-- Kanchi -->
+        <div class="account-card">
+          <div class="card-top">
+            <div class="avatar green">か</div>
+            <div class="card-info">
+              <div class="card-name">かんち<span class="achievement">&#x1F451; 8億円</span></div>
+              <div class="card-handle">@kanti990</div>
+              <div class="card-followers">フォロワー: <strong>数万</strong></div>
+            </div>
+          </div>
+          <div class="card-desc">40年の投資歴で8億円のポートフォリオを構築。配当金と株主優待だけで生活。約700銘柄を保有する究極の分散投資家。配当・優待投資の教科書的存在。</div>
+          <div class="card-tags">
+            <span class="tag okuribito">億り人</span>
+            <span class="tag stock">高配当</span>
+            <span class="tag stock">株主優待</span>
+          </div>
+        </div>
+        <!-- Kabu1000 -->
+        <div class="account-card">
+          <div class="card-top">
+            <div class="avatar blue">株</div>
+            <div class="card-info">
+              <div class="card-name">かぶ1000<span class="achievement">&#x1F451; 4億円+</span></div>
+              <div class="card-handle">@kabu1000</div>
+              <div class="card-followers">フォロワー: <strong>数万</strong></div>
+            </div>
+          </div>
+          <div class="card-desc">1988年に中学生で40万円から投資を開始し4億円超へ。ベンジャミン・グレアム流のネットネット分析を実践する日本を代表するバリュー投資家。投資手法の著書はベストセラー。</div>
+          <div class="card-tags">
+            <span class="tag okuribito">億り人</span>
+            <span class="tag stock">バリュー投資</span>
+            <span class="tag stock">ネットネット</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== SECTION 3: FX 億り人 ===== -->
+    <section class="section">
+      <div class="section-header">
+        <div class="section-icon fx">&#x1F4B1;</div>
+        <div class="section-title-group">
+          <h2 class="section-title">FX 億り人トレーダー</h2>
+          <p class="section-desc">外国為替取引で億超えの利益を達成した著名トレーダー</p>
+        </div>
+      </div>
+      <div class="cards">
+        <!-- Aki -->
+        <div class="account-card">
+          <div class="card-top">
+            <div class="avatar gold">A</div>
+            <div class="card-info">
+              <div class="card-name">Aki<span class="achievement">&#x1F451; 5億円</span></div>
+              <div class="card-handle">@aki_fx1</div>
+              <div class="card-followers">フォロワー: <strong>数万</strong></div>
+            </div>
+          </div>
+          <div class="card-desc">大学時代のアルバイト資金からFXトレードを開始し、1年で5億円を達成。eスポーツや塾経営にも進出。アグレッシブかつ規律あるトレードスタイルで知られる。</div>
+          <div class="card-tags">
+            <span class="tag okuribito">億り人</span>
+            <span class="tag fx">FXトレード</span>
+          </div>
+        </div>
+        <!-- Jun FX -->
+        <div class="account-card">
+          <div class="card-top">
+            <div class="avatar cyan">J</div>
+            <div class="card-info">
+              <div class="card-name">ジュンFX<span class="achievement">&#x1F451; 17億円</span></div>
+              <div class="card-handle">@jun123789</div>
+              <div class="card-followers">フォロワー: <strong>数万</strong></div>
+            </div>
+          </div>
+          <div class="card-desc">2008年に20歳でFXを開始、2014年に専業化。2019年に31歳で億り人達成。2025年時点で生涯利益17億円に到達。長期にわたるFXの成功記録を公開。</div>
+          <div class="card-tags">
+            <span class="tag okuribito">億り人</span>
+            <span class="tag fx">FXトレード</span>
+          </div>
+        </div>
+        <!-- Fuuta -->
+        <div class="account-card">
+          <div class="card-top">
+            <div class="avatar red">ふ</div>
+            <div class="card-info">
+              <div class="card-name">スキャトレふうた</div>
+              <div class="card-handle">@fuuta_fx_trader</div>
+              <div class="card-followers">フォロワー: <strong>数万</strong></div>
+            </div>
+          </div>
+          <div class="card-desc">5.5万件超の投稿を誇る多作なFXスキャルピングトレーダー。リアルタイムのトレードセットアップ、スキャルピング戦略、短期FXの市場解説を精力的に発信。</div>
+          <div class="card-tags">
+            <span class="tag fx">スキャルピング</span>
+            <span class="tag fx">FXトレード</span>
+          </div>
+        </div>
+        <!-- Kobayashi -->
+        <div class="account-card">
+          <div class="card-top">
+            <div class="avatar dark">小</div>
+            <div class="card-info">
+              <div class="card-name">小林芳彦 (JFX CEO)</div>
+              <div class="card-handle">@JFXkobayashi</div>
+              <div class="card-followers">フォロワー: <strong>数万</strong></div>
+            </div>
+          </div>
+          <div class="card-desc">FX会社JFXの代表取締役でありアクティブトレーダー。自身のポジションとトレード根拠をリアルタイムで公開。数十年の外為市場経験に基づく機関投資家レベルの分析を発信。</div>
+          <div class="card-tags">
+            <span class="tag fx">FXトレード</span>
+            <span class="tag official">FX会社CEO</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Disclaimer -->
+    <div class="disclaimer">
+      <strong>免責事項:</strong> 本ページは情報提供を目的としたものであり、投資助言ではありません。フォロワー数は2025年末〜2026年初頭時点の概算であり、実際の数値と異なる場合があります。投資判断はご自身の責任で行ってください。各アカウントの情報は複数の金融メディア（ZUU Online、ダイヤモンドZAi、日経、マネックス証券、SMBC日興フロッギー等）を参照して掲載しています。
+    </div>
+  </div>
+
+  <footer>
+    <p>&copy; 2026 Infographics Collection</p>
+  </footer>
+</body>
+</html>
