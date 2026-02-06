@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TradingView Datafeed API 解説</title>
+  <style>
+    body {
+      font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+      line-height: 1.7;
+      margin: 24px;
+      color: #1f2933;
+    }
+    h1, h2, h3 {
+      color: #0f172a;
+    }
+    code {
+      background: #f5f5f5;
+      padding: 2px 4px;
+      border-radius: 4px;
+    }
+    pre {
+      background: #f5f5f5;
+      padding: 12px;
+      border-radius: 6px;
+      overflow-x: auto;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 12px 0;
+    }
+    th, td {
+      border: 1px solid #cbd5e1;
+      padding: 8px;
+      text-align: left;
+    }
+    th {
+      background: #e2e8f0;
+    }
+    .note {
+      background: #eef6ff;
+      border-left: 4px solid #3b82f6;
+      padding: 12px;
+    }
+  </style>
+</head>
+<body>
+  <h1>TradingView Datafeed API 解説</h1>
+  <p>
+    公式ドキュメント「Datafeed API」は、Charting Library がデータを取得するための
+    JavaScript インターフェースを説明しています。UDF のような HTTP プロトコルではなく、
+    チャートライブラリが <code>datafeed</code> オブジェクトを直接呼び出す方式です。
+  </p>
+
+  <h2>Datafeed API の全体像</h2>
+  <p>
+    Datafeed API は、チャートが必要とするデータを「いつ・どの形で渡すべきか」を定義します。
+    以下の3つの領域に分かれます。
+  </p>
+  <ul>
+    <li><strong>初期設定</strong>：datafeed の機能や対応時間足を返す</li>
+    <li><strong>シンボル解決</strong>：銘柄情報を取得しチャートに適用する</li>
+    <li><strong>データ取得</strong>：過去データとリアルタイム更新を提供する</li>
+  </ul>
+
+  <h2>必須メソッドと役割</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>メソッド</th>
+        <th>役割</th>
+        <th>ポイント</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>onReady</code></td>
+        <td>初期化時に設定を返す</td>
+        <td>対応時間足と <code>supports_*</code> を正確に</td>
+      </tr>
+      <tr>
+        <td><code>resolveSymbol</code></td>
+        <td>シンボル情報を返す</td>
+        <td><code>pricescale</code>、<code>session</code>、<code>timezone</code> の整合性</td>
+      </tr>
+      <tr>
+        <td><code>getBars</code></td>
+        <td>ヒストリカルデータ取得</td>
+        <td>UNIX秒で <code>from/to</code> を処理し <code>noData</code> に対応</td>
+      </tr>
+      <tr>
+        <td><code>subscribeBars</code></td>
+        <td>リアルタイム更新</td>
+        <td>一定の粒度でバーを更新</td>
+      </tr>
+      <tr>
+        <td><code>unsubscribeBars</code></td>
+        <td>購読解除</td>
+        <td>subscriberUID で確実に解除</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="note">
+    <strong>任意メソッド</strong>
+    <p>
+      <code>searchSymbols</code>、<code>getServerTime</code> は要件次第で実装します。検索 UI を使う場合や
+      サーバー時刻の同期が必要な場合は追加してください。
+    </p>
+  </div>
+
+  <h2>呼び出しフローのイメージ</h2>
+  <pre>
++-----------+      +-------------+      +---------------+
+| onReady   | ---> | resolveSymbol | ---> | getBars       |
++-----------+      +-------------+      +---------------+
+                                             |
+                                             v
+                                      subscribeBars
+  </pre>
+
+  <h2>SymbolInfo で重要なフィールド</h2>
+  <ul>
+    <li><strong>pricescale</strong>：価格の最小単位（例: 0.01 → 100）</li>
+    <li><strong>session</strong>：取引時間（例: <code>0930-1600</code>、<code>24x7</code>）</li>
+    <li><strong>timezone</strong>：IANA形式（例: <code>Asia/Tokyo</code>）</li>
+    <li><strong>supported_resolutions</strong>：実際に提供できる時間足のみ指定</li>
+  </ul>
+
+  <h2>履歴データ（getBars）の注意点</h2>
+  <ul>
+    <li>タイムスタンプは必ず<strong>秒単位</strong>にする</li>
+    <li>配列の長さは <code>t/o/h/l/c/v</code> で完全一致</li>
+    <li>データがなければ <code>onHistory([], { noData: true })</code></li>
+  </ul>
+
+  <h2>リアルタイム更新の実装ポイント</h2>
+  <ul>
+    <li>最小限は「最新バーを更新 or 新しいバー追加」だけで動く</li>
+    <li>データ更新間隔が不規則だとチャートがギクシャクする</li>
+    <li>購読解除は subscriberUID で確実に管理</li>
+  </ul>
+
+  <h2>よくあるミスと対策</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>ミス</th>
+        <th>結果</th>
+        <th>対策</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>ミリ秒タイムスタンプ</td>
+        <td>チャートが表示されない</td>
+        <td>必ず秒単位に変換</td>
+      </tr>
+      <tr>
+        <td>pricescale 不一致</td>
+        <td>価格表示がズレる</td>
+        <td>小数桁に合わせて設定</td>
+      </tr>
+      <tr>
+        <td>supports_* の過剰宣言</td>
+        <td>未実装機能が呼ばれる</td>
+        <td>対応できる機能だけ true に</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>まとめ</h2>
+  <p>
+    Datafeed API は Charting Library の中核。<strong>onReady → resolveSymbol → getBars</strong> の
+    基本フローを押さえたうえで、リアルタイム更新や検索機能を拡張していくとスムーズです。
+    公式ドキュメントと合わせて読み進めると、実装の精度が上がります。
+  </p>
+</body>
+</html>
