@@ -126,9 +126,117 @@
       color: rgba(255,255,255,0.7);
       font-size: 14px;
     }
+    /* === Emoji Auth Overlay === */
+    #auth-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #auth-overlay.hidden { display: none; }
+    .auth-box {
+      background: #fff;
+      border-radius: 24px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+      padding: 40px 36px;
+      text-align: center;
+      max-width: 380px;
+      width: 90%;
+    }
+    .auth-box h2 {
+      margin: 0 0 8px;
+      font-size: 24px;
+      color: #1f2937;
+    }
+    .auth-box .auth-desc {
+      margin: 0 0 24px;
+      font-size: 14px;
+      color: #6b7280;
+      line-height: 1.6;
+    }
+    .emoji-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .emoji-cell {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto;
+      font-size: 36px;
+      border: 3px solid #e5e7eb;
+      border-radius: 16px;
+      background: #f9fafb;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .emoji-cell:hover {
+      border-color: #667eea;
+      background: #f0f0ff;
+    }
+    .emoji-cell.selected {
+      border-color: #667eea;
+      background: #e0e7ff;
+      box-shadow: 0 0 0 3px rgba(102,126,234,0.3);
+      transform: scale(1.05);
+    }
+    .auth-status {
+      min-height: 24px;
+      font-size: 14px;
+      color: #6b7280;
+      margin-bottom: 16px;
+    }
+    .auth-error {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 8px;
+    }
+    .auth-error p {
+      margin: 0 0 16px;
+      color: #dc2626;
+      font-weight: 600;
+      font-size: 15px;
+    }
+    .reload-btn {
+      display: inline-block;
+      padding: 10px 28px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .reload-btn:hover {
+      opacity: 0.85;
+    }
   </style>
 </head>
 <body>
+  <!-- Emoji Auth Overlay -->
+  <div id="auth-overlay">
+    <div class="auth-box">
+      <h2>🔒 認証</h2>
+      <p class="auth-desc">3つの絵文字を選んでください。<br>数字の合計が <strong>9</strong> になれば認証成功です。</p>
+      <div class="emoji-grid" id="emoji-grid"></div>
+      <div class="auth-status" id="auth-status">0 / 3 選択中</div>
+      <div id="auth-result"></div>
+    </div>
+  </div>
+
   <div class="wrap">
     <header>
       <h1>📊 インフォグラフィック一覧</h1>
@@ -227,5 +335,135 @@
       <p>© 2026 Infographics Collection</p>
     </footer>
   </div>
+  <script>
+  (function() {
+    // Number emojis (keycap digits) mapped to their numeric value
+    var numberEmojis = [
+      { emoji: '0\uFE0F\u20E3', value: 0 },
+      { emoji: '1\uFE0F\u20E3', value: 1 },
+      { emoji: '2\uFE0F\u20E3', value: 2 },
+      { emoji: '3\uFE0F\u20E3', value: 3 },
+      { emoji: '4\uFE0F\u20E3', value: 4 },
+      { emoji: '5\uFE0F\u20E3', value: 5 },
+      { emoji: '6\uFE0F\u20E3', value: 6 },
+      { emoji: '7\uFE0F\u20E3', value: 7 },
+      { emoji: '8\uFE0F\u20E3', value: 8 },
+      { emoji: '9\uFE0F\u20E3', value: 9 }
+    ];
+
+    // Random non-number emojis pool
+    var randomEmojis = [
+      '\uD83C\uDF1F', '\uD83C\uDF08', '\uD83D\uDD25', '\uD83C\uDF3A', '\uD83C\uDF40',
+      '\uD83C\uDF1E', '\uD83C\uDF19', '\u2B50', '\uD83D\uDC8E', '\uD83C\uDF38',
+      '\uD83C\uDF3B', '\uD83C\uDF3C', '\uD83C\uDF3E', '\uD83C\uDF32', '\uD83C\uDF34',
+      '\uD83C\uDF35', '\uD83C\uDF37', '\uD83C\uDF39', '\uD83C\uDF3D', '\uD83D\uDE80',
+      '\uD83C\uDFA8', '\uD83C\uDFB5', '\u26A1', '\uD83E\uDD84', '\uD83D\uDC1F',
+      '\uD83E\uDD8B', '\uD83D\uDC26', '\uD83C\uDF52', '\uD83C\uDF53', '\uD83C\uDF49'
+    ];
+
+    function shuffle(arr) {
+      for (var i = arr.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+      }
+      return arr;
+    }
+
+    // Check if a set of 4 numbers has at least one 3-pick combo summing to 9
+    // (picks can include non-number emojis which count as 0)
+    function hasValidCombo(nums) {
+      var vals = nums.map(function(n) { return n.value; });
+      // Check: any single value == 9 (+ two zeros from non-number emojis)
+      for (var i = 0; i < vals.length; i++) {
+        if (vals[i] === 9) return true;
+      }
+      // Check: any pair sums to 9 (+ one zero)
+      for (var i = 0; i < vals.length; i++) {
+        for (var j = i + 1; j < vals.length; j++) {
+          if (vals[i] + vals[j] === 9) return true;
+        }
+      }
+      // Check: any triple sums to 9
+      for (var i = 0; i < vals.length; i++) {
+        for (var j = i + 1; j < vals.length; j++) {
+          for (var k = j + 1; k < vals.length; k++) {
+            if (vals[i] + vals[j] + vals[k] === 9) return true;
+          }
+        }
+      }
+      return false;
+    }
+
+    function pickNumbers() {
+      var pool = numberEmojis.slice();
+      var picked;
+      do {
+        shuffle(pool);
+        picked = pool.slice(0, 4);
+      } while (!hasValidCombo(picked));
+      return picked;
+    }
+
+    function pickRandomEmojis(count) {
+      var pool = randomEmojis.slice();
+      shuffle(pool);
+      return pool.slice(0, count).map(function(e) {
+        return { emoji: e, value: 0 };
+      });
+    }
+
+    function buildGrid() {
+      var nums = pickNumbers();
+      var randoms = pickRandomEmojis(5);
+      var cells = nums.concat(randoms);
+      shuffle(cells);
+      return cells;
+    }
+
+    // --- Render & Interaction ---
+    var grid = document.getElementById('emoji-grid');
+    var statusEl = document.getElementById('auth-status');
+    var resultEl = document.getElementById('auth-result');
+    var overlay = document.getElementById('auth-overlay');
+    var cells = buildGrid();
+    var selected = [];
+
+    cells.forEach(function(cell, idx) {
+      var btn = document.createElement('button');
+      btn.className = 'emoji-cell';
+      btn.textContent = cell.emoji;
+      btn.setAttribute('data-index', idx);
+      btn.addEventListener('click', function() {
+        if (btn.classList.contains('selected')) {
+          btn.classList.remove('selected');
+          selected = selected.filter(function(s) { return s.idx !== idx; });
+        } else {
+          if (selected.length >= 3) return; // already 3 selected
+          btn.classList.add('selected');
+          selected.push({ idx: idx, value: cell.value });
+        }
+        statusEl.textContent = selected.length + ' / 3 選択中';
+        if (selected.length === 3) {
+          validate();
+        }
+      });
+      grid.appendChild(btn);
+    });
+
+    function validate() {
+      var sum = selected.reduce(function(a, b) { return a + b.value; }, 0);
+      if (sum === 9) {
+        overlay.classList.add('hidden');
+      } else {
+        statusEl.textContent = '';
+        resultEl.innerHTML =
+          '<div class="auth-error">' +
+            '<p>認証失敗: 合計が ' + sum + ' です（9 が必要です）</p>' +
+            '<button class="reload-btn" onclick="location.reload()">🔄 リロード</button>' +
+          '</div>';
+      }
+    }
+  })();
+  </script>
 </body>
 </html>
