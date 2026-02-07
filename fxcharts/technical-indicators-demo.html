@@ -56,6 +56,26 @@
       line-height: 1.7;
       font-size: 14px;
     }
+    .desc-detail {
+      background: rgba(30, 41, 59, 0.6);
+      border-left: 3px solid #6366f1;
+      padding: 14px 18px;
+      margin: 12px 0 16px;
+      border-radius: 0 10px 10px 0;
+      font-size: 13px;
+      line-height: 1.8;
+      color: #c7d2fe;
+    }
+    .desc-detail strong {
+      color: #a5b4fc;
+    }
+    .desc-detail ul {
+      margin: 6px 0 0;
+      padding-left: 18px;
+    }
+    .desc-detail li {
+      margin-bottom: 4px;
+    }
     .chart-grid {
       display: grid;
       gap: 20px;
@@ -77,7 +97,7 @@
       height: 320px;
     }
     .chart.small {
-      height: 220px;
+      height: 240px;
     }
     .legend {
       display: flex;
@@ -104,6 +124,12 @@
     .dot.rsi { background: #34d399; }
     .dot.macd { background: #f97316; }
     .dot.signal { background: #60a5fa; }
+    .dot.stoch-k { background: #f472b6; }
+    .dot.stoch-d { background: #fbbf24; }
+    .dot.bb-upper { background: #818cf8; }
+    .dot.bb-mid { background: #fb923c; }
+    .dot.bb-lower { background: #818cf8; }
+    .dot.bb-fill { background: rgba(129, 140, 248, 0.25); }
     .note {
       background: rgba(59, 130, 246, 0.1);
       border: 1px solid rgba(59, 130, 246, 0.3);
@@ -124,18 +150,28 @@
   <header>
     <h1>FXチャートの代表的なテクニカル指標</h1>
     <p>
-      ECharts の JavaScript ライブラリを使って、ローソク足・移動平均線・RSI・MACD を
+      ECharts の JavaScript ライブラリを使って、ローソク足・移動平均線・RSI・MACD・ストキャスティクス・ボリンジャーバンドを
       サンプルデータで可視化する方法をまとめたデモ資料です。
     </p>
   </header>
 
   <main>
+    <!-- ===== 1. ローソク足 & 移動平均線 ===== -->
     <section class="section">
       <h2>1. ローソク足 & 移動平均線（MA）</h2>
       <p>
-        ローソク足は「始値・高値・安値・終値」の4値をまとめて表示します。MA（移動平均線）は
-        トレンドの方向感を把握するために利用され、短期（5日）と中期（20日）を重ねることが一般的です。
+        ローソク足は「始値・高値・安値・終値」の4本値をまとめて表示するチャートの基本形です。
+        移動平均線（Moving Average）はトレンドの方向感を把握するために利用され、短期（5日）と中期（20日）を重ねることが一般的です。
       </p>
+      <div class="desc-detail">
+        <strong>専門解説</strong>
+        <ul>
+          <li><strong>ローソク足の構造：</strong>実体（始値〜終値の幅）とヒゲ（高値・安値への延長線）で構成されます。陽線（終値 &gt; 始値）は買い圧力、陰線（終値 &lt; 始値）は売り圧力を示し、ヒゲの長さは一時的な価格到達と反発の強さを表します。</li>
+          <li><strong>移動平均線（SMA）：</strong>過去 N 日間の終値の算術平均。短期線が長期線を下から上に突き抜ける「ゴールデンクロス」は買いシグナル、逆の「デッドクロス」は売りシグナルと解釈されます。</li>
+          <li><strong>EMA（指数移動平均）との違い：</strong>SMA は全期間の終値を等しく重み付けしますが、EMA は直近のデータに大きな重みを与えるため、トレンド変化に対してより早く反応します。</li>
+          <li><strong>グランビルの法則：</strong>移動平均線と価格の位置関係から、売買タイミングを判定する8つのパターンが提唱されています。</li>
+        </ul>
+      </div>
       <div class="chart-panel">
         <h3>サンプル：USD/JPY 12日分</h3>
         <div id="chart-candles" class="chart"></div>
@@ -146,15 +182,26 @@
         </div>
       </div>
       <div class="note">
-        MAは終値の平均値を計算して折れ線として重ねています。EChartsでは series に line を追加するだけで簡単に重ね描きできます。
+        ECharts では <code>candlestick</code> シリーズと <code>line</code> シリーズを同一グリッド上に重ねて描画します。<code>tooltip</code> の <code>trigger: 'axis'</code> により、カーソル位置の全系列データを一括表示できます。<code>dataZoom</code> を追加すればスクロール・ズームも可能です。
       </div>
     </section>
 
+    <!-- ===== 2. RSI ===== -->
     <section class="section">
-      <h2>2. RSI（相対力指数）</h2>
+      <h2>2. RSI（相対力指数 / Relative Strength Index）</h2>
       <p>
-        RSI は買われすぎ・売られすぎを判断するオシレーター指標で、70以上で過熱、30以下で売られ過ぎと解釈されます。
+        RSI は買われすぎ・売られすぎを判断するオシレーター指標で、0〜100 の範囲で推移します。
+        一般に 70 以上で「買われすぎ」、30 以下で「売られすぎ」と解釈されます。
       </p>
+      <div class="desc-detail">
+        <strong>専門解説</strong>
+        <ul>
+          <li><strong>算出式：</strong>RSI = 100 - 100 / (1 + RS)。RS = N 期間の平均上昇幅 / N 期間の平均下降幅。標準的には N = 14 を使用します。</li>
+          <li><strong>ダイバージェンス：</strong>価格が新高値を更新しているのに RSI が前回高値を下回る場合（弱気ダイバージェンス）、トレンドの反転を示唆します。逆パターンは強気ダイバージェンスです。</li>
+          <li><strong>フェイラースイング：</strong>RSI が 70 を超えた後に下落し、再上昇しても 70 を超えられず再下落するパターン。ワイルダーが提唱した強力な反転シグナルとされます。</li>
+          <li><strong>注意点：</strong>強いトレンド相場では RSI が 70 以上（または 30 以下）に張り付くことがあり、逆張りシグナルとして機能しにくくなります。レンジ相場での利用が適しています。</li>
+        </ul>
+      </div>
       <div class="chart-panel">
         <h3>RSI 14（擬似データ）</h3>
         <div id="chart-rsi" class="chart small"></div>
@@ -162,13 +209,27 @@
           <span><span class="dot rsi"></span>RSI 14</span>
         </div>
       </div>
+      <div class="note">
+        ECharts の <code>markLine</code> を使用して 70 / 30 の閾値ラインを描画し、<code>markArea</code> で買われすぎ・売られすぎゾーンを視覚的に色分けしています。<code>areaStyle</code> で線の下を半透明で塗りつぶし、勢いの強さを直感的に把握できるようにしています。
+      </div>
     </section>
 
+    <!-- ===== 3. MACD ===== -->
     <section class="section">
-      <h2>3. MACD（移動平均収束拡散）</h2>
+      <h2>3. MACD（移動平均収束拡散 / Moving Average Convergence Divergence）</h2>
       <p>
-        MACDは短期EMAと長期EMAの差（MACD線）と、その平均（シグナル）を比較し、トレンドの転換を探ります。
+        MACD は短期 EMA と長期 EMA の差（MACD 線）と、その移動平均であるシグナル線を比較し、トレンドの発生・転換を探ります。
       </p>
+      <div class="desc-detail">
+        <strong>専門解説</strong>
+        <ul>
+          <li><strong>算出式：</strong>MACD 線 = EMA(12) - EMA(26)。シグナル線 = MACD 線の EMA(9)。ヒストグラム = MACD 線 - シグナル線。</li>
+          <li><strong>クロスオーバー：</strong>MACD 線がシグナル線を上抜け（ゴールデンクロス）で買い、下抜け（デッドクロス）で売りと判断します。ゼロライン付近でのクロスは特にトレンド転換の信頼度が高いとされます。</li>
+          <li><strong>ヒストグラムの解釈：</strong>ヒストグラムが正から負に転じるとき売り圧力増加、負から正に転じるとき買い圧力増加を示します。ヒストグラムの山・谷の大きさはモメンタムの強さを反映します。</li>
+          <li><strong>ダイバージェンス：</strong>RSI 同様、価格とMACDの方向が乖離する場合はトレンド反転の兆候と解釈されます。</li>
+          <li><strong>注意点：</strong>MACD は遅行指標であるため、急激な相場変動の初動を捉えにくい面があります。他の先行指標との組み合わせが推奨されます。</li>
+        </ul>
+      </div>
       <div class="chart-grid">
         <div class="chart-panel">
           <h3>MACD & シグナル</h3>
@@ -183,23 +244,101 @@
           <div id="chart-hist" class="chart small"></div>
         </div>
       </div>
+      <div class="note">
+        ECharts では MACD とシグナルを <code>line</code> シリーズ、ヒストグラムを <code>bar</code> シリーズで描画します。<code>itemStyle.color</code> にコールバック関数を渡すことで、正負の値に応じた色分け（青 / 赤）を動的に適用しています。<code>markLine</code> でゼロラインを明示すると判読性が向上します。
+      </div>
     </section>
 
+    <!-- ===== 4. ストキャスティクス ===== -->
     <section class="section">
-      <h2>4. EChartsでの実装ポイント</h2>
+      <h2>4. ストキャスティクス（Stochastic Oscillator）</h2>
+      <p>
+        ストキャスティクスは、一定期間の価格レンジにおける現在の終値の相対的な位置を 0〜100 の範囲で示すオシレーター指標です。
+        %K（ファスト）と %D（スロー）の 2 本のラインを使って売買タイミングを判定します。
+      </p>
+      <div class="desc-detail">
+        <strong>専門解説</strong>
+        <ul>
+          <li><strong>算出式：</strong>%K = (現在の終値 - N 日間の最安値) / (N 日間の最高値 - N 日間の最安値) &times; 100。標準期間は N = 14。%D は %K の M 日間（通常 M = 3）の単純移動平均です。</li>
+          <li><strong>ファスト vs スロー：</strong>ファストストキャスティクスは %K と %D をそのまま使用。スローストキャスティクスは %D を新たな %K とし、さらにその SMA を %D とします。スローの方がノイズが少なく実践的に多用されます。</li>
+          <li><strong>売買シグナル：</strong>%K が %D を下から上に突き抜ける（ゴールデンクロス）かつ 20 以下のゾーンで発生した場合は強い買いシグナル。逆に 80 以上でデッドクロスが発生すれば強い売りシグナルです。</li>
+          <li><strong>ダイバージェンス：</strong>RSI と同様に、価格とストキャスティクスの方向が乖離する場合はトレンド反転の兆候と解釈されます。</li>
+          <li><strong>注意点：</strong>強いトレンド相場では 80 以上 / 20 以下に張り付くことがあり、レンジ相場での利用が適しています。RSI と組み合わせて確認することが推奨されます。</li>
+        </ul>
+      </div>
+      <div class="chart-panel">
+        <h3>ストキャスティクス %K / %D（擬似データ）</h3>
+        <div id="chart-stoch" class="chart small"></div>
+        <div class="legend">
+          <span><span class="dot stoch-k"></span>%K（ファスト）</span>
+          <span><span class="dot stoch-d"></span>%D（スロー）</span>
+        </div>
+      </div>
+      <div class="note">
+        ECharts の <code>markArea</code> を使用して 80 以上（買われすぎ）と 20 以下（売られすぎ）のゾーンを半透明の背景色で視覚化しています。<code>markLine</code> で閾値ラインを破線で描画し、%K と %D のクロスポイントが一目で判別できるようにしています。
+      </div>
+    </section>
+
+    <!-- ===== 5. ボリンジャーバンド ===== -->
+    <section class="section">
+      <h2>5. ボリンジャーバンド（Bollinger Bands）</h2>
+      <p>
+        ボリンジャーバンドは、移動平均線を中心に標準偏差（&sigma;）で算出した上下バンドを描き、
+        価格の変動幅（ボラティリティ）を視覚化する指標です。ジョン・ボリンジャーが開発しました。
+      </p>
+      <div class="desc-detail">
+        <strong>専門解説</strong>
+        <ul>
+          <li><strong>算出式：</strong>ミドルバンド = SMA(N)（通常 N = 20）。アッパーバンド = SMA(N) + K &times; &sigma;（通常 K = 2）。ロワーバンド = SMA(N) - K &times; &sigma;。&sigma; は N 期間の終値の標準偏差です。</li>
+          <li><strong>統計的意味：</strong>&plusmn;1&sigma; に約 68.3%、&plusmn;2&sigma; に約 95.4% の価格が収まるとされます（正規分布仮定）。バンドの外に価格が出ることは統計的に稀なイベントです。</li>
+          <li><strong>スクイーズ（収縮）：</strong>バンド幅が狭くなる「スクイーズ」は、低ボラティリティ状態を示し、近い将来の大きな値動き（ブレイクアウト）の予兆とされます。</li>
+          <li><strong>エクスパンション（拡大）：</strong>バンド幅が急激に広がる状態はボラティリティの増大を示し、トレンドの発生を示唆します。</li>
+          <li><strong>バンドウォーク：</strong>強いトレンドが発生すると、価格がアッパー（またはロワー）バンドに沿って推移する現象。トレンド継続のサインです。</li>
+          <li><strong>%B 指標：</strong>%B = (価格 - ロワーバンド) / (アッパーバンド - ロワーバンド)。現在価格がバンド内のどの位置にあるかを 0〜1 で示します。</li>
+        </ul>
+      </div>
+      <div class="chart-panel">
+        <h3>ボリンジャーバンド（&plusmn;2&sigma;）& ローソク足</h3>
+        <div id="chart-bb" class="chart"></div>
+        <div class="legend">
+          <span><span class="dot candle"></span>ローソク足</span>
+          <span><span class="dot bb-mid"></span>ミドル（SMA 20）</span>
+          <span><span class="dot bb-upper"></span>アッパー（+2&sigma;）</span>
+          <span><span class="dot bb-lower"></span>ロワー（-2&sigma;）</span>
+          <span><span class="dot bb-fill"></span>バンド範囲</span>
+        </div>
+      </div>
+      <div class="note">
+        ECharts ではアッパーバンドとロワーバンドの間の範囲を表現するために、ロワーバンドの <code>areaStyle</code> で塗りつぶしを行い、アッパーバンドの <code>areaStyle</code> で背景色と同色で上書きすることでバンド領域を可視化しています。<code>candlestick</code> シリーズと重ねて表示することで、価格がバンドに対してどの位置にあるかを直感的に把握できます。
+      </div>
+    </section>
+
+    <!-- ===== 6. 実装ポイント ===== -->
+    <section class="section">
+      <h2>6. EChartsでの実装ポイント</h2>
       <ul>
-        <li>CDNで <code>echarts.min.js</code> を読み込み、対象DOMに対して <code>echarts.init()</code> で描画。</li>
-        <li>ローソク足は <code>candlestick</code> シリーズ、移動平均線は <code>line</code> シリーズで重ねる。</li>
-        <li>RSIやMACDは別チャートにし、スクロールや同期を <code>dataZoom</code> で制御すると扱いやすい。</li>
+        <li>CDN で <code>echarts.min.js</code> を読み込み、対象 DOM に対して <code>echarts.init()</code> で描画。</li>
+        <li>ローソク足は <code>candlestick</code> シリーズ、移動平均線・ボリンジャーバンドは <code>line</code> シリーズで重ねる。</li>
+        <li><code>markLine</code> で閾値ライン（RSI の 70/30、ストキャスティクスの 80/20、MACD のゼロライン）を描画。</li>
+        <li><code>markArea</code> で買われすぎ・売られすぎゾーンの背景色を設定し、視認性を向上。</li>
+        <li><code>areaStyle</code> で線の下（またはバンド間）を半透明で塗りつぶし、範囲の広がりを可視化。</li>
+        <li><code>tooltip</code> の <code>trigger: 'axis'</code> と <code>axisPointer</code> で、同一日付の全系列データを一括表示。</li>
+        <li>RSI・MACD・ストキャスティクスは別チャートにし、スクロールや同期を <code>dataZoom</code> で制御すると扱いやすい。</li>
+        <li><code>itemStyle.color</code> にコールバック関数を渡すことで、正負やクロス判定に応じた動的な色分けが可能。</li>
+        <li><code>window.addEventListener('resize', ...)</code> で全チャートに <code>.resize()</code> を呼ぶことでレスポンシブ対応。</li>
       </ul>
     </section>
 
-    <footer>Sample data © 2026 FX Technical Indicators Demo</footer>
+    <footer>Sample data &copy; 2026 FX Technical Indicators Demo</footer>
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
   <script>
-    const dates = ['09/02', '09/03', '09/04', '09/05', '09/06', '09/09', '09/10', '09/11', '09/12', '09/13', '09/16', '09/17'];
+    /* ========================================
+       共通データ
+    ======================================== */
+    const dates = ['09/02','09/03','09/04','09/05','09/06','09/09','09/10','09/11','09/12','09/13','09/16','09/17'];
+    // [open, close, low, high] — ECharts candlestick format
     const candleData = [
       [147.8, 148.6, 147.4, 148.2],
       [148.2, 149.1, 147.9, 148.9],
@@ -216,21 +355,39 @@
     ];
 
     const closeValues = candleData.map(item => item[1]);
+    const highValues  = candleData.map(item => item[3]);
+    const lowValues   = candleData.map(item => item[2]);
+
     const calcMA = (dayCount) => closeValues.map((_, idx) => {
       if (idx < dayCount - 1) return null;
       const slice = closeValues.slice(idx - dayCount + 1, idx + 1);
-      const sum = slice.reduce((a, b) => a + b, 0);
-      return +(sum / dayCount).toFixed(2);
+      return +(slice.reduce((a, b) => a + b, 0) / dayCount).toFixed(2);
     });
 
+    /* ========================================
+       1. ローソク足 & MA
+    ======================================== */
     const chartCandles = echarts.init(document.getElementById('chart-candles'));
     chartCandles.setOption({
       backgroundColor: 'transparent',
-      tooltip: { trigger: 'axis' },
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: { type: 'cross' }
+      },
       legend: { show: false },
-      xAxis: { type: 'category', data: dates, boundaryGap: true, axisLabel: { color: '#94a3b8' } },
-      yAxis: { scale: true, axisLabel: { color: '#94a3b8' } },
-      grid: { left: 40, right: 20, bottom: 30, top: 20 },
+      xAxis: {
+        type: 'category',
+        data: dates,
+        boundaryGap: true,
+        axisLabel: { color: '#94a3b8' },
+        axisLine: { lineStyle: { color: '#334155' } }
+      },
+      yAxis: {
+        scale: true,
+        axisLabel: { color: '#94a3b8' },
+        splitLine: { lineStyle: { color: '#1e293b' } }
+      },
+      grid: { left: 50, right: 20, bottom: 30, top: 20 },
       series: [
         {
           type: 'candlestick',
@@ -261,12 +418,28 @@
       ]
     });
 
+    /* ========================================
+       2. RSI
+    ======================================== */
     const rsiValues = [52, 58, 49, 44, 48, 54, 60, 63, 68, 59, 51, 47];
     const chartRsi = echarts.init(document.getElementById('chart-rsi'));
     chartRsi.setOption({
-      tooltip: { trigger: 'axis' },
-      xAxis: { type: 'category', data: dates, axisLabel: { color: '#94a3b8' } },
-      yAxis: { min: 0, max: 100, axisLabel: { color: '#94a3b8' } },
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: { type: 'line' }
+      },
+      xAxis: {
+        type: 'category',
+        data: dates,
+        axisLabel: { color: '#94a3b8' },
+        axisLine: { lineStyle: { color: '#334155' } }
+      },
+      yAxis: {
+        min: 0,
+        max: 100,
+        axisLabel: { color: '#94a3b8' },
+        splitLine: { lineStyle: { color: '#1e293b' } }
+      },
       grid: { left: 40, right: 20, bottom: 30, top: 20 },
       series: [
         {
@@ -275,27 +448,60 @@
           data: rsiValues,
           smooth: true,
           lineStyle: { color: '#34d399', width: 2 },
-          areaStyle: { color: 'rgba(52, 211, 153, 0.1)' }
+          areaStyle: { color: 'rgba(52, 211, 153, 0.08)' },
+          markLine: {
+            silent: true,
+            symbol: 'none',
+            label: {
+              formatter: '{b}',
+              color: '#94a3b8',
+              fontSize: 11
+            },
+            data: [
+              { name: '70（買われすぎ）', yAxis: 70, lineStyle: { color: '#f87171', type: 'dashed', width: 1 } },
+              { name: '30（売られすぎ）', yAxis: 30, lineStyle: { color: '#60a5fa', type: 'dashed', width: 1 } }
+            ]
+          },
+          markArea: {
+            silent: true,
+            data: [
+              [
+                { yAxis: 70, itemStyle: { color: 'rgba(248, 113, 113, 0.06)' } },
+                { yAxis: 100 }
+              ],
+              [
+                { yAxis: 0, itemStyle: { color: 'rgba(96, 165, 250, 0.06)' } },
+                { yAxis: 30 }
+              ]
+            ]
+          }
         }
-      ],
-      markLine: {
-        symbol: 'none',
-        data: [
-          { yAxis: 70, lineStyle: { color: '#f87171', type: 'dashed' } },
-          { yAxis: 30, lineStyle: { color: '#60a5fa', type: 'dashed' } }
-        ]
-      }
+      ]
     });
 
+    /* ========================================
+       3. MACD
+    ======================================== */
     const macd = [0.32, 0.45, 0.12, -0.05, 0.08, 0.18, 0.36, 0.41, 0.22, 0.05, -0.08, -0.16];
     const signal = [0.26, 0.33, 0.28, 0.14, 0.12, 0.16, 0.25, 0.32, 0.29, 0.17, 0.05, -0.02];
     const histogram = macd.map((v, i) => +(v - signal[i]).toFixed(2));
 
     const chartMacd = echarts.init(document.getElementById('chart-macd'));
     chartMacd.setOption({
-      tooltip: { trigger: 'axis' },
-      xAxis: { type: 'category', data: dates, axisLabel: { color: '#94a3b8' } },
-      yAxis: { axisLabel: { color: '#94a3b8' } },
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: { type: 'line' }
+      },
+      xAxis: {
+        type: 'category',
+        data: dates,
+        axisLabel: { color: '#94a3b8' },
+        axisLine: { lineStyle: { color: '#334155' } }
+      },
+      yAxis: {
+        axisLabel: { color: '#94a3b8' },
+        splitLine: { lineStyle: { color: '#1e293b' } }
+      },
       grid: { left: 40, right: 20, bottom: 30, top: 20 },
       series: [
         {
@@ -303,13 +509,23 @@
           type: 'line',
           data: macd,
           smooth: true,
-          lineStyle: { color: '#f97316', width: 2 }
+          showSymbol: false,
+          lineStyle: { color: '#f97316', width: 2 },
+          markLine: {
+            silent: true,
+            symbol: 'none',
+            label: { show: false },
+            data: [
+              { yAxis: 0, lineStyle: { color: '#475569', type: 'solid', width: 1 } }
+            ]
+          }
         },
         {
           name: 'Signal',
           type: 'line',
           data: signal,
           smooth: true,
+          showSymbol: false,
           lineStyle: { color: '#60a5fa', width: 2 }
         }
       ]
@@ -317,9 +533,20 @@
 
     const chartHist = echarts.init(document.getElementById('chart-hist'));
     chartHist.setOption({
-      tooltip: { trigger: 'axis' },
-      xAxis: { type: 'category', data: dates, axisLabel: { color: '#94a3b8' } },
-      yAxis: { axisLabel: { color: '#94a3b8' } },
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: { type: 'shadow' }
+      },
+      xAxis: {
+        type: 'category',
+        data: dates,
+        axisLabel: { color: '#94a3b8' },
+        axisLine: { lineStyle: { color: '#334155' } }
+      },
+      yAxis: {
+        axisLabel: { color: '#94a3b8' },
+        splitLine: { lineStyle: { color: '#1e293b' } }
+      },
       grid: { left: 40, right: 20, bottom: 30, top: 20 },
       series: [
         {
@@ -327,16 +554,224 @@
           data: histogram,
           itemStyle: {
             color: (params) => params.value >= 0 ? '#38bdf8' : '#f87171'
+          },
+          markLine: {
+            silent: true,
+            symbol: 'none',
+            label: { show: false },
+            data: [
+              { yAxis: 0, lineStyle: { color: '#475569', type: 'solid', width: 1 } }
+            ]
           }
         }
       ]
     });
 
+    /* ========================================
+       4. ストキャスティクス
+    ======================================== */
+    // %K 計算: (終値 - N日間最安値) / (N日間最高値 - N日間最安値) * 100
+    const stochPeriod = 5;
+    const stochK = closeValues.map((close, idx) => {
+      if (idx < stochPeriod - 1) return null;
+      const highs = highValues.slice(idx - stochPeriod + 1, idx + 1);
+      const lows  = lowValues.slice(idx - stochPeriod + 1, idx + 1);
+      const highMax = Math.max(...highs);
+      const lowMin  = Math.min(...lows);
+      if (highMax === lowMin) return 50;
+      return +((close - lowMin) / (highMax - lowMin) * 100).toFixed(1);
+    });
+
+    // %D = %K の 3 日 SMA
+    const stochDPeriod = 3;
+    const stochD = stochK.map((_, idx) => {
+      if (stochK[idx] === null) return null;
+      if (idx < stochPeriod - 1 + stochDPeriod - 1) return null;
+      const slice = stochK.slice(idx - stochDPeriod + 1, idx + 1);
+      if (slice.some(v => v === null)) return null;
+      return +(slice.reduce((a, b) => a + b, 0) / stochDPeriod).toFixed(1);
+    });
+
+    const chartStoch = echarts.init(document.getElementById('chart-stoch'));
+    chartStoch.setOption({
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: { type: 'line' }
+      },
+      xAxis: {
+        type: 'category',
+        data: dates,
+        axisLabel: { color: '#94a3b8' },
+        axisLine: { lineStyle: { color: '#334155' } }
+      },
+      yAxis: {
+        min: 0,
+        max: 100,
+        axisLabel: { color: '#94a3b8' },
+        splitLine: { lineStyle: { color: '#1e293b' } }
+      },
+      grid: { left: 40, right: 20, bottom: 30, top: 20 },
+      series: [
+        {
+          name: '%K',
+          type: 'line',
+          data: stochK,
+          smooth: true,
+          showSymbol: false,
+          lineStyle: { color: '#f472b6', width: 2 },
+          markLine: {
+            silent: true,
+            symbol: 'none',
+            label: {
+              formatter: '{b}',
+              color: '#94a3b8',
+              fontSize: 11
+            },
+            data: [
+              { name: '80（買われすぎ）', yAxis: 80, lineStyle: { color: '#f87171', type: 'dashed', width: 1 } },
+              { name: '20（売られすぎ）', yAxis: 20, lineStyle: { color: '#60a5fa', type: 'dashed', width: 1 } }
+            ]
+          },
+          markArea: {
+            silent: true,
+            data: [
+              [
+                { yAxis: 80, itemStyle: { color: 'rgba(248, 113, 113, 0.06)' } },
+                { yAxis: 100 }
+              ],
+              [
+                { yAxis: 0, itemStyle: { color: 'rgba(96, 165, 250, 0.06)' } },
+                { yAxis: 20 }
+              ]
+            ]
+          }
+        },
+        {
+          name: '%D',
+          type: 'line',
+          data: stochD,
+          smooth: true,
+          showSymbol: false,
+          lineStyle: { color: '#fbbf24', width: 2 }
+        }
+      ]
+    });
+
+    /* ========================================
+       5. ボリンジャーバンド
+    ======================================== */
+    const bbPeriod = 5;
+    const bbK = 2;
+
+    const bbMid = closeValues.map((_, idx) => {
+      if (idx < bbPeriod - 1) return null;
+      const slice = closeValues.slice(idx - bbPeriod + 1, idx + 1);
+      return +(slice.reduce((a, b) => a + b, 0) / bbPeriod).toFixed(3);
+    });
+
+    const bbStdDev = closeValues.map((_, idx) => {
+      if (idx < bbPeriod - 1) return null;
+      const slice = closeValues.slice(idx - bbPeriod + 1, idx + 1);
+      const mean = slice.reduce((a, b) => a + b, 0) / bbPeriod;
+      const variance = slice.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / bbPeriod;
+      return Math.sqrt(variance);
+    });
+
+    const bbUpper = bbMid.map((mid, idx) => {
+      if (mid === null) return null;
+      return +(mid + bbK * bbStdDev[idx]).toFixed(3);
+    });
+
+    const bbLower = bbMid.map((mid, idx) => {
+      if (mid === null) return null;
+      return +(mid - bbK * bbStdDev[idx]).toFixed(3);
+    });
+
+    const chartBB = echarts.init(document.getElementById('chart-bb'));
+    chartBB.setOption({
+      backgroundColor: 'transparent',
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: { type: 'cross' }
+      },
+      legend: { show: false },
+      xAxis: {
+        type: 'category',
+        data: dates,
+        boundaryGap: true,
+        axisLabel: { color: '#94a3b8' },
+        axisLine: { lineStyle: { color: '#334155' } }
+      },
+      yAxis: {
+        scale: true,
+        axisLabel: { color: '#94a3b8' },
+        splitLine: { lineStyle: { color: '#1e293b' } }
+      },
+      grid: { left: 50, right: 20, bottom: 30, top: 20 },
+      series: [
+        // ロワーバンド（バンド塗りつぶしのベース）
+        {
+          name: 'Lower',
+          type: 'line',
+          data: bbLower,
+          smooth: true,
+          showSymbol: false,
+          lineStyle: { color: '#818cf8', width: 1, type: 'dashed' },
+          areaStyle: {
+            color: 'rgba(129, 140, 248, 0.12)',
+            origin: 'auto'
+          },
+          z: 1
+        },
+        // アッパーバンド（上側を背景色で塗りつぶしてバンド外を消す）
+        {
+          name: 'Upper',
+          type: 'line',
+          data: bbUpper,
+          smooth: true,
+          showSymbol: false,
+          lineStyle: { color: '#818cf8', width: 1, type: 'dashed' },
+          areaStyle: {
+            color: '#0b1220',
+            origin: 'auto'
+          },
+          z: 2
+        },
+        // ミドルバンド
+        {
+          name: 'Middle',
+          type: 'line',
+          data: bbMid,
+          smooth: true,
+          showSymbol: false,
+          lineStyle: { color: '#fb923c', width: 2 },
+          z: 3
+        },
+        // ローソク足
+        {
+          type: 'candlestick',
+          data: candleData,
+          itemStyle: {
+            color: '#38bdf8',
+            color0: '#f87171',
+            borderColor: '#38bdf8',
+            borderColor0: '#f87171'
+          },
+          z: 4
+        }
+      ]
+    });
+
+    /* ========================================
+       リサイズ対応
+    ======================================== */
     window.addEventListener('resize', () => {
       chartCandles.resize();
       chartRsi.resize();
       chartMacd.resize();
       chartHist.resize();
+      chartStoch.resize();
+      chartBB.resize();
     });
   </script>
 </body>
