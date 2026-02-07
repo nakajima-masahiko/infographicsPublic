@@ -130,6 +130,12 @@
     .dot.bb-mid { background: #fb923c; }
     .dot.bb-lower { background: #818cf8; }
     .dot.bb-fill { background: rgba(129, 140, 248, 0.25); }
+    .dot.ichi-tenkan { background: #f87171; }
+    .dot.ichi-kijun { background: #60a5fa; }
+    .dot.ichi-span-a { background: #4ade80; }
+    .dot.ichi-span-b { background: #fb923c; }
+    .dot.ichi-chikou { background: #c084fc; }
+    .dot.ichi-cloud { background: rgba(99, 102, 241, 0.25); }
     .note {
       background: rgba(59, 130, 246, 0.1);
       border: 1px solid rgba(59, 130, 246, 0.3);
@@ -150,7 +156,7 @@
   <header>
     <h1>FXチャートの代表的なテクニカル指標</h1>
     <p>
-      ECharts の JavaScript ライブラリを使って、ローソク足・移動平均線・RSI・MACD・ストキャスティクス・ボリンジャーバンドを
+      ECharts の JavaScript ライブラリを使って、ローソク足・移動平均線・RSI・MACD・ストキャスティクス・ボリンジャーバンド・一目均衡表を
       サンプルデータで可視化する方法をまとめたデモ資料です。
     </p>
   </header>
@@ -313,9 +319,49 @@
       </div>
     </section>
 
-    <!-- ===== 6. 実装ポイント ===== -->
+    <!-- ===== 6. 一目均衡表 ===== -->
     <section class="section">
-      <h2>6. EChartsでの実装ポイント</h2>
+      <h2>6. 一目均衡表（Ichimoku Kinko Hyo）</h2>
+      <p>
+        一目均衡表は、日本の株式評論家・細田悟一（ペンネーム：一目山人）が約20年の歳月をかけて開発したテクニカル指標です。
+        「相場の均衡状態を一目で把握する」ことを目指し、5本の線と「雲（くも）」で構成されます。
+        時間論・波動論・値幅観測論の3つの理論を基盤とし、世界中のトレーダーに利用されています。
+      </p>
+      <div class="desc-detail">
+        <strong>専門解説</strong>
+        <ul>
+          <li><strong>転換線（Tenkan-sen）：</strong>過去9期間の最高値と最安値の中間値。短期的なトレンド方向を示します。（9期間高値 + 9期間安値）/ 2</li>
+          <li><strong>基準線（Kijun-sen）：</strong>過去26期間の最高値と最安値の中間値。中期的なトレンドの基準となり、サポート／レジスタンスとして機能します。（26期間高値 + 26期間安値）/ 2</li>
+          <li><strong>先行スパンA（Senkou Span A）：</strong>転換線と基準線の中間値を26期間先行させてプロット。雲の一辺を形成します。（転換線 + 基準線）/ 2</li>
+          <li><strong>先行スパンB（Senkou Span B）：</strong>過去52期間の最高値と最安値の中間値を26期間先行させてプロット。雲のもう一辺を形成します。（52期間高値 + 52期間安値）/ 2</li>
+          <li><strong>遅行スパン（Chikou Span）：</strong>当日の終値を26期間遅行させてプロット。過去の価格と現在の価格の比較に使用されます。</li>
+          <li><strong>雲（Kumo）：</strong>先行スパンAとBの間の領域。雲の厚みはサポート／レジスタンスの強さを示し、価格が雲の上にあれば強気、下にあれば弱気と判断します。スパンAがスパンBより上なら強気の雲（好転）、下なら弱気の雲（逆転）です。</li>
+          <li><strong>三役好転（強い買いシグナル）：</strong>①転換線が基準線を上抜け ②遅行スパンがローソク足を上抜け ③価格が雲を上抜け — この3条件が揃った状態。</li>
+          <li><strong>三役逆転（強い売りシグナル）：</strong>三役好転の逆パターン。3条件すべてが売り方向に揃った状態。</li>
+          <li><strong>時間論：</strong>一目均衡表の基本数値（9, 17, 26, 33, 42, 65, 76, 129, 172, 200〜257）を用いて、変化日（トレンド転換が起きやすい日柄）を予測します。</li>
+        </ul>
+      </div>
+      <div class="chart-panel">
+        <h3>一目均衡表（擬似データ・短縮パラメータ）</h3>
+        <div id="chart-ichimoku" class="chart" style="height:380px;"></div>
+        <div class="legend">
+          <span><span class="dot ichi-tenkan"></span>転換線</span>
+          <span><span class="dot ichi-kijun"></span>基準線</span>
+          <span><span class="dot ichi-span-a"></span>先行スパンA</span>
+          <span><span class="dot ichi-span-b"></span>先行スパンB</span>
+          <span><span class="dot ichi-chikou"></span>遅行スパン</span>
+          <span><span class="dot ichi-cloud"></span>雲（くも）</span>
+        </div>
+      </div>
+      <div class="note">
+        ECharts では転換線・基準線・先行スパン・遅行スパンを <code>line</code> シリーズで描画します。雲（くも）はボリンジャーバンドと同様の手法で、先行スパンA・Bの間を <code>areaStyle</code> の塗り重ねにより表現しています。先行スパンは <code>xAxis</code> のカテゴリデータをデータ期間＋先行期間分だけ拡張し、各配列の先頭を <code>null</code> で埋めることで未来方向へのシフトを実現しています。遅行スパンは逆に過去方向へシフトさせてプロットします。<br>
+        ※本デモでは表示スペースの都合上、パラメータを短縮しています（転換=5, 基準=13, スパンB=26, 先行/遅行=13）。標準パラメータは 転換=9, 基準=26, スパンB=52, 先行/遅行=26 です。
+      </div>
+    </section>
+
+    <!-- ===== 7. 実装ポイント ===== -->
+    <section class="section">
+      <h2>7. EChartsでの実装ポイント</h2>
       <ul>
         <li>CDN で <code>echarts.min.js</code> を読み込み、対象 DOM に対して <code>echarts.init()</code> で描画。</li>
         <li>ローソク足は <code>candlestick</code> シリーズ、移動平均線・ボリンジャーバンドは <code>line</code> シリーズで重ねる。</li>
@@ -325,6 +371,7 @@
         <li><code>tooltip</code> の <code>trigger: 'axis'</code> と <code>axisPointer</code> で、同一日付の全系列データを一括表示。</li>
         <li>RSI・MACD・ストキャスティクスは別チャートにし、スクロールや同期を <code>dataZoom</code> で制御すると扱いやすい。</li>
         <li><code>itemStyle.color</code> にコールバック関数を渡すことで、正負やクロス判定に応じた動的な色分けが可能。</li>
+        <li>一目均衡表の雲は先行スパンA・Bの <code>areaStyle</code> 塗り重ねで表現し、先行・遅行のシフトは <code>xAxis</code> カテゴリの拡張と配列の <code>null</code> パディングで実現。</li>
         <li><code>window.addEventListener('resize', ...)</code> で全チャートに <code>.resize()</code> を呼ぶことでレスポンシブ対応。</li>
       </ul>
     </section>
@@ -763,6 +810,162 @@
     });
 
     /* ========================================
+       6. 一目均衡表（Ichimoku Kinko Hyo）
+    ======================================== */
+    // デモ用短縮パラメータ（標準: 転換=9, 基準=26, スパンB=52, 先行/遅行=26）
+    const tenkanP = 5, kijunP = 13, spanBP = 26, ichiDisp = 13;
+    const ichiN = 60;
+
+    // 拡張日付ラベル（データ期間 ＋ 先行スパン投影分）
+    const ichiDates = [];
+    {
+      let dt = new Date(2024, 6, 1);
+      for (let i = 0; i < ichiN + ichiDisp; i++) {
+        while (dt.getDay() === 0 || dt.getDay() === 6) dt.setDate(dt.getDate() + 1);
+        ichiDates.push(String(dt.getMonth() + 1).padStart(2, '0') + '/' + String(dt.getDate()).padStart(2, '0'));
+        dt.setDate(dt.getDate() + 1);
+      }
+    }
+
+    // 擬似 OHLC データ生成（上昇→もみ合い→下降のパターン）
+    const ichiCandle = [], ichiClose = [], ichiHigh = [], ichiLow = [];
+    {
+      let p = 147.50;
+      for (let i = 0; i < ichiN; i++) {
+        const drift = i < 20 ? 0.10 : i < 40 ? 0.01 * Math.sin(i * 0.6) : -0.08;
+        p += drift + 0.07 * Math.sin(i * 2.3) + 0.04 * Math.sin(i * 3.7);
+        const v = 0.30 + 0.12 * Math.abs(Math.sin(i * 0.6));
+        const o = +p.toFixed(2);
+        const h = +(p + v * (0.4 + 0.25 * Math.abs(Math.sin(i * 1.9)))).toFixed(2);
+        const l = +(p - v * (0.3 + 0.20 * Math.abs(Math.sin(i * 1.3)))).toFixed(2);
+        const c = +(l + (h - l) * (0.3 + 0.4 * ((Math.sin(i * 0.9) + 1) / 2))).toFixed(2);
+        ichiCandle.push([o, c, l, h]);
+        ichiClose.push(c);
+        ichiHigh.push(h);
+        ichiLow.push(l);
+      }
+    }
+
+    // (N期間高値 + N期間安値) / 2
+    function ichiMidHL(hArr, lArr, n, idx) {
+      if (idx < n - 1) return null;
+      const hs = hArr.slice(idx - n + 1, idx + 1);
+      const ls = lArr.slice(idx - n + 1, idx + 1);
+      return +((Math.max(...hs) + Math.min(...ls)) / 2).toFixed(3);
+    }
+
+    // 転換線・基準線
+    const tenkan   = Array.from({length: ichiN}, (_, i) => ichiMidHL(ichiHigh, ichiLow, tenkanP, i));
+    const kijunArr = Array.from({length: ichiN}, (_, i) => ichiMidHL(ichiHigh, ichiLow, kijunP, i));
+
+    // 先行スパンA = (転換 + 基準) / 2、ichiDisp 期間先行
+    const spanA = new Array(ichiN + ichiDisp).fill(null);
+    for (let i = 0; i < ichiN; i++) {
+      if (tenkan[i] !== null && kijunArr[i] !== null)
+        spanA[i + ichiDisp] = +((tenkan[i] + kijunArr[i]) / 2).toFixed(3);
+    }
+
+    // 先行スパンB = midHL(spanBP)、ichiDisp 期間先行
+    const spanB = new Array(ichiN + ichiDisp).fill(null);
+    for (let i = 0; i < ichiN; i++) {
+      const val = ichiMidHL(ichiHigh, ichiLow, spanBP, i);
+      if (val !== null) spanB[i + ichiDisp] = val;
+    }
+
+    // 遅行スパン = 終値を ichiDisp 期間遅行させてプロット
+    const chikouSpan = new Array(ichiN + ichiDisp).fill(null);
+    for (let i = ichiDisp; i < ichiN; i++) {
+      chikouSpan[i - ichiDisp] = ichiClose[i];
+    }
+
+    // 雲（上限・下限）
+    const cloudUpper = spanA.map((a, i) => (a !== null && spanB[i] !== null) ? Math.max(a, spanB[i]) : null);
+    const cloudLower = spanA.map((a, i) => (a !== null && spanB[i] !== null) ? Math.min(a, spanB[i]) : null);
+
+    // xAxis カテゴリ数に合わせてパディング
+    const totalLen = ichiN + ichiDisp;
+    const ichiPad = (arr) => arr.length < totalLen ? arr.concat(new Array(totalLen - arr.length).fill(null)) : arr;
+    const tenkanPad  = ichiPad(tenkan);
+    const kijunPad   = ichiPad(kijunArr);
+    const candlePad  = ichiCandle.concat(new Array(ichiDisp).fill('-'));
+
+    const chartIchi = echarts.init(document.getElementById('chart-ichimoku'));
+    chartIchi.setOption({
+      backgroundColor: 'transparent',
+      tooltip: { trigger: 'axis', axisPointer: { type: 'cross' } },
+      legend: { show: false },
+      xAxis: {
+        type: 'category',
+        data: ichiDates,
+        boundaryGap: true,
+        axisLabel: { color: '#94a3b8', rotate: 30, fontSize: 10 },
+        axisLine: { lineStyle: { color: '#334155' } }
+      },
+      yAxis: {
+        scale: true,
+        axisLabel: { color: '#94a3b8' },
+        splitLine: { lineStyle: { color: '#1e293b' } }
+      },
+      grid: { left: 50, right: 20, bottom: 50, top: 20 },
+      dataZoom: [{ type: 'inside', start: 0, end: 100 }],
+      series: [
+        // 雲（下限 → areaStyle で上方向に塗りつぶし）
+        {
+          name: '雲下限', type: 'line', data: cloudLower,
+          showSymbol: false, lineStyle: { width: 0 },
+          areaStyle: { color: 'rgba(99, 102, 241, 0.10)', origin: 'auto' },
+          z: 1
+        },
+        // 雲（上限 → 背景色で上書きしてバンド外を消す）
+        {
+          name: '雲上限', type: 'line', data: cloudUpper,
+          showSymbol: false, lineStyle: { width: 0 },
+          areaStyle: { color: '#0b1220', origin: 'auto' },
+          z: 2
+        },
+        // 先行スパンA
+        {
+          name: '先行スパンA', type: 'line', data: spanA,
+          showSymbol: false, lineStyle: { color: '#4ade80', width: 1.5 },
+          z: 3
+        },
+        // 先行スパンB
+        {
+          name: '先行スパンB', type: 'line', data: spanB,
+          showSymbol: false, lineStyle: { color: '#fb923c', width: 1.5 },
+          z: 3
+        },
+        // 転換線
+        {
+          name: '転換線', type: 'line', data: tenkanPad,
+          showSymbol: false, lineStyle: { color: '#f87171', width: 2 },
+          z: 4
+        },
+        // 基準線
+        {
+          name: '基準線', type: 'line', data: kijunPad,
+          showSymbol: false, lineStyle: { color: '#60a5fa', width: 2 },
+          z: 4
+        },
+        // 遅行スパン
+        {
+          name: '遅行スパン', type: 'line', data: chikouSpan,
+          showSymbol: false, lineStyle: { color: '#c084fc', width: 1.5, type: 'dotted' },
+          z: 4
+        },
+        // ローソク足
+        {
+          type: 'candlestick', data: candlePad,
+          itemStyle: {
+            color: '#38bdf8', color0: '#f87171',
+            borderColor: '#38bdf8', borderColor0: '#f87171'
+          },
+          z: 5
+        }
+      ]
+    });
+
+    /* ========================================
        リサイズ対応
     ======================================== */
     window.addEventListener('resize', () => {
@@ -772,6 +975,7 @@
       chartHist.resize();
       chartStoch.resize();
       chartBB.resize();
+      chartIchi.resize();
     });
   </script>
 </body>
