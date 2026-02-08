@@ -878,10 +878,6 @@
       chikouSpan[i - ichiDisp] = ichiClose[i];
     }
 
-    // 雲（上限・下限）
-    const cloudUpper = spanA.map((a, i) => (a !== null && spanB[i] !== null) ? Math.max(a, spanB[i]) : null);
-    const cloudLower = spanA.map((a, i) => (a !== null && spanB[i] !== null) ? Math.min(a, spanB[i]) : null);
-
     // xAxis カテゴリ数に合わせてパディング
     const totalLen = ichiN + ichiDisp;
     const ichiPad = (arr) => arr.length < totalLen ? arr.concat(new Array(totalLen - arr.length).fill(null)) : arr;
@@ -909,19 +905,39 @@
       grid: { left: 50, right: 20, bottom: 50, top: 20 },
       dataZoom: [{ type: 'inside', start: 0, end: 100 }],
       series: [
-        // 雲（下限 → areaStyle で上方向に塗りつぶし）
+        // 雲（custom series — SpanA/SpanB 間をポリゴンで塗りつぶし）
         {
-          name: '雲下限', type: 'line', data: cloudLower,
-          showSymbol: false, lineStyle: { width: 0 },
-          areaStyle: { color: 'rgba(99, 102, 241, 0.10)', origin: 'auto' },
+          name: '雲',
+          type: 'custom',
+          renderItem: function(params, api) {
+            var idx = params.dataIndex;
+            var nextIdx = idx + 1;
+            if (nextIdx >= totalLen) return;
+            var a0 = spanA[idx], b0 = spanB[idx];
+            var a1 = spanA[nextIdx], b1 = spanB[nextIdx];
+            if (a0 == null || b0 == null || a1 == null || b1 == null) return;
+
+            var p0A = api.coord([idx, a0]);
+            var p1A = api.coord([nextIdx, a1]);
+            var p1B = api.coord([nextIdx, b1]);
+            var p0B = api.coord([idx, b0]);
+
+            // 好転（SpanA >= SpanB）なら緑、逆転なら赤橙
+            var midA = (a0 + a1) / 2;
+            var midB = (b0 + b1) / 2;
+            var fillColor = midA >= midB
+              ? 'rgba(74, 222, 128, 0.22)'
+              : 'rgba(251, 146, 60, 0.22)';
+
+            return {
+              type: 'polygon',
+              shape: { points: [p0A, p1A, p1B, p0B] },
+              style: { fill: fillColor },
+              silent: true
+            };
+          },
+          data: Array.from({length: totalLen}, function(_, i) { return [i]; }),
           z: 1
-        },
-        // 雲（上限 → 背景色で上書きしてバンド外を消す）
-        {
-          name: '雲上限', type: 'line', data: cloudUpper,
-          showSymbol: false, lineStyle: { width: 0 },
-          areaStyle: { color: '#0b1220', origin: 'auto' },
-          z: 2
         },
         // 先行スパンA
         {
