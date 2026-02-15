@@ -118,7 +118,7 @@
     </p>
 
     <div class="card">
-      <svg viewBox="0 0 1200 820" role="img" aria-label="マグニフィセント・セブンと生成AI関連会社の投資関係図">
+      <svg viewBox="0 0 1200 900" role="img" aria-label="マグニフィセント・セブンと生成AI関連会社の投資関係図">
         <defs>
           <marker id="arrowBig" markerWidth="14" markerHeight="10" refX="12" refY="5" orient="auto">
             <polygon points="0,0 14,5 0,10" fill="#83f6d5"></polygon>
@@ -170,6 +170,16 @@
           <text x="520" y="334">Tesla</text>
         </g>
 
+        <g fill="#c9d6ff" font-size="10.5" font-weight="600" text-anchor="middle" opacity="0.95">
+          <text x="180" y="194">Apple Intelligence / Siri</text>
+          <text x="390" y="144">Copilot / Azure OpenAI</text>
+          <text x="610" y="134">DGX / NIM</text>
+          <text x="820" y="164">Gemini / Vertex AI</text>
+          <text x="1020" y="224">Bedrock / Q</text>
+          <text x="280" y="374">Meta AI / Llama</text>
+          <text x="520" y="354">Grok(協業) / Dojo</text>
+        </g>
+
         <!-- Developer platform (GitHub) -->
         <g>
           <circle cx="470" cy="470" r="46" fill="url(#platformGrad)" stroke="#bbd3ff" stroke-opacity="0.55" stroke-width="2" />
@@ -193,6 +203,14 @@
           <text x="715" y="654">Mistral AI</text>
           <text x="885" y="654">Cohere</text>
           <text x="1030" y="649">Inflection</text>
+        </g>
+
+        <g fill="#ffe9d3" font-size="10.5" font-weight="600" text-anchor="middle" opacity="0.95">
+          <text x="350" y="694">ChatGPT / Sora / API</text>
+          <text x="540" y="694">Claude</text>
+          <text x="715" y="694">Le Chat / Mistral API</text>
+          <text x="885" y="694">Command R</text>
+          <text x="1030" y="689">Pi</text>
         </g>
 
         <!-- Revenue labels (current, simplified) -->
@@ -222,6 +240,8 @@
           <path d="M1030 270 C1035 360, 1035 520, 1030 610" stroke-width="3.8" marker-end="url(#arrowSmall)" />
           <!-- Apple -> OpenAI partner relation (small) -->
           <path d="M210 225 C250 340, 310 500, 335 590" stroke-width="3" stroke-dasharray="8 7" marker-end="url(#arrowSmall)" />
+          <!-- Apple <-> Alphabet (Gemini discussions / strategic option) -->
+          <path d="M250 150 C410 90, 640 90, 760 130" stroke-width="2.6" stroke-dasharray="6 6" marker-end="url(#arrowSmall)" />
         </g>
 
         <!-- GitHub strategy / engagement arrows -->
@@ -239,6 +259,7 @@
           <text x="676" y="332">中規模投資</text>
           <text x="1008" y="440">戦略投資</text>
           <text x="248" y="440">提携・連携</text>
+          <text x="430" y="86">Apple×Gemini 協議報道</text>
         </g>
         <g fill="#c9d6ff" font-size="12" font-weight="700">
           <text x="420" y="300">開発者基盤（GitHub）</text>
@@ -247,40 +268,40 @@
 
         <!-- Revenue bars (relative) for GenAI companies -->
         <g opacity="0.95">
-          <text x="245" y="745" fill="#ffd7aa" font-size="12" font-weight="800">生成AI 収益規模（相対）</text>
+          <text x="245" y="765" fill="#ffd7aa" font-size="12" font-weight="800">生成AI 収益規模（相対）</text>
 
           <!-- OpenAI (high) -->
-          <rect x="290" y="760" width="120" height="10" rx="5" fill="rgba(255, 215, 170, 0.18)" stroke="rgba(255,215,170,0.35)" />
-          <rect x="290" y="760" width="120" height="10" rx="5" fill="#ffd7aa" />
+          <rect x="290" y="780" width="120" height="10" rx="5" fill="rgba(255, 215, 170, 0.18)" stroke="rgba(255,215,170,0.35)" />
+          <rect x="290" y="780" width="120" height="10" rx="5" fill="#ffd7aa" />
 
           <!-- Anthropic (high) -->
-          <rect x="480" y="760" width="120" height="10" rx="5" fill="rgba(255, 215, 170, 0.18)" stroke="rgba(255,215,170,0.35)" />
-          <rect x="480" y="760" width="120" height="10" rx="5" fill="#ffd7aa" />
+          <rect x="480" y="780" width="120" height="10" rx="5" fill="rgba(255, 215, 170, 0.18)" stroke="rgba(255,215,170,0.35)" />
+          <rect x="480" y="780" width="120" height="10" rx="5" fill="#ffd7aa" />
 
           <!-- Mistral (mid) -->
-          <rect x="655" y="760" width="120" height="10" rx="5" fill="rgba(255, 215, 170, 0.18)" stroke="rgba(255,215,170,0.35)" />
-          <rect x="655" y="760" width="48" height="10" rx="5" fill="#ffd7aa" />
+          <rect x="655" y="780" width="120" height="10" rx="5" fill="rgba(255, 215, 170, 0.18)" stroke="rgba(255,215,170,0.35)" />
+          <rect x="655" y="780" width="48" height="10" rx="5" fill="#ffd7aa" />
 
           <!-- Cohere (low-mid) -->
-          <rect x="825" y="760" width="120" height="10" rx="5" fill="rgba(255, 215, 170, 0.18)" stroke="rgba(255,215,170,0.35)" />
-          <rect x="825" y="760" width="24" height="10" rx="5" fill="#ffd7aa" />
+          <rect x="825" y="780" width="120" height="10" rx="5" fill="rgba(255, 215, 170, 0.18)" stroke="rgba(255,215,170,0.35)" />
+          <rect x="825" y="780" width="24" height="10" rx="5" fill="#ffd7aa" />
 
           <!-- Inflection (n/a) -->
-          <rect x="970" y="760" width="120" height="10" rx="5" fill="rgba(255, 215, 170, 0.10)" stroke="rgba(255,215,170,0.22)" />
-          <rect x="970" y="760" width="6" height="10" rx="5" fill="rgba(255,215,170,0.55)" />
+          <rect x="970" y="780" width="120" height="10" rx="5" fill="rgba(255, 215, 170, 0.10)" stroke="rgba(255,215,170,0.22)" />
+          <rect x="970" y="780" width="6" height="10" rx="5" fill="rgba(255,215,170,0.55)" />
 
           <g fill="#ffe9d3" font-size="11" font-weight="700" text-anchor="middle">
-            <text x="350" y="782">OpenAI</text>
-            <text x="540" y="782">Anthropic</text>
-            <text x="715" y="782">Mistral</text>
-            <text x="885" y="782">Cohere</text>
-            <text x="1030" y="782">Inflection</text>
+            <text x="350" y="802">OpenAI</text>
+            <text x="540" y="802">Anthropic</text>
+            <text x="715" y="802">Mistral</text>
+            <text x="885" y="802">Cohere</text>
+            <text x="1030" y="802">Inflection</text>
           </g>
         </g>
 
         <!-- grouping guides -->
         <rect x="60" y="70" width="1080" height="340" rx="18" fill="none" stroke="#6e8cd5" stroke-opacity="0.32" stroke-dasharray="10 8" />
-        <rect x="240" y="560" width="860" height="160" rx="18" fill="none" stroke="#efb577" stroke-opacity="0.38" stroke-dasharray="10 8" />
+        <rect x="240" y="560" width="860" height="180" rx="18" fill="none" stroke="#efb577" stroke-opacity="0.38" stroke-dasharray="10 8" />
 
         <text x="86" y="95" fill="#9eb4e7" font-size="13">マグニフィセント・セブン（資本規模が大きい）</text>
         <text x="260" y="585" fill="#f1c18c" font-size="13">生成AI関連企業（成長企業群）</text>
@@ -307,6 +328,13 @@
           <li>各社の収益は、主に <b>API課金</b>・<b>サブスク</b>・<b>Enterprise契約</b> によって構成されます。</li>
           <li>図中の収益は、公開情報の粒度差を吸収するため <b>年換算/ランレートの目安</b> として単純化しています。</li>
           <li>参考：OpenAI 年換算 ~$12B（2025/07） / Anthropic ランレート ~$14B（2026/02） / Mistral &gt;$0.4B（2026/02） / Cohere ~$0.1B（2025/05）。</li>
+        </ul>
+
+        <b>直近ニュースの反映（2026/02時点）</b>
+        <ul>
+          <li><b>Apple × OpenAI</b>：Apple Intelligence で ChatGPT 連携を開始済み。Siri 経由の外部モデル活用を反映。</li>
+          <li><b>Apple × Gemini</b>：Gemini を Apple Intelligence の追加オプションにする協議報道を、点線の提携ルートで追記。</li>
+          <li><b>各社の製品名</b>：主要ノードに代表製品（Gemini、Copilot、Bedrock、Claude など）を併記し、関係の解像度を向上。</li>
         </ul>
       </div>
     </div>
