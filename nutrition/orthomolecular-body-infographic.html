@@ -4,320 +4,958 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>人体図×栄養素インフォグラフィック（オーソモレキュラー）</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap">
   <style>
+
     :root {
+      --bg-deep: #020617;
       --bg-1: #0f172a;
       --bg-2: #1e293b;
-      --panel: rgba(255, 255, 255, 0.12);
+      --panel: rgba(255,255,255,0.07);
       --text: #e2e8f0;
       --accent: #22d3ee;
-      --accent-2: #a78bfa;
+      --accent2: #a78bfa;
       --good: #34d399;
-      font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+      --c-brain: #a855f7;
+      --c-shoulder: #06b6d4;
+      --c-heart: #f43f5e;
+      --c-gut: #f97316;
+      --c-muscle: #22c55e;
+      --c-bone: #eab308;
     }
 
-    * { box-sizing: border-box; }
+    *, *::before, *::after { box-sizing: border-box; }
 
     body {
       margin: 0;
+      font-family: 'Noto Sans JP', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', sans-serif;
       color: var(--text);
-      background: radial-gradient(circle at top, #1d4ed8 0%, var(--bg-1) 48%, #020617 100%);
+      background: var(--bg-deep);
       min-height: 100vh;
       overflow-x: hidden;
     }
 
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 28px 18px 48px;
+    /* ── Starfield canvas ── */
+    #starfield {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
     }
 
-    h1 {
-      text-align: center;
-      margin: 0 0 8px;
-      font-size: clamp(24px, 4vw, 42px);
-      letter-spacing: 0.02em;
+    /* ── Nav header ── */
+    .nav {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 24px;
+      background: rgba(15,23,42,0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255,255,255,0.1);
     }
-
-    .subtitle {
-      text-align: center;
-      color: #bfdbfe;
-      margin: 0 0 22px;
-      font-size: clamp(14px, 2vw, 17px);
-      line-height: 1.7;
+    .nav-title {
+      font-size: clamp(15px,2.2vw,20px);
+      font-weight: 900;
+      background: linear-gradient(90deg,#22d3ee,#a855f7,#f43f5e);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: 0.03em;
     }
-
-    .legend {
-      background: var(--panel);
-      border: 1px solid rgba(255, 255, 255, 0.18);
-      border-radius: 14px;
-      padding: 14px;
-      margin-bottom: 22px;
-      backdrop-filter: blur(6px);
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 10px;
+    .btn-all {
+      font-family: inherit;
       font-size: 13px;
-      color: #dbeafe;
+      font-weight: 700;
+      padding: 8px 18px;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      background: linear-gradient(135deg,#7c3aed,#0891b2);
+      color: #fff;
+      transition: transform 0.18s, box-shadow 0.18s;
+      box-shadow: 0 0 16px rgba(124,58,237,0.45);
     }
+    .btn-all:hover { transform: scale(1.06); box-shadow: 0 0 28px rgba(124,58,237,0.7); }
+    .btn-all:focus-visible { outline: 3px solid #a855f7; outline-offset: 3px; }
 
-    .stage {
+    /* ── Main layout ── */
+    .main-wrap {
       position: relative;
-      border-radius: 20px;
-      border: 1px solid rgba(255, 255, 255, 0.18);
-      background: linear-gradient(160deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.78) 100%);
-      padding: 18px;
-      min-height: 650px;
-      box-shadow: 0 30px 90px rgba(0, 0, 0, 0.35);
-      overflow: hidden;
+      z-index: 2;
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 18px 48px;
     }
 
-    .human-wrap {
-      width: min(440px, 96%);
+    /* ── Hero title ── */
+    .hero {
+      text-align: center;
+      padding: 36px 12px 28px;
+    }
+    .hero h1 {
+      margin: 0 0 10px;
+      font-size: clamp(26px,4.5vw,52px);
+      font-weight: 900;
+      line-height: 1.18;
+      background: linear-gradient(135deg,#38bdf8 0%,#a855f7 50%,#f43f5e 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: 0.02em;
+      position: relative;
+    }
+    .sparkle {
+      display: inline-block;
+      animation: sparkle-spin 2.4s linear infinite;
+    }
+    @keyframes sparkle-spin {
+      0%   { transform: rotate(0deg) scale(1);   }
+      50%  { transform: rotate(180deg) scale(1.3); }
+      100% { transform: rotate(360deg) scale(1);  }
+    }
+    .hero-sub {
+      color: #94a3b8;
+      font-size: clamp(13px,1.8vw,16px);
+      line-height: 1.75;
+      max-width: 620px;
+      margin: 0 auto;
+    }
+
+    /* ── Two-column stage ── */
+    .stage {
+      display: grid;
+      grid-template-columns: minmax(0, 420px) 1fr;
+      gap: 28px;
+      align-items: start;
+    }
+    @media (max-width: 820px) {
+      .stage { grid-template-columns: 1fr; }
+    }
+
+    /* ── Body figure column ── */
+    .body-col {
+      position: relative;
+      background: linear-gradient(160deg, rgba(30,41,59,0.75) 0%, rgba(15,23,42,0.6) 100%);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 22px;
+      padding: 22px 18px 18px;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 24px 80px rgba(0,0,0,0.4);
+    }
+    .body-svg-wrap {
+      width: min(340px, 100%);
       margin: 0 auto;
       position: relative;
-      padding-top: 6px;
     }
-
-    svg {
+    .body-svg-wrap svg {
       width: 100%;
       height: auto;
-      filter: drop-shadow(0 0 14px rgba(34, 211, 238, 0.2));
+    }
+    .hint-text {
+      text-align: center;
+      color: #64748b;
+      font-size: 12px;
+      margin-top: 12px;
+    }
+    .hint-text span {
+      animation: hint-pulse 2s ease-in-out infinite;
+    }
+    @keyframes hint-pulse {
+      0%,100% { opacity: 0.6; }
+      50%      { opacity: 1; }
     }
 
-    .body-outline {
-      fill: #0f1c34;
-      stroke: #93c5fd;
-      stroke-width: 3;
-    }
+    /* SVG body outline */
+    .body-outline { fill: #0c1628; stroke: #1e3a5f; stroke-width: 2.5; }
 
+    /* Zone base + per-zone glow */
     .zone {
-      fill: rgba(52, 211, 153, 0.22);
-      stroke: rgba(134, 239, 172, 0.9);
-      stroke-width: 2;
       cursor: pointer;
-      transition: transform 0.2s ease, fill 0.2s ease;
+      stroke-width: 2.5;
+      transition: filter 0.25s, transform 0.25s;
+      transform-box: fill-box;
       transform-origin: center;
     }
-
-    .zone:hover,
-    .zone.active {
-      fill: rgba(34, 211, 238, 0.38);
-      transform: scale(1.04);
+    .zone:focus { outline: none; }
+    .zone:focus-visible {
+      stroke: #fff;
+      stroke-width: 4;
     }
 
+    .zone[data-zone="brain"]    { fill: rgba(168,85,247,0.28);  stroke: #a855f7; filter: drop-shadow(0 0 8px #a855f7); }
+    .zone[data-zone="shoulder"] { fill: rgba(6,182,212,0.28);   stroke: #06b6d4; filter: drop-shadow(0 0 8px #06b6d4); }
+    .zone[data-zone="heart"]    { fill: rgba(244,63,94,0.28);   stroke: #f43f5e; filter: drop-shadow(0 0 8px #f43f5e); }
+    .zone[data-zone="gut"]      { fill: rgba(249,115,22,0.28);  stroke: #f97316; filter: drop-shadow(0 0 8px #f97316); }
+    .zone[data-zone="muscle"]   { fill: rgba(34,197,94,0.28);   stroke: #22c55e; filter: drop-shadow(0 0 8px #22c55e); }
+    .zone[data-zone="bone"]     { fill: rgba(234,179,8,0.28);   stroke: #eab308; filter: drop-shadow(0 0 8px #eab308); }
+
+    /* pulse animations per zone */
+    .zone[data-zone="brain"]    { animation: pulse-brain    2.8s ease-in-out infinite; }
+    .zone[data-zone="shoulder"] { animation: pulse-shoulder 3.1s ease-in-out infinite; }
+    .zone[data-zone="heart"]    { animation: pulse-heart    1.8s ease-in-out infinite; }
+    .zone[data-zone="gut"]      { animation: pulse-gut      3.4s ease-in-out infinite; }
+    .zone[data-zone="muscle"]   { animation: pulse-muscle   2.5s ease-in-out infinite; }
+    .zone[data-zone="bone"]     { animation: pulse-bone     3.8s ease-in-out infinite; }
+
+    @keyframes pulse-brain    { 0%,100%{filter:drop-shadow(0 0 6px #a855f7);transform:scale(1)}   50%{filter:drop-shadow(0 0 18px #a855f7);transform:scale(1.04)} }
+    @keyframes pulse-shoulder { 0%,100%{filter:drop-shadow(0 0 6px #06b6d4);transform:scale(1)}   50%{filter:drop-shadow(0 0 18px #06b6d4);transform:scale(1.04)} }
+    @keyframes pulse-heart    { 0%,100%{filter:drop-shadow(0 0 6px #f43f5e);transform:scale(1)}   50%{filter:drop-shadow(0 0 22px #f43f5e);transform:scale(1.07)} }
+    @keyframes pulse-gut      { 0%,100%{filter:drop-shadow(0 0 6px #f97316);transform:scale(1)}   50%{filter:drop-shadow(0 0 18px #f97316);transform:scale(1.04)} }
+    @keyframes pulse-muscle   { 0%,100%{filter:drop-shadow(0 0 6px #22c55e);transform:scale(1)}   50%{filter:drop-shadow(0 0 18px #22c55e);transform:scale(1.04)} }
+    @keyframes pulse-bone     { 0%,100%{filter:drop-shadow(0 0 6px #eab308);transform:scale(1)}   50%{filter:drop-shadow(0 0 18px #eab308);transform:scale(1.04)} }
+
+    .zone:hover, .zone.active {
+      animation: none !important;
+      transform: scale(1.1);
+      cursor: pointer;
+    }
+    .zone[data-zone="brain"].active,    .zone[data-zone="brain"]:hover    { fill: rgba(168,85,247,0.55);  filter: drop-shadow(0 0 28px #a855f7); }
+    .zone[data-zone="shoulder"].active, .zone[data-zone="shoulder"]:hover { fill: rgba(6,182,212,0.55);   filter: drop-shadow(0 0 28px #06b6d4); }
+    .zone[data-zone="heart"].active,    .zone[data-zone="heart"]:hover    { fill: rgba(244,63,94,0.55);   filter: drop-shadow(0 0 28px #f43f5e); }
+    .zone[data-zone="gut"].active,      .zone[data-zone="gut"]:hover      { fill: rgba(249,115,22,0.55);  filter: drop-shadow(0 0 28px #f97316); }
+    .zone[data-zone="muscle"].active,   .zone[data-zone="muscle"]:hover   { fill: rgba(34,197,94,0.55);   filter: drop-shadow(0 0 28px #22c55e); }
+    .zone[data-zone="bone"].active,     .zone[data-zone="bone"]:hover     { fill: rgba(234,179,8,0.55);   filter: drop-shadow(0 0 28px #eab308); }
+
     .zone-label {
-      fill: #f8fafc;
-      font-size: 14px;
+      fill: #f1f5f9;
+      font-size: 13px;
       font-weight: 700;
       text-anchor: middle;
       pointer-events: none;
-      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.65);
     }
 
-    .tip {
-      position: absolute;
-      max-width: 360px;
-      width: min(360px, calc(100vw - 56px));
-      padding: 14px 14px 16px;
-      border-radius: 14px;
-      border: 1px solid rgba(255, 255, 255, 0.24);
-      background: rgba(15, 23, 42, 0.93);
-      box-shadow: 0 16px 50px rgba(0, 0, 0, 0.45);
-      pointer-events: none;
+    /* ── Info panel column ── */
+    .info-col {
+      position: relative;
+      min-height: 420px;
+    }
+
+    .panel-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      height: 100%;
+      min-height: 380px;
+      background: rgba(255,255,255,0.04);
+      border: 1px dashed rgba(255,255,255,0.12);
+      border-radius: 22px;
+      color: #475569;
+      font-size: 15px;
+      text-align: center;
+      padding: 32px;
+      transition: opacity 0.3s;
+    }
+    .panel-placeholder .ph-icon { font-size: 52px; }
+    .panel-placeholder.hidden { display: none; }
+
+    .info-panel {
+      display: none;
+      flex-direction: column;
+      gap: 18px;
+      background: linear-gradient(160deg, rgba(30,41,59,0.88) 0%, rgba(15,23,42,0.75) 100%);
+      border: 1px solid rgba(255,255,255,0.14);
+      border-radius: 22px;
+      padding: 26px 24px 28px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 24px 80px rgba(0,0,0,0.38);
       opacity: 0;
-      transform: translateY(14px) scale(0.95);
-      transition: opacity 0.28s ease, transform 0.28s ease;
-      z-index: 7;
+      transform: translateX(30px);
+      transition: opacity 0.35s ease, transform 0.35s ease;
     }
-
-    .tip.show {
+    .info-panel.visible {
+      display: flex;
+      opacity: 0;
+      transform: translateX(30px);
+    }
+    .info-panel.shown {
       opacity: 1;
-      transform: translateY(0) scale(1);
+      transform: translateX(0);
     }
 
-    .tip h3 {
-      margin: 0 0 6px;
-      font-size: 16px;
-      color: #7dd3fc;
+    .panel-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
     }
-
-    .tip p {
-      margin: 0;
+    .panel-icon {
+      font-size: 42px;
+      line-height: 1;
+      filter: drop-shadow(0 0 10px currentColor);
+    }
+    .panel-zone-name {
+      font-size: clamp(20px,2.8vw,28px);
+      font-weight: 900;
+      line-height: 1.1;
+    }
+    .panel-desc {
+      margin-top: 4px;
       font-size: 13px;
-      line-height: 1.6;
-      color: #e2e8f0;
+      color: #94a3b8;
+      line-height: 1.65;
     }
 
+    .section-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: #64748b;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    /* Nutrient chips */
     .chip-list {
       display: flex;
       flex-wrap: wrap;
-      gap: 6px;
-      margin-top: 10px;
+      gap: 7px;
+    }
+    .chip {
+      font-size: 12px;
+      font-weight: 700;
+      padding: 5px 11px;
+      border-radius: 999px;
+      color: #fff;
+      white-space: nowrap;
     }
 
-    .chip {
+    /* Top 3 ranking */
+    .ranking-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .rank-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 12px;
+      padding: 9px 14px;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    .rank-medal { font-size: 20px; line-height: 1; flex-shrink: 0; }
+    .rank-nutrient { font-weight: 700; font-size: 14px; flex: 1; }
+    .rank-food-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+    .food-tag {
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.1);
+      color: #cbd5e1;
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+
+    /* Deficiency signs */
+    .sign-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+    .sign-badge {
       font-size: 11px;
       font-weight: 700;
-      padding: 5px 8px;
+      padding: 4px 10px;
       border-radius: 999px;
-      color: #082f49;
-      background: linear-gradient(135deg, #a5f3fc, #c4b5fd);
+      background: rgba(239,68,68,0.18);
+      color: #fca5a5;
+      border: 1px solid rgba(239,68,68,0.35);
     }
 
-    .particle {
-      position: absolute;
-      width: 8px;
-      height: 8px;
-      border-radius: 999px;
-      pointer-events: none;
-      z-index: 6;
-      opacity: 0.9;
+    /* "All zones" highlight overlay panel */
+    .all-panel {
+      display: none;
+      margin-top: 22px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 18px;
+      padding: 20px 20px 24px;
     }
-
-    .helper {
+    .all-panel.open { display: block; }
+    .all-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 12px;
       margin-top: 14px;
-      text-align: center;
-      color: #93c5fd;
-      font-size: 13px;
     }
+    .all-card {
+      border-radius: 14px;
+      padding: 12px 14px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.04);
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .all-card:hover { transform: translateY(-3px); }
+    .all-card-title { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+    .all-card-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+    .all-chip { font-size: 10px; padding: 2px 7px; border-radius: 999px; color: #fff; opacity: 0.88; }
+
+    /* Particle burst */
+    .particle {
+      position: fixed;
+      pointer-events: none;
+      z-index: 999;
+      line-height: 1;
+    }
+
+    /* Footer */
+    footer {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      padding: 20px 18px 28px;
+      font-size: 12px;
+      color: #475569;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #0f172a; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>🧠 人体図と栄養価の関係（オーソモレキュラー）</h1>
-    <p class="subtitle">人体の部位をクリックすると、分子整合栄養医学（オーソモレキュラー）の観点で重視されるビタミン・ミネラルの働きを吹き出しで確認できます。</p>
 
-    <div class="legend">
-      <div>✅ 栄養素は <strong>ビタミン + ミネラル</strong> を中心に表示</div>
-      <div>✅ クリックごとにアニメーション演出（バースト）</div>
-      <div>✅ 学習用の簡易図解（診断・治療の代替ではありません）</div>
-    </div>
+<canvas id="starfield"></canvas>
 
-    <div class="stage" id="stage">
-      <div class="human-wrap">
-        <svg viewBox="0 0 320 640" aria-label="人体図">
-          <circle class="body-outline" cx="160" cy="85" r="56"></circle>
-          <rect class="body-outline" x="118" y="145" width="84" height="180" rx="38"></rect>
-          <rect class="body-outline" x="64" y="160" width="52" height="170" rx="28"></rect>
-          <rect class="body-outline" x="204" y="160" width="52" height="170" rx="28"></rect>
-          <rect class="body-outline" x="122" y="325" width="32" height="208" rx="18"></rect>
-          <rect class="body-outline" x="166" y="325" width="32" height="208" rx="18"></rect>
+<!-- Navigation -->
+<nav class="nav" role="navigation" aria-label="メインナビゲーション">
+  <span class="nav-title">🔬 オーソモレキュラー 人体栄養マップ</span>
+  <button class="btn-all" id="btnAll" aria-expanded="false" aria-controls="allPanel">✨ 全部位を見る</button>
+</nav>
 
-          <circle class="zone" data-zone="brain" cx="160" cy="83" r="44"></circle>
-          <ellipse class="zone" data-zone="shoulder" cx="160" cy="168" rx="88" ry="26"></ellipse>
-          <ellipse class="zone" data-zone="heart" cx="160" cy="228" rx="44" ry="36"></ellipse>
-          <ellipse class="zone" data-zone="gut" cx="160" cy="282" rx="46" ry="30"></ellipse>
-          <ellipse class="zone" data-zone="muscle" cx="160" cy="376" rx="58" ry="30"></ellipse>
-          <ellipse class="zone" data-zone="bone" cx="160" cy="510" rx="56" ry="30"></ellipse>
+<!-- Main -->
+<main class="main-wrap" role="main">
+  <!-- Hero -->
+  <div class="hero">
+    <h1><span class="sparkle">✨</span> 人体図と栄養素の関係 <span class="sparkle">✨</span></h1>
+    <p class="hero-sub">分子整合栄養医学（オーソモレキュラー）の観点から、<br>各部位に必要なビタミン・ミネラルをインタラクティブに学べます。</p>
+  </div>
 
-          <text class="zone-label" x="160" y="89">頭</text>
-          <text class="zone-label" x="160" y="172">肩・首</text>
-          <text class="zone-label" x="160" y="232">心臓</text>
-          <text class="zone-label" x="160" y="286">腸</text>
-          <text class="zone-label" x="160" y="380">筋肉</text>
-          <text class="zone-label" x="160" y="514">骨</text>
+  <!-- Two-column stage -->
+  <div class="stage">
+    <!-- Left: body figure -->
+    <div class="body-col" id="bodyCol">
+      <div class="body-svg-wrap">
+        <svg viewBox="0 0 320 660" aria-label="人体インタラクティブ図。各部位をクリックして栄養情報を表示" role="img">
+          <!-- Body outline -->
+          <!-- Head -->
+          <ellipse class="body-outline" cx="160" cy="72" rx="52" ry="58"/>
+          <!-- Neck -->
+          <rect class="body-outline" x="146" y="124" width="28" height="22" rx="6"/>
+          <!-- Torso -->
+          <path class="body-outline" d="M104,146 C88,148 72,158 68,178 L58,290 C56,306 60,318 72,322 L122,330 L198,330 L248,322 C260,318 264,306 262,290 L252,178 C248,158 232,148 216,146 Z"/>
+          <!-- Left arm -->
+          <path class="body-outline" d="M104,150 C90,152 72,162 64,178 L50,280 C46,296 54,312 68,316 L80,318 L88,200 Z"/>
+          <!-- Right arm -->
+          <path class="body-outline" d="M216,150 C230,152 248,162 256,178 L270,280 C274,296 266,312 252,316 L240,318 L232,200 Z"/>
+          <!-- Left leg -->
+          <path class="body-outline" d="M122,330 L110,460 C108,476 112,498 118,520 L128,580 C130,592 138,600 148,600 L158,600 L162,460 L162,332 Z"/>
+          <!-- Right leg -->
+          <path class="body-outline" d="M198,330 L210,460 C212,476 208,498 202,520 L192,580 C190,592 182,600 172,600 L162,600 L162,460 L162,332 Z"/>
+
+          <!-- Face features -->
+          <!-- Left eye -->
+          <ellipse cx="144" cy="64" rx="6" ry="5" fill="#1e3a5f" stroke="#2d5a8e" stroke-width="1.5"/>
+          <circle cx="144" cy="64" r="2.5" fill="#7dd3fc" opacity="0.7"/>
+          <!-- Right eye -->
+          <ellipse cx="176" cy="64" rx="6" ry="5" fill="#1e3a5f" stroke="#2d5a8e" stroke-width="1.5"/>
+          <circle cx="176" cy="64" r="2.5" fill="#7dd3fc" opacity="0.7"/>
+          <!-- Eyebrows -->
+          <path d="M138,56 Q144,53 150,56" stroke="#475569" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <path d="M170,56 Q176,53 182,56" stroke="#475569" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <!-- Mouth -->
+          <path d="M150,86 Q160,92 170,86" stroke="#475569" stroke-width="2" fill="none" stroke-linecap="round"/>
+
+          <!-- Clickable zones -->
+          <ellipse class="zone" data-zone="brain"
+            cx="160" cy="68" rx="46" ry="52"
+            tabindex="0" role="button"
+            aria-label="頭・脳 - クリックして栄養情報を見る"/>
+
+          <ellipse class="zone" data-zone="shoulder"
+            cx="160" cy="162" rx="92" ry="22"
+            tabindex="0" role="button"
+            aria-label="肩・首 - クリックして栄養情報を見る"/>
+
+          <ellipse class="zone" data-zone="heart"
+            cx="152" cy="218" rx="42" ry="38"
+            tabindex="0" role="button"
+            aria-label="心臓 - クリックして栄養情報を見る"/>
+
+          <ellipse class="zone" data-zone="gut"
+            cx="160" cy="282" rx="50" ry="34"
+            tabindex="0" role="button"
+            aria-label="腸 - クリックして栄養情報を見る"/>
+
+          <ellipse class="zone" data-zone="muscle"
+            cx="160" cy="390" rx="60" ry="34"
+            tabindex="0" role="button"
+            aria-label="筋肉 - クリックして栄養情報を見る"/>
+
+          <ellipse class="zone" data-zone="bone"
+            cx="160" cy="530" rx="56" ry="32"
+            tabindex="0" role="button"
+            aria-label="骨 - クリックして栄養情報を見る"/>
+
+          <!-- Zone labels -->
+          <text class="zone-label" x="160" y="72">🧠 頭</text>
+          <text class="zone-label" x="160" y="166">💆 肩・首</text>
+          <text class="zone-label" x="152" y="222">❤️ 心臓</text>
+          <text class="zone-label" x="160" y="286">🌿 腸</text>
+          <text class="zone-label" x="160" y="394">💪 筋肉</text>
+          <text class="zone-label" x="160" y="534">🦴 骨</text>
         </svg>
       </div>
-      <div class="tip" id="tip"></div>
-      <p class="helper">👆 頭・肩・心臓・腸・筋肉・骨をクリックして学べます</p>
+      <p class="hint-text"><span>👆 部位をクリックして栄養情報を確認</span></p>
+    </div>
+
+    <!-- Right: info panel -->
+    <div class="info-col" id="infoCol">
+      <div class="panel-placeholder" id="placeholder">
+        <span class="ph-icon">🔬</span>
+        <div>部位をクリックすると<br>詳細な栄養情報が表示されます</div>
+      </div>
+      <div class="info-panel" id="infoPanel" aria-live="polite"></div>
     </div>
   </div>
 
-  <script>
-    const zoneInfo = {
-      brain: {
-        title: "頭（脳・神経）",
-        body: "オーソモレキュラーでは、神経伝達・集中力・気分安定のためにB群、鉄、亜鉛、マグネシウム、オメガ3を重視します。B6/B12/葉酸はメチル化回路、鉄は酸素供給、亜鉛は神経伝達物質合成を支えます。",
-        nutrients: ["B1", "B6", "B12", "葉酸", "鉄", "亜鉛", "Mg", "オメガ3"]
-      },
-      shoulder: {
-        title: "肩・首（緊張・コリ）",
-        body: "筋緊張・血流面からマグネシウム、カルシウム、ビタミンD、ビタミンE、カリウムを確認。Mgは筋弛緩、Kは電解質バランス、Eは末梢循環のサポートに関与します。",
-        nutrients: ["Mg", "Ca", "ビタミンD", "ビタミンE", "K（カリウム）"]
-      },
-      heart: {
-        title: "心臓（循環）",
-        body: "循環・エネルギー代謝の観点で、CoQ10、ビタミンB1、マグネシウム、セレン、カリウムが重要視されます。B1不足は心機能低下に関わるため、糖質摂取量が高い場合は特に注目します。",
-        nutrients: ["CoQ10", "B1", "Mg", "セレン", "K（カリウム）"]
-      },
-      gut: {
-        title: "腸（消化・吸収）",
-        body: "腸粘膜の維持にはビタミンA、ビタミンD、亜鉛が定番。胃酸・酵素働きには塩化物、マグネシウム、マンガンも関与。オーソモレキュラーでは『吸収できる体』づくりを最優先します。",
-        nutrients: ["ビタミンA", "ビタミンD", "亜鉛", "塩化物", "Mg", "Mn"]
-      },
-      muscle: {
-        title: "筋肉（代謝・回復）",
-        body: "筋収縮と回復にはマグネシウム、カルシウム、カリウム、鉄、ビタミンC、ビタミンB群をチェック。ビタミンCはコラーゲン生成、鉄は酸素運搬、B群はミトコンドリア代謝を支えます。",
-        nutrients: ["Mg", "Ca", "K", "鉄", "ビタミンC", "B群"]
-      },
-      bone: {
-        title: "骨（骨代謝）",
-        body: "骨密度維持ではカルシウムだけでなく、ビタミンD・K2・マグネシウム・ホウ素・亜鉛の連携が鍵。オーソモレキュラーでは単一栄養素でなく『ネットワーク』として評価します。",
-        nutrients: ["Ca", "ビタミンD", "ビタミンK2", "Mg", "ホウ素", "亜鉛"]
-      }
-    };
+  <!-- All-zones overview panel -->
+  <div class="all-panel" id="allPanel" aria-label="全部位の栄養情報一覧">
+    <div class="section-label">全部位の栄養サマリー</div>
+    <div class="all-grid" id="allGrid"></div>
+  </div>
+</main>
 
-    const stage = document.getElementById("stage");
-    const tip = document.getElementById("tip");
-    const zones = [...document.querySelectorAll(".zone")];
+<footer>
+  <p>⚠️ このコンテンツは学習・情報提供を目的としたものです。医療診断・治療の代替ではありません。<br>健康上の問題は必ず医療専門家にご相談ください。</p>
+</footer>
 
-    function showTip(zone, event) {
-      zones.forEach(z => z.classList.remove("active"));
-      zone.classList.add("active");
+<script>
+/* ─────────────────────────────────────────
+   Zone data
+───────────────────────────────────────── */
+const zones = {
+  brain: {
+    icon: "🧠",
+    name: "頭（脳・神経）",
+    color: "#a855f7",
+    desc: "オーソモレキュラーでは、神経伝達・集中力・気分安定のためにB群、鉄、亜鉛、マグネシウム、オメガ3を重視します。B6/B12/葉酸はメチル化回路に不可欠で、鉄は酸素供給、亜鉛は神経伝達物質の合成を支えます。CoQ10はミトコンドリア機能を高め、脳エネルギーの安定に貢献します。",
+    nutrients: [
+      { label: "💊 B1", color: "#7c3aed" },
+      { label: "💊 B6", color: "#6d28d9" },
+      { label: "💊 B12", color: "#5b21b6" },
+      { label: "🌱 葉酸", color: "#7c3aed" },
+      { label: "🔴 鉄", color: "#b45309" },
+      { label: "⚡ 亜鉛", color: "#0e7490" },
+      { label: "✨ Mg", color: "#475569" },
+      { label: "🐟 オメガ3", color: "#1d4ed8" },
+      { label: "⚡ CoQ10", color: "#7c2d12" }
+    ],
+    top3: [
+      { medal: "🥇", name: "B12", foods: ["レバー", "卵", "魚"] },
+      { medal: "🥈", name: "オメガ3", foods: ["サーモン", "クルミ"] },
+      { medal: "🥉", name: "亜鉛", foods: ["牡蠣", "かぼちゃの種"] }
+    ],
+    signs: ["集中力低下", "気分の落ち込み", "記憶力低下"]
+  },
+  shoulder: {
+    icon: "💆",
+    name: "肩・首（緊張・コリ）",
+    color: "#06b6d4",
+    desc: "筋緊張と血流の観点からマグネシウム、カルシウム、ビタミンD、ビタミンEが重要です。Mgは筋弛緩作用、Kは電解質バランス、EはPGE1産生を通じた末梢循環サポートに関与します。ビタミンDは筋力と神経機能の両方を支えます。",
+    nutrients: [
+      { label: "✨ Mg", color: "#0e7490" },
+      { label: "🦷 Ca", color: "#0369a1" },
+      { label: "☀️ ビタミンD", color: "#0284c7" },
+      { label: "🛡 ビタミンE", color: "#0891b2" },
+      { label: "⚡ K", color: "#0e7490" }
+    ],
+    top3: [
+      { medal: "🥇", name: "Mg", foods: ["ナッツ", "豆腐"] },
+      { medal: "🥈", name: "ビタミンD", foods: ["鮭", "きのこ"] },
+      { medal: "🥉", name: "Ca", foods: ["小魚", "乳製品"] }
+    ],
+    signs: ["肩こり", "筋けいれん", "疲労感"]
+  },
+  heart: {
+    icon: "❤️",
+    name: "心臓（循環）",
+    color: "#f43f5e",
+    desc: "循環・心臓エネルギー代謝の観点で、CoQ10、ビタミンB1、マグネシウム、セレン、カリウム、オメガ3が重要視されます。CoQ10は心筋のミトコンドリアエネルギー産生の要で、B1不足は心機能低下と直結します。Kは心拍リズムの安定に欠かせません。",
+    nutrients: [
+      { label: "⚡ CoQ10", color: "#be123c" },
+      { label: "💊 B1", color: "#9f1239" },
+      { label: "✨ Mg", color: "#881337" },
+      { label: "🛡 セレン", color: "#be123c" },
+      { label: "⚡ K", color: "#9f1239" },
+      { label: "🐟 オメガ3", color: "#7f1d1d" }
+    ],
+    top3: [
+      { medal: "🥇", name: "CoQ10", foods: ["牛ハツ", "イワシ"] },
+      { medal: "🥈", name: "Mg", foods: ["ほうれん草", "アーモンド"] },
+      { medal: "🥉", name: "K", foods: ["バナナ", "さつまいも"] }
+    ],
+    signs: ["動悸", "息切れ", "疲れやすさ"]
+  },
+  gut: {
+    icon: "🌿",
+    name: "腸（消化・吸収）",
+    color: "#f97316",
+    desc: "腸粘膜の維持にはビタミンA、ビタミンD、亜鉛が定番。胃酸・消化酵素の働きには塩化物、マグネシウム、マンガンも関与します。オーソモレキュラーでは「吸収できる体」づくりを最優先とし、グルタミンで腸粘膜を直接修復します。",
+    nutrients: [
+      { label: "🥕 ビタミンA", color: "#c2410c" },
+      { label: "☀️ ビタミンD", color: "#ea580c" },
+      { label: "⚡ 亜鉛", color: "#c2410c" },
+      { label: "🧂 塩化物", color: "#9a3412" },
+      { label: "✨ Mg", color: "#7c2d12" },
+      { label: "🔬 Mn", color: "#c2410c" },
+      { label: "🌾 グルタミン", color: "#ea580c" }
+    ],
+    top3: [
+      { medal: "🥇", name: "ビタミンA", foods: ["にんじん", "レバー"] },
+      { medal: "🥈", name: "亜鉛", foods: ["牡蠣", "豆類"] },
+      { medal: "🥉", name: "グルタミン", foods: ["鶏胸肉", "卵"] }
+    ],
+    signs: ["お腹の張り", "消化不良", "免疫低下"]
+  },
+  muscle: {
+    icon: "💪",
+    name: "筋肉（代謝・回復）",
+    color: "#22c55e",
+    desc: "筋収縮と回復にはマグネシウム、カルシウム、カリウム、鉄、ビタミンC、ビタミンB群、ビタミンDをチェック。ビタミンCはコラーゲン生成と抗酸化、鉄は酸素運搬、B群はミトコンドリアでのエネルギー代謝を支えます。",
+    nutrients: [
+      { label: "✨ Mg", color: "#15803d" },
+      { label: "🦷 Ca", color: "#166534" },
+      { label: "⚡ K", color: "#14532d" },
+      { label: "🔴 鉄", color: "#365314" },
+      { label: "🍊 ビタミンC", color: "#4d7c0f" },
+      { label: "💊 B群", color: "#15803d" },
+      { label: "☀️ ビタミンD", color: "#166534" }
+    ],
+    top3: [
+      { medal: "🥇", name: "Mg", foods: ["アーモンド", "玄米"] },
+      { medal: "🥈", name: "鉄", foods: ["赤身肉", "ほうれん草"] },
+      { medal: "🥉", name: "ビタミンC", foods: ["パプリカ", "ブロッコリー"] }
+    ],
+    signs: ["筋肉痛", "だるさ", "回復遅延"]
+  },
+  bone: {
+    icon: "🦴",
+    name: "骨（骨代謝）",
+    color: "#eab308",
+    desc: "骨密度維持ではカルシウムだけでなく、ビタミンD・K2・マグネシウム・ホウ素・亜鉛・コラーゲンの連携が鍵。ビタミンK2はカルシウムを骨へ誘導し、Mgは骨結晶の形成を助けます。オーソモレキュラーでは単一栄養素でなく「ネットワーク」として評価します。",
+    nutrients: [
+      { label: "🦷 Ca", color: "#a16207" },
+      { label: "☀️ ビタミンD", color: "#ca8a04" },
+      { label: "💊 ビタミンK2", color: "#a16207" },
+      { label: "✨ Mg", color: "#854d0e" },
+      { label: "🔬 ホウ素", color: "#78350f" },
+      { label: "⚡ 亜鉛", color: "#a16207" },
+      { label: "🧬 コラーゲン", color: "#ca8a04" }
+    ],
+    top3: [
+      { medal: "🥇", name: "Ca", foods: ["小魚", "乳製品", "豆腐"] },
+      { medal: "🥈", name: "ビタミンD", foods: ["鮭", "卵黄"] },
+      { medal: "🥉", name: "ビタミンK2", foods: ["納豆", "チーズ"] }
+    ],
+    signs: ["骨密度低下", "関節の痛み", "歯のトラブル"]
+  }
+};
 
-      const key = zone.dataset.zone;
-      const data = zoneInfo[key];
-      tip.innerHTML = `
-        <h3>${data.title}</h3>
-        <p>${data.body}</p>
-        <div class="chip-list">${data.nutrients.map(n => `<span class="chip">${n}</span>`).join("")}</div>
-      `;
+/* ─────────────────────────────────────────
+   Starfield
+───────────────────────────────────────── */
+(function initStarfield() {
+  const canvas = document.getElementById("starfield");
+  const ctx = canvas.getContext("2d");
+  let W, H, stars;
 
-      const stageRect = stage.getBoundingClientRect();
-      const x = event.clientX - stageRect.left + 12;
-      const y = event.clientY - stageRect.top - 16;
-      const maxX = stageRect.width - tip.offsetWidth - 14;
-      const left = Math.min(Math.max(12, x), Math.max(12, maxX));
-      const top = Math.min(Math.max(12, y), stageRect.height - 210);
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
 
-      tip.style.left = `${left}px`;
-      tip.style.top = `${top}px`;
-      tip.classList.add("show");
+  function createStars(n) {
+    return Array.from({ length: n }, () => ({
+      x: Math.random() * W,
+      y: Math.random() * H,
+      r: Math.random() * 1.4 + 0.3,
+      speed: Math.random() * 0.18 + 0.04,
+      alpha: Math.random(),
+      da: (Math.random() * 0.008 + 0.003) * (Math.random() < 0.5 ? 1 : -1)
+    }));
+  }
 
-      burst(event.clientX - stageRect.left, event.clientY - stageRect.top);
-    }
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    // deep space gradient
+    const g = ctx.createRadialGradient(W / 2, 0, 0, W / 2, H / 2, Math.max(W, H));
+    g.addColorStop(0, "#0d1b3e");
+    g.addColorStop(0.5, "#020617");
+    g.addColorStop(1, "#000");
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W, H);
 
-    function burst(x, y) {
-      for (let i = 0; i < 18; i++) {
-        const p = document.createElement("span");
-        p.className = "particle";
-        const hue = 180 + Math.random() * 120;
-        p.style.background = `hsl(${hue}, 90%, 70%)`;
-        p.style.left = `${x}px`;
-        p.style.top = `${y}px`;
-        stage.appendChild(p);
+    stars.forEach(s => {
+      s.alpha += s.da;
+      if (s.alpha >= 1 || s.alpha <= 0) s.da *= -1;
+      s.y += s.speed;
+      if (s.y > H) { s.y = 0; s.x = Math.random() * W; }
 
-        const angle = Math.random() * Math.PI * 2;
-        const dist = 28 + Math.random() * 70;
-        const dx = Math.cos(angle) * dist;
-        const dy = Math.sin(angle) * dist;
-
-        p.animate(
-          [
-            { transform: "translate(0, 0) scale(1)", opacity: 0.95 },
-            { transform: `translate(${dx}px, ${dy}px) scale(0.2)`, opacity: 0 }
-          ],
-          { duration: 650 + Math.random() * 350, easing: "cubic-bezier(0.22,1,0.36,1)" }
-        );
-
-        setTimeout(() => p.remove(), 1050);
-      }
-    }
-
-    zones.forEach(zone => {
-      zone.addEventListener("click", (event) => showTip(zone, event));
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(200,220,255,${Math.max(0, Math.min(1, s.alpha))})`;
+      ctx.fill();
     });
-  </script>
+
+    requestAnimationFrame(draw);
+  }
+
+  resize();
+  stars = createStars(220);
+  draw();
+  let resizeTimer;
+  window.addEventListener("resize", () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => { resize(); stars = createStars(220); }, 150);
+  });
+}());
+
+/* ─────────────────────────────────────────
+   Particle burst
+───────────────────────────────────────── */
+const SHAPES = ["●", "★", "♥", "◆", "✦", "⬟"];
+
+/** Convert a 6-digit hex color string to an approximate HSL hue (0-360). */
+function hexToHue(hex) {
+  const n = parseInt(hex.replace("#", ""), 16);
+  const r = (n >> 16 & 0xff) / 255;
+  const g = (n >>  8 & 0xff) / 255;
+  const b = (n       & 0xff) / 255;
+  const max = Math.max(r, g, b), min = Math.min(r, g, b);
+  if (max === min) return 0;
+  const d = max - min;
+  let h;
+  if (max === r)      h = (g - b) / d + (g < b ? 6 : 0);
+  else if (max === g) h = (b - r) / d + 2;
+  else                h = (r - g) / d + 4;
+  return Math.round(h * 60);
+}
+
+function burst(cx, cy, color) {
+  const baseHue = hexToHue(color);
+  const count = 55 + Math.floor(Math.random() * 20);
+  for (let i = 0; i < count; i++) {
+    const el = document.createElement("span");
+    el.className = "particle";
+    el.textContent = SHAPES[Math.floor(Math.random() * SHAPES.length)];
+    const h = Math.round(baseHue + Math.random() * 60 - 30);
+    el.style.cssText = `
+      left: ${cx}px; top: ${cy}px;
+      font-size: ${8 + Math.random() * 14}px;
+      color: hsl(${h},90%,65%);
+      text-shadow: 0 0 8px hsl(${h},90%,65%);
+      position: fixed;
+    `;
+    document.body.appendChild(el);
+
+    const angle = Math.random() * Math.PI * 2;
+    const dist  = 40 + Math.random() * 120;
+    const dx = Math.cos(angle) * dist;
+    const dy = Math.sin(angle) * dist;
+    const dur = 600 + Math.random() * 500;
+
+    el.animate(
+      [
+        { transform: "translate(-50%,-50%) scale(1) rotate(0deg)",   opacity: 1 },
+        { transform: `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(0.1) rotate(${Math.random()*720-360}deg)`, opacity: 0 }
+      ],
+      { duration: dur, easing: "cubic-bezier(0.22,1,0.36,1)" }
+    );
+
+    setTimeout(() => el.remove(), dur + 50);
+  }
+}
+
+/* ─────────────────────────────────────────
+   Info panel render
+───────────────────────────────────────── */
+const placeholder = document.getElementById("placeholder");
+const infoPanel   = document.getElementById("infoPanel");
+
+function buildPanel(key) {
+  const d = zones[key];
+  const chipHTML = d.nutrients.map(n =>
+    `<span class="chip" style="background:${n.color}">${n.label}</span>`
+  ).join("");
+
+  const top3HTML = d.top3.map(r =>
+    `<div class="rank-item">
+      <span class="rank-medal">${r.medal}</span>
+      <span class="rank-nutrient" style="color:${d.color}">${r.name}</span>
+      <div class="rank-food-tags">${r.foods.map(f => `<span class="food-tag">${f}</span>`).join("")}</div>
+    </div>`
+  ).join("");
+
+  const signHTML = d.signs.map(s =>
+    `<span class="sign-badge">⚠ ${s}</span>`
+  ).join("");
+
+  return `
+    <div class="panel-header">
+      <div class="panel-icon">${d.icon}</div>
+      <div class="panel-title-wrap">
+        <div class="panel-zone-name" style="color:${d.color}">${d.name}</div>
+      </div>
+    </div>
+    <p class="panel-desc">${d.desc}</p>
+    <div>
+      <div class="section-label">💊 関連栄養素</div>
+      <div class="chip-list">${chipHTML}</div>
+    </div>
+    <div>
+      <div class="section-label">🏆 重要度 Top 3</div>
+      <div class="ranking-list">${top3HTML}</div>
+    </div>
+    <div>
+      <div class="section-label">⚠️ 欠乏サイン</div>
+      <div class="sign-list">${signHTML}</div>
+    </div>
+  `;
+}
+
+function showPanel(key, clickX, clickY) {
+  const d = zones[key];
+
+  // update body panel
+  infoPanel.innerHTML = buildPanel(key);
+
+  placeholder.classList.add("hidden");
+
+  // animate panel in
+  infoPanel.classList.remove("shown");
+  infoPanel.classList.add("visible");
+  // Force a browser reflow so the CSS transition plays from the initial state
+  void infoPanel.offsetWidth;
+  infoPanel.style.borderColor = d.color + "55";
+  infoPanel.style.boxShadow   = `0 24px 80px rgba(0,0,0,0.38), 0 0 40px ${d.color}22`;
+  infoPanel.classList.add("shown");
+
+  burst(clickX, clickY, d.color);
+}
+
+/* ─────────────────────────────────────────
+   Zone click/keyboard
+───────────────────────────────────────── */
+let activeKey = null;
+
+document.querySelectorAll(".zone").forEach(el => {
+  function activate(event) {
+    document.querySelectorAll(".zone").forEach(z => z.classList.remove("active"));
+    el.classList.add("active");
+
+    const key = el.dataset.zone;
+    activeKey = key;
+
+    let cx, cy;
+    if (event.type === "keydown") {
+      const rect = el.getBoundingClientRect();
+      cx = rect.left + rect.width / 2;
+      cy = rect.top  + rect.height / 2;
+    } else {
+      cx = event.clientX;
+      cy = event.clientY;
+    }
+
+    showPanel(key, cx, cy);
+  }
+
+  el.addEventListener("click", activate);
+  el.addEventListener("keydown", e => {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); activate(e); }
+  });
+});
+
+/* ─────────────────────────────────────────
+   "View all" button
+───────────────────────────────────────── */
+const btnAll   = document.getElementById("btnAll");
+const allPanel = document.getElementById("allPanel");
+const allGrid  = document.getElementById("allGrid");
+
+// Build all-grid once
+allGrid.innerHTML = Object.entries(zones).map(([key, d]) => {
+  const chips = d.nutrients.slice(0, 4).map(n =>
+    `<span class="all-chip" style="background:${n.color}">${n.label}</span>`
+  ).join("");
+  return `
+    <div class="all-card" data-zone="${key}" tabindex="0" role="button"
+      aria-label="${d.name}の詳細を見る"
+      style="border-color:${d.color}44; box-shadow: 0 0 16px ${d.color}18">
+      <div class="all-card-title" style="color:${d.color}">${d.icon} ${d.name.split("（")[0]}</div>
+      <div class="all-card-chips">${chips}</div>
+    </div>
+  `;
+}).join("");
+
+allGrid.querySelectorAll(".all-card").forEach(card => {
+  function activateCard(event) {
+    const key = card.dataset.zone;
+    const el  = document.querySelector(`.zone[data-zone="${key}"]`);
+    document.querySelectorAll(".zone").forEach(z => z.classList.remove("active"));
+    if (el) el.classList.add("active");
+
+    let cx, cy;
+    if (event.type === "keydown") {
+      const rect = card.getBoundingClientRect();
+      cx = rect.left + rect.width / 2;
+      cy = rect.top  + rect.height / 2;
+    } else {
+      cx = event.clientX;
+      cy = event.clientY;
+    }
+
+    showPanel(key, cx, cy);
+    // scroll body col into view on mobile
+    document.getElementById("bodyCol").scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+  card.addEventListener("click", activateCard);
+  card.addEventListener("keydown", e => {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); activateCard(e); }
+  });
+});
+
+btnAll.addEventListener("click", () => {
+  const open = allPanel.classList.toggle("open");
+  btnAll.setAttribute("aria-expanded", open);
+  if (open) {
+    // highlight all zones
+    document.querySelectorAll(".zone").forEach(z => z.classList.add("active"));
+    allPanel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    // burst from each zone
+    document.querySelectorAll(".zone").forEach((z, i) => {
+      const rect = z.getBoundingClientRect();
+      const key  = z.dataset.zone;
+      setTimeout(() => burst(
+        rect.left + rect.width / 2,
+        rect.top  + rect.height / 2,
+        zones[key].color
+      ), i * 120);
+    });
+  } else {
+    document.querySelectorAll(".zone").forEach(z => {
+      if (z.dataset.zone !== activeKey) z.classList.remove("active");
+    });
+  }
+});
+</script>
 </body>
 </html>
