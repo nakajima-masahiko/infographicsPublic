@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>人体図×栄養素インフォグラフィック（オーソモレキュラー）</title>
+  <style>
+    :root {
+      --bg-1: #0f172a;
+      --bg-2: #1e293b;
+      --panel: rgba(255, 255, 255, 0.12);
+      --text: #e2e8f0;
+      --accent: #22d3ee;
+      --accent-2: #a78bfa;
+      --good: #34d399;
+      font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      color: var(--text);
+      background: radial-gradient(circle at top, #1d4ed8 0%, var(--bg-1) 48%, #020617 100%);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 28px 18px 48px;
+    }
+
+    h1 {
+      text-align: center;
+      margin: 0 0 8px;
+      font-size: clamp(24px, 4vw, 42px);
+      letter-spacing: 0.02em;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #bfdbfe;
+      margin: 0 0 22px;
+      font-size: clamp(14px, 2vw, 17px);
+      line-height: 1.7;
+    }
+
+    .legend {
+      background: var(--panel);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 14px;
+      padding: 14px;
+      margin-bottom: 22px;
+      backdrop-filter: blur(6px);
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 10px;
+      font-size: 13px;
+      color: #dbeafe;
+    }
+
+    .stage {
+      position: relative;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: linear-gradient(160deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.78) 100%);
+      padding: 18px;
+      min-height: 650px;
+      box-shadow: 0 30px 90px rgba(0, 0, 0, 0.35);
+      overflow: hidden;
+    }
+
+    .human-wrap {
+      width: min(440px, 96%);
+      margin: 0 auto;
+      position: relative;
+      padding-top: 6px;
+    }
+
+    svg {
+      width: 100%;
+      height: auto;
+      filter: drop-shadow(0 0 14px rgba(34, 211, 238, 0.2));
+    }
+
+    .body-outline {
+      fill: #0f1c34;
+      stroke: #93c5fd;
+      stroke-width: 3;
+    }
+
+    .zone {
+      fill: rgba(52, 211, 153, 0.22);
+      stroke: rgba(134, 239, 172, 0.9);
+      stroke-width: 2;
+      cursor: pointer;
+      transition: transform 0.2s ease, fill 0.2s ease;
+      transform-origin: center;
+    }
+
+    .zone:hover,
+    .zone.active {
+      fill: rgba(34, 211, 238, 0.38);
+      transform: scale(1.04);
+    }
+
+    .zone-label {
+      fill: #f8fafc;
+      font-size: 14px;
+      font-weight: 700;
+      text-anchor: middle;
+      pointer-events: none;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.65);
+    }
+
+    .tip {
+      position: absolute;
+      max-width: 360px;
+      width: min(360px, calc(100vw - 56px));
+      padding: 14px 14px 16px;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.24);
+      background: rgba(15, 23, 42, 0.93);
+      box-shadow: 0 16px 50px rgba(0, 0, 0, 0.45);
+      pointer-events: none;
+      opacity: 0;
+      transform: translateY(14px) scale(0.95);
+      transition: opacity 0.28s ease, transform 0.28s ease;
+      z-index: 7;
+    }
+
+    .tip.show {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    .tip h3 {
+      margin: 0 0 6px;
+      font-size: 16px;
+      color: #7dd3fc;
+    }
+
+    .tip p {
+      margin: 0;
+      font-size: 13px;
+      line-height: 1.6;
+      color: #e2e8f0;
+    }
+
+    .chip-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 10px;
+    }
+
+    .chip {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 5px 8px;
+      border-radius: 999px;
+      color: #082f49;
+      background: linear-gradient(135deg, #a5f3fc, #c4b5fd);
+    }
+
+    .particle {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      pointer-events: none;
+      z-index: 6;
+      opacity: 0.9;
+    }
+
+    .helper {
+      margin-top: 14px;
+      text-align: center;
+      color: #93c5fd;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🧠 人体図と栄養価の関係（オーソモレキュラー）</h1>
+    <p class="subtitle">人体の部位をクリックすると、分子整合栄養医学（オーソモレキュラー）の観点で重視されるビタミン・ミネラルの働きを吹き出しで確認できます。</p>
+
+    <div class="legend">
+      <div>✅ 栄養素は <strong>ビタミン + ミネラル</strong> を中心に表示</div>
+      <div>✅ クリックごとにアニメーション演出（バースト）</div>
+      <div>✅ 学習用の簡易図解（診断・治療の代替ではありません）</div>
+    </div>
+
+    <div class="stage" id="stage">
+      <div class="human-wrap">
+        <svg viewBox="0 0 320 640" aria-label="人体図">
+          <circle class="body-outline" cx="160" cy="85" r="56"></circle>
+          <rect class="body-outline" x="118" y="145" width="84" height="180" rx="38"></rect>
+          <rect class="body-outline" x="64" y="160" width="52" height="170" rx="28"></rect>
+          <rect class="body-outline" x="204" y="160" width="52" height="170" rx="28"></rect>
+          <rect class="body-outline" x="122" y="325" width="32" height="208" rx="18"></rect>
+          <rect class="body-outline" x="166" y="325" width="32" height="208" rx="18"></rect>
+
+          <circle class="zone" data-zone="brain" cx="160" cy="83" r="44"></circle>
+          <ellipse class="zone" data-zone="shoulder" cx="160" cy="168" rx="88" ry="26"></ellipse>
+          <ellipse class="zone" data-zone="heart" cx="160" cy="228" rx="44" ry="36"></ellipse>
+          <ellipse class="zone" data-zone="gut" cx="160" cy="282" rx="46" ry="30"></ellipse>
+          <ellipse class="zone" data-zone="muscle" cx="160" cy="376" rx="58" ry="30"></ellipse>
+          <ellipse class="zone" data-zone="bone" cx="160" cy="510" rx="56" ry="30"></ellipse>
+
+          <text class="zone-label" x="160" y="89">頭</text>
+          <text class="zone-label" x="160" y="172">肩・首</text>
+          <text class="zone-label" x="160" y="232">心臓</text>
+          <text class="zone-label" x="160" y="286">腸</text>
+          <text class="zone-label" x="160" y="380">筋肉</text>
+          <text class="zone-label" x="160" y="514">骨</text>
+        </svg>
+      </div>
+      <div class="tip" id="tip"></div>
+      <p class="helper">👆 頭・肩・心臓・腸・筋肉・骨をクリックして学べます</p>
+    </div>
+  </div>
+
+  <script>
+    const zoneInfo = {
+      brain: {
+        title: "頭（脳・神経）",
+        body: "オーソモレキュラーでは、神経伝達・集中力・気分安定のためにB群、鉄、亜鉛、マグネシウム、オメガ3を重視します。B6/B12/葉酸はメチル化回路、鉄は酸素供給、亜鉛は神経伝達物質合成を支えます。",
+        nutrients: ["B1", "B6", "B12", "葉酸", "鉄", "亜鉛", "Mg", "オメガ3"]
+      },
+      shoulder: {
+        title: "肩・首（緊張・コリ）",
+        body: "筋緊張・血流面からマグネシウム、カルシウム、ビタミンD、ビタミンE、カリウムを確認。Mgは筋弛緩、Kは電解質バランス、Eは末梢循環のサポートに関与します。",
+        nutrients: ["Mg", "Ca", "ビタミンD", "ビタミンE", "K（カリウム）"]
+      },
+      heart: {
+        title: "心臓（循環）",
+        body: "循環・エネルギー代謝の観点で、CoQ10、ビタミンB1、マグネシウム、セレン、カリウムが重要視されます。B1不足は心機能低下に関わるため、糖質摂取量が高い場合は特に注目します。",
+        nutrients: ["CoQ10", "B1", "Mg", "セレン", "K（カリウム）"]
+      },
+      gut: {
+        title: "腸（消化・吸収）",
+        body: "腸粘膜の維持にはビタミンA、ビタミンD、亜鉛が定番。胃酸・酵素働きには塩化物、マグネシウム、マンガンも関与。オーソモレキュラーでは『吸収できる体』づくりを最優先します。",
+        nutrients: ["ビタミンA", "ビタミンD", "亜鉛", "塩化物", "Mg", "Mn"]
+      },
+      muscle: {
+        title: "筋肉（代謝・回復）",
+        body: "筋収縮と回復にはマグネシウム、カルシウム、カリウム、鉄、ビタミンC、ビタミンB群をチェック。ビタミンCはコラーゲン生成、鉄は酸素運搬、B群はミトコンドリア代謝を支えます。",
+        nutrients: ["Mg", "Ca", "K", "鉄", "ビタミンC", "B群"]
+      },
+      bone: {
+        title: "骨（骨代謝）",
+        body: "骨密度維持ではカルシウムだけでなく、ビタミンD・K2・マグネシウム・ホウ素・亜鉛の連携が鍵。オーソモレキュラーでは単一栄養素でなく『ネットワーク』として評価します。",
+        nutrients: ["Ca", "ビタミンD", "ビタミンK2", "Mg", "ホウ素", "亜鉛"]
+      }
+    };
+
+    const stage = document.getElementById("stage");
+    const tip = document.getElementById("tip");
+    const zones = [...document.querySelectorAll(".zone")];
+
+    function showTip(zone, event) {
+      zones.forEach(z => z.classList.remove("active"));
+      zone.classList.add("active");
+
+      const key = zone.dataset.zone;
+      const data = zoneInfo[key];
+      tip.innerHTML = `
+        <h3>${data.title}</h3>
+        <p>${data.body}</p>
+        <div class="chip-list">${data.nutrients.map(n => `<span class="chip">${n}</span>`).join("")}</div>
+      `;
+
+      const stageRect = stage.getBoundingClientRect();
+      const x = event.clientX - stageRect.left + 12;
+      const y = event.clientY - stageRect.top - 16;
+      const maxX = stageRect.width - tip.offsetWidth - 14;
+      const left = Math.min(Math.max(12, x), Math.max(12, maxX));
+      const top = Math.min(Math.max(12, y), stageRect.height - 210);
+
+      tip.style.left = `${left}px`;
+      tip.style.top = `${top}px`;
+      tip.classList.add("show");
+
+      burst(event.clientX - stageRect.left, event.clientY - stageRect.top);
+    }
+
+    function burst(x, y) {
+      for (let i = 0; i < 18; i++) {
+        const p = document.createElement("span");
+        p.className = "particle";
+        const hue = 180 + Math.random() * 120;
+        p.style.background = `hsl(${hue}, 90%, 70%)`;
+        p.style.left = `${x}px`;
+        p.style.top = `${y}px`;
+        stage.appendChild(p);
+
+        const angle = Math.random() * Math.PI * 2;
+        const dist = 28 + Math.random() * 70;
+        const dx = Math.cos(angle) * dist;
+        const dy = Math.sin(angle) * dist;
+
+        p.animate(
+          [
+            { transform: "translate(0, 0) scale(1)", opacity: 0.95 },
+            { transform: `translate(${dx}px, ${dy}px) scale(0.2)`, opacity: 0 }
+          ],
+          { duration: 650 + Math.random() * 350, easing: "cubic-bezier(0.22,1,0.36,1)" }
+        );
+
+        setTimeout(() => p.remove(), 1050);
+      }
+    }
+
+    zones.forEach(zone => {
+      zone.addEventListener("click", (event) => showTip(zone, event));
+    });
+  </script>
+</body>
+</html>
