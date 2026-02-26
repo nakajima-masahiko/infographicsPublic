@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Claude Code の CLAUDE.md で役割を定義する</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+      color: #1b1f2a;
+      min-height: 100vh;
+    }
+    .wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 36px 20px 64px;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 36px;
+      color: #fff;
+    }
+    header .badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 999px;
+      padding: 4px 16px;
+      font-size: 13px;
+      letter-spacing: 0.05em;
+      margin-bottom: 16px;
+      color: #a8d8ea;
+    }
+    header h1 {
+      font-size: 34px;
+      margin: 0 0 12px;
+      text-shadow: 0 2px 12px rgba(0,0,0,0.3);
+      line-height: 1.3;
+    }
+    header p {
+      margin: 0;
+      color: rgba(255,255,255,0.8);
+      font-size: 16px;
+    }
+
+    /* ==================== HERO CONCEPT ==================== */
+    .hero-concept {
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+      padding: 40px;
+      margin-bottom: 24px;
+    }
+    .concept-grid {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 24px;
+      align-items: center;
+    }
+    .concept-box {
+      background: #f8fafc;
+      border-radius: 14px;
+      padding: 28px 24px;
+      text-align: center;
+      border: 2px solid #e2e8f0;
+    }
+    .concept-box .icon {
+      font-size: 40px;
+      margin-bottom: 12px;
+    }
+    .concept-box h3 {
+      margin: 0 0 10px;
+      font-size: 17px;
+      color: #1e293b;
+    }
+    .concept-box p {
+      margin: 0;
+      font-size: 14px;
+      color: #64748b;
+      line-height: 1.7;
+    }
+    .concept-arrow {
+      font-size: 32px;
+      color: #94a3b8;
+      text-align: center;
+    }
+    .concept-box.highlight {
+      border-color: #3b82f6;
+      background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    }
+    .concept-box.highlight h3 { color: #1d4ed8; }
+
+    /* ==================== SECTION TITLES ==================== */
+    .section-wrap {
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+      padding: 40px;
+      margin-bottom: 24px;
+    }
+    .section-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: #0f172a;
+      margin: 0 0 28px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 2px;
+      background: linear-gradient(90deg, #3b82f6, transparent);
+      border-radius: 2px;
+    }
+
+    /* ==================== FILE TREE ==================== */
+    .filetree {
+      background: #0f172a;
+      border-radius: 14px;
+      padding: 28px 32px;
+      font-family: "Courier New", Consolas, monospace;
+      font-size: 14px;
+      line-height: 2;
+      color: #e2e8f0;
+      overflow-x: auto;
+    }
+    .filetree .dir { color: #93c5fd; font-weight: 600; }
+    .filetree .file-md { color: #4ade80; font-weight: 600; }
+    .filetree .file-other { color: #94a3b8; }
+    .filetree .comment { color: #475569; font-style: italic; }
+    .filetree .highlight-line {
+      background: rgba(59,130,246,0.15);
+      border-left: 3px solid #3b82f6;
+      padding-left: 8px;
+      margin-left: -8px;
+      border-radius: 0 4px 4px 0;
+    }
+
+    /* ==================== RULE CARDS ==================== */
+    .rule-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+      margin-top: 8px;
+    }
+    .rule-card {
+      border-radius: 12px;
+      padding: 20px;
+      border: 1px solid #e2e8f0;
+    }
+    .rule-card .rule-icon {
+      font-size: 28px;
+      margin-bottom: 10px;
+    }
+    .rule-card h4 {
+      margin: 0 0 8px;
+      font-size: 15px;
+      color: #0f172a;
+    }
+    .rule-card p {
+      margin: 0;
+      font-size: 13px;
+      color: #64748b;
+      line-height: 1.7;
+    }
+    .rule-card.blue { background: #eff6ff; border-color: #bfdbfe; }
+    .rule-card.green { background: #f0fdf4; border-color: #bbf7d0; }
+    .rule-card.orange { background: #fff7ed; border-color: #fed7aa; }
+    .rule-card.purple { background: #faf5ff; border-color: #e9d5ff; }
+
+    /* ==================== CLAUDE.MD EXAMPLES ==================== */
+    .md-examples-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    @media (max-width: 700px) {
+      .md-examples-grid { grid-template-columns: 1fr; }
+      .concept-grid { grid-template-columns: 1fr; }
+      .concept-arrow { transform: rotate(90deg); }
+    }
+    .md-example-card {
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+    }
+    .md-example-header {
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 15px;
+    }
+    .md-example-header .dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .md-example-header.backend {
+      background: linear-gradient(135deg, #1e3a5f, #2d5a87);
+      color: #fff;
+    }
+    .md-example-header.frontend {
+      background: linear-gradient(135deg, #1a1a2e, #16213e);
+      color: #fff;
+    }
+    .md-example-header.backend .dot { background: #60a5fa; }
+    .md-example-header.frontend .dot { background: #a78bfa; }
+    .md-code-block {
+      background: #0f172a;
+      padding: 20px 22px;
+      font-family: "Courier New", Consolas, monospace;
+      font-size: 12.5px;
+      line-height: 1.8;
+      color: #e2e8f0;
+      overflow-x: auto;
+    }
+    .md-code-block .heading { color: #60a5fa; font-weight: 700; }
+    .md-code-block .subheading { color: #a78bfa; font-weight: 600; }
+    .md-code-block .list-item { color: #94a3b8; }
+    .md-code-block .list-item .keyword { color: #4ade80; }
+    .md-code-block .list-item .rule { color: #fbbf24; }
+    .md-code-block .list-item .path { color: #f87171; }
+
+    /* ==================== CLI EXAMPLE ==================== */
+    .cli-section {
+      background: #0f172a;
+      border-radius: 14px;
+      overflow: hidden;
+    }
+    .cli-header {
+      background: #1e293b;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .cli-header .dot { width: 12px; height: 12px; border-radius: 50%; }
+    .cli-header .dot-red { background: #ef4444; }
+    .cli-header .dot-yellow { background: #f59e0b; }
+    .cli-header .dot-green { background: #22c55e; }
+    .cli-header span { color: #64748b; font-size: 13px; margin-left: 8px; font-family: monospace; }
+    .cli-body {
+      padding: 24px 28px;
+      font-family: "Courier New", Consolas, monospace;
+      font-size: 13.5px;
+      line-height: 2;
+    }
+    .cli-comment { color: #475569; }
+    .cli-prompt { color: #4ade80; }
+    .cli-cmd { color: #e2e8f0; }
+    .cli-cmd .dir-name { color: #93c5fd; }
+    .cli-cmd .arg { color: #fde68a; }
+    .cli-output { color: #94a3b8; font-style: italic; }
+
+    /* ==================== BENEFITS ==================== */
+    .benefit-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+    }
+    .benefit-item {
+      background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+    }
+    .benefit-item .num {
+      font-size: 28px;
+      font-weight: 800;
+      color: #3b82f6;
+      margin-bottom: 6px;
+    }
+    .benefit-item h4 { margin: 0 0 6px; font-size: 14px; color: #0f172a; }
+    .benefit-item p { margin: 0; font-size: 12.5px; color: #64748b; line-height: 1.6; }
+
+    /* ==================== HOW IT WORKS FLOW ==================== */
+    .flow-steps {
+      display: flex;
+      gap: 0;
+      align-items: stretch;
+    }
+    .flow-step {
+      flex: 1;
+      text-align: center;
+      position: relative;
+    }
+    .flow-step:not(:last-child)::after {
+      content: '→';
+      position: absolute;
+      right: -14px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 22px;
+      color: #94a3b8;
+      z-index: 1;
+    }
+    .flow-step-inner {
+      background: #f8fafc;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 20px 14px;
+      height: 100%;
+    }
+    .flow-step-inner .step-num {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 12px;
+    }
+    .flow-step-inner h4 { margin: 0 0 6px; font-size: 14px; color: #0f172a; }
+    .flow-step-inner p { margin: 0; font-size: 12px; color: #64748b; line-height: 1.6; }
+
+    @media (max-width: 600px) {
+      .flow-steps { flex-direction: column; gap: 12px; }
+      .flow-step:not(:last-child)::after { content: '↓'; right: 50%; top: auto; bottom: -18px; transform: translateX(50%); }
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 40px;
+      color: rgba(255,255,255,0.5);
+      font-size: 13px;
+    }
+    .back-link {
+      display: inline-block;
+      margin-top: 16px;
+      padding: 10px 28px;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.25);
+      color: #fff;
+      text-decoration: none;
+      border-radius: 999px;
+      font-size: 14px;
+      transition: background 0.2s;
+    }
+    .back-link:hover { background: rgba(255,255,255,0.2); }
+
+    /* tag */
+    .tag {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+    .tag.backend { background: #dbeafe; color: #1d4ed8; }
+    .tag.frontend { background: #ede9fe; color: #6d28d9; }
+    .tag.global { background: #dcfce7; color: #166534; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="badge">Claude Code ガイド</div>
+      <h1>CLAUDE.md で<br>役割を定義する</h1>
+      <p>ディレクトリごとに Claude の振る舞いを切り替える仕組み</p>
+    </header>
+
+    <!-- ===== CONCEPT ===== -->
+    <div class="hero-concept">
+      <div class="section-title">コアコンセプト</div>
+      <div class="concept-grid">
+        <div class="concept-box">
+          <div class="icon">📁</div>
+          <h3>CLAUDE.md を配置</h3>
+          <p>リポジトリのルートや<br>各サブディレクトリに<br>CLAUDE.md ファイルを置く</p>
+        </div>
+        <div class="concept-arrow">→</div>
+        <div class="concept-box highlight">
+          <div class="icon">🤖</div>
+          <h3>Claude が自動的に読み込む</h3>
+          <p>作業ディレクトリの<br>CLAUDE.md をコンテキストとして<br>自動的に認識・適用する</p>
+        </div>
+      </div>
+
+      <!-- How it works flow -->
+      <div style="margin-top: 32px;">
+        <div style="font-size: 15px; font-weight: 700; color: #0f172a; margin-bottom: 16px;">仕組みのフロー</div>
+        <div class="flow-steps">
+          <div class="flow-step">
+            <div class="flow-step-inner">
+              <div class="step-num">1</div>
+              <h4>ディレクトリ移動</h4>
+              <p>claude コマンドを<br>実行するディレクトリへ移動</p>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-step-inner">
+              <div class="step-num">2</div>
+              <h4>CLAUDE.md 検索</h4>
+              <p>そのディレクトリの<br>CLAUDE.md を自動検索・読込</p>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-step-inner">
+              <div class="step-num">3</div>
+              <h4>役割の切替</h4>
+              <p>定義された役割・ルールで<br>Claude が振る舞う</p>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-step-inner">
+              <div class="step-num">4</div>
+              <h4>タスク実行</h4>
+              <p>専門特化した指示で<br>高精度な出力を得る</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== DIRECTORY STRUCTURE ===== -->
+    <div class="section-wrap">
+      <div class="section-title">ディレクトリ構成例</div>
+      <div class="filetree">
+<span class="dir">my-app/</span>
+├── <span class="file-md highlight-line">CLAUDE.md</span>                <span class="comment"># 全体ルール（命名規則・技術スタックなど）</span>
+│
+├── <span class="dir">backend/</span>
+│   ├── <span class="file-md highlight-line">CLAUDE.md</span>            <span class="comment"># バックエンド固有の指示</span>
+│   ├── <span class="file-other">src/</span>
+│   └── <span class="file-other">package.json</span>
+│
+├── <span class="dir">frontend/</span>
+│   ├── <span class="file-md highlight-line">CLAUDE.md</span>            <span class="comment"># フロントエンド固有の指示</span>
+│   ├── <span class="file-other">src/</span>
+│   └── <span class="file-other">package.json</span>
+│
+└── <span class="dir">docs/</span>
+    ├── <span class="file-other">architecture.md</span>
+    ├── <span class="file-other">api-spec.md</span>
+    └── <span class="file-other">db-schema.md</span>
+      </div>
+
+      <div class="rule-grid" style="margin-top: 20px;">
+        <div class="rule-card green">
+          <div class="rule-icon">🌐</div>
+          <h4><span class="tag global">ルート</span> CLAUDE.md</h4>
+          <p>プロジェクト全体に適用される共通ルール。命名規則・コーディング規約・使用言語など横断的な設定を記述する。</p>
+        </div>
+        <div class="rule-card blue">
+          <div class="rule-icon">⚙️</div>
+          <h4><span class="tag backend">backend</span> CLAUDE.md</h4>
+          <p>Node.js / Express / DB 設計など、バックエンド専門の開発者として振る舞うための役割と制約を記述する。</p>
+        </div>
+        <div class="rule-card purple">
+          <div class="rule-icon">🎨</div>
+          <h4><span class="tag frontend">frontend</span> CLAUDE.md</h4>
+          <p>React / TypeScript / UI コンポーネントなど、フロントエンド専門の開発者として振る舞うための役割と制約を記述する。</p>
+        </div>
+        <div class="rule-card orange">
+          <div class="rule-icon">📚</div>
+          <h4>参照ドキュメントの指定</h4>
+          <p>CLAUDE.md から関連ドキュメント（API仕様書・DB スキーマなど）へのパスを記述し、自動的に参照させることができる。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== CLAUDE.MD EXAMPLES ===== -->
+    <div class="section-wrap">
+      <div class="section-title">CLAUDE.md の記述例</div>
+      <div class="md-examples-grid">
+
+        <!-- Backend -->
+        <div class="md-example-card">
+          <div class="md-example-header backend">
+            <span class="dot"></span>
+            backend/CLAUDE.md
+          </div>
+          <div class="md-code-block">
+<span class="heading"># バックエンド開発ルール</span>
+
+<span class="subheading">## あなたの役割</span>
+<span class="list-item">バックエンド専門の開発者として
+振る舞ってください。</span>
+
+<span class="subheading">## 技術スタック</span>
+<span class="list-item">- <span class="keyword">Node.js</span> + <span class="keyword">Express</span>
+- <span class="keyword">PostgreSQL</span> + <span class="keyword">Prisma ORM</span>
+- <span class="keyword">Jest</span> でテスト</span>
+
+<span class="subheading">## 守るべきルール</span>
+<span class="list-item">- <span class="rule">docs/api-spec.md</span> の仕様に従う
+- 全エンドポイントにバリデーション
+- エラーは <span class="keyword">{ error: { code, message } }</span>
+- 1関数は<span class="rule">50行以内</span></span>
+
+<span class="subheading">## 参照ドキュメント</span>
+<span class="list-item">- <span class="path">../docs/architecture.md</span>
+- <span class="path">../docs/api-spec.md</span>
+- <span class="path">../docs/db-schema.md</span></span>
+          </div>
+        </div>
+
+        <!-- Frontend -->
+        <div class="md-example-card">
+          <div class="md-example-header frontend">
+            <span class="dot"></span>
+            frontend/CLAUDE.md
+          </div>
+          <div class="md-code-block">
+<span class="heading"># フロントエンド開発ルール</span>
+
+<span class="subheading">## あなたの役割</span>
+<span class="list-item">フロントエンド専門の開発者として
+振る舞ってください。</span>
+
+<span class="subheading">## 技術スタック</span>
+<span class="list-item">- <span class="keyword">React</span> + <span class="keyword">TypeScript</span>
+- <span class="keyword">Tailwind CSS</span>
+- <span class="keyword">React Query</span> でAPI通信</span>
+
+<span class="subheading">## 守るべきルール</span>
+<span class="list-item">- <span class="rule">docs/frontend-spec.md</span> の仕様に従う
+- コンポーネントは<span class="rule">200行以内</span>
+- 型定義は <span class="keyword">backend/types/</span> を参照</span>
+
+<span class="subheading">## 参照ドキュメント</span>
+<span class="list-item">- <span class="path">../docs/architecture.md</span>
+- <span class="path">../docs/frontend-spec.md</span></span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ===== CLI USAGE ===== -->
+    <div class="section-wrap">
+      <div class="section-title">実行コマンド例</div>
+      <div class="cli-section">
+        <div class="cli-header">
+          <span class="dot dot-red"></span>
+          <span class="dot dot-yellow"></span>
+          <span class="dot dot-green"></span>
+          <span>Terminal</span>
+        </div>
+        <div class="cli-body">
+          <span class="cli-comment"># ── バックエンド作業 ──────────────────────────</span><br>
+          <span class="cli-prompt">$</span> <span class="cli-cmd">cd <span class="dir-name">backend</span></span><br>
+          <span class="cli-output">  → backend/CLAUDE.md を読み込み</span><br>
+          <span class="cli-output">  → "バックエンド専門開発者" として動作開始</span><br>
+          <span class="cli-prompt">$</span> <span class="cli-cmd">claude <span class="arg">"タスクCRUDのAPIを実装して"</span></span><br>
+          <span class="cli-output">  → Node.js / Express / Prisma で実装</span><br>
+          <span class="cli-output">  → api-spec.md の仕様に沿ったエンドポイント生成</span><br>
+          <br>
+          <span class="cli-comment"># ── フロントエンド作業（別ターミナル）───────────</span><br>
+          <span class="cli-prompt">$</span> <span class="cli-cmd">cd <span class="dir-name">frontend</span></span><br>
+          <span class="cli-output">  → frontend/CLAUDE.md を読み込み</span><br>
+          <span class="cli-output">  → "フロントエンド専門開発者" として動作開始</span><br>
+          <span class="cli-prompt">$</span> <span class="cli-cmd">claude <span class="arg">"タスク一覧画面を実装して"</span></span><br>
+          <span class="cli-output">  → React / TypeScript / Tailwind CSS で実装</span><br>
+          <span class="cli-output">  → frontend-spec.md の画面仕様に沿ったコンポーネント生成</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== BENEFITS ===== -->
+    <div class="section-wrap">
+      <div class="section-title">CLAUDE.md 活用のメリット</div>
+      <div class="benefit-list">
+        <div class="benefit-item">
+          <div class="num">01</div>
+          <h4>役割の自動切替</h4>
+          <p>ディレクトリを移動するだけで<br>専門家として振る舞いが変わる</p>
+        </div>
+        <div class="benefit-item">
+          <div class="num">02</div>
+          <h4>一貫したコード品質</h4>
+          <p>ルール・制約を明示することで<br>毎回同じ基準のコードを生成</p>
+        </div>
+        <div class="benefit-item">
+          <div class="num">03</div>
+          <h4>ドキュメント自動参照</h4>
+          <p>仕様書・スキーマへのパスを書くだけで<br>Claude が自動的に参照する</p>
+        </div>
+        <div class="benefit-item">
+          <div class="num">04</div>
+          <h4>チーム全体で共有</h4>
+          <p>Git で管理できるので<br>チーム全員が同じ指示を共有できる</p>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <p>© 2026 Infographics Collection</p>
+      <a href="../index.html" class="back-link">← 一覧に戻る</a>
+    </footer>
+  </div>
+</body>
+</html>
