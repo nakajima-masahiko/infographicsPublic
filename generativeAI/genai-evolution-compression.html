@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>生成AIの進化と情報圧縮の技術</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: linear-gradient(160deg, #0a0e2e 0%, #0d1b4b 40%, #0a1f3d 70%, #061229 100%);
+      color: #1b1f2a;
+      min-height: 100vh;
+    }
+
+    .wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 44px 20px 72px;
+    }
+
+    /* ====== HEADER ====== */
+    header {
+      text-align: center;
+      margin-bottom: 48px;
+      color: #fff;
+    }
+    header .badge {
+      display: inline-block;
+      background: rgba(99,179,237,0.18);
+      border: 1px solid rgba(99,179,237,0.45);
+      border-radius: 999px;
+      padding: 5px 20px;
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      color: #90cdf4;
+      margin-bottom: 18px;
+    }
+    header h1 {
+      font-size: 36px;
+      font-weight: 800;
+      line-height: 1.35;
+      margin-bottom: 14px;
+      background: linear-gradient(90deg, #e0f2fe 0%, #bae6fd 50%, #a5f3fc 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    header p {
+      font-size: 16px;
+      color: rgba(255,255,255,0.72);
+      max-width: 640px;
+      margin: 0 auto;
+      line-height: 1.75;
+    }
+
+    /* ====== SECTION CARD ====== */
+    .section-card {
+      background: #ffffff;
+      border-radius: 22px;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.28);
+      padding: 40px 40px 44px;
+      margin-bottom: 28px;
+      position: relative;
+      overflow: hidden;
+    }
+    .section-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 5px;
+    }
+    .section-card.blue::before  { background: linear-gradient(90deg, #3b82f6, #06b6d4); }
+    .section-card.purple::before { background: linear-gradient(90deg, #8b5cf6, #ec4899); }
+    .section-card.green::before  { background: linear-gradient(90deg, #10b981, #3b82f6); }
+
+    .section-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      font-size: 17px;
+      font-weight: 800;
+      color: #fff;
+      margin-right: 12px;
+      flex-shrink: 0;
+    }
+    .blue  .section-num { background: linear-gradient(135deg, #3b82f6, #06b6d4); }
+    .purple .section-num { background: linear-gradient(135deg, #8b5cf6, #ec4899); }
+    .green  .section-num { background: linear-gradient(135deg, #10b981, #3b82f6); }
+
+    .section-head {
+      display: flex;
+      align-items: center;
+      margin-bottom: 30px;
+      padding-bottom: 18px;
+      border-bottom: 2px solid #f1f5f9;
+    }
+    .section-head h2 {
+      font-size: 22px;
+      font-weight: 800;
+      color: #0f172a;
+    }
+    .section-head .icon {
+      font-size: 26px;
+      margin-left: auto;
+    }
+
+    /* ====== TIMELINE (Section 1) ====== */
+    .timeline {
+      position: relative;
+      padding-left: 0;
+    }
+    .timeline-track {
+      position: absolute;
+      left: 72px;
+      top: 0; bottom: 0;
+      width: 3px;
+      background: linear-gradient(180deg, #3b82f6 0%, #06b6d4 100%);
+      border-radius: 2px;
+    }
+    .tl-item {
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+      margin-bottom: 24px;
+      position: relative;
+    }
+    .tl-item:last-child { margin-bottom: 0; }
+    .tl-year {
+      width: 58px;
+      flex-shrink: 0;
+      text-align: right;
+      font-size: 14px;
+      font-weight: 800;
+      color: #3b82f6;
+      padding-top: 14px;
+    }
+    .tl-dot {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      position: relative;
+      z-index: 1;
+      margin-top: 8px;
+      box-shadow: 0 0 0 4px #fff;
+    }
+    .tl-body {
+      flex: 1;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 14px 18px;
+    }
+    .tl-body h3 { font-size: 15px; font-weight: 700; color: #0f172a; margin-bottom: 6px; }
+    .tl-body p  { font-size: 13.5px; color: #475569; line-height: 1.65; }
+    .tl-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 9px;
+      border-radius: 999px;
+      margin-bottom: 8px;
+    }
+
+    /* ====== FACTOR GRID (Section 1 bottom) ====== */
+    .factor-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-top: 28px;
+    }
+    .factor-card {
+      background: linear-gradient(135deg, #eff6ff 0%, #e0f2fe 100%);
+      border: 1px solid #bae6fd;
+      border-radius: 16px;
+      padding: 20px 16px;
+      text-align: center;
+    }
+    .factor-card .f-icon { font-size: 32px; margin-bottom: 10px; }
+    .factor-card h4 { font-size: 14px; font-weight: 700; color: #1e40af; margin-bottom: 6px; }
+    .factor-card p  { font-size: 12.5px; color: #3b5998; line-height: 1.6; }
+
+    /* ====== COMPRESSION GRID (Section 2) ====== */
+    .comp-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+    .comp-card {
+      border-radius: 16px;
+      padding: 22px 20px;
+      position: relative;
+      overflow: hidden;
+    }
+    .comp-card .cc-num {
+      position: absolute;
+      top: 14px; right: 16px;
+      font-size: 48px;
+      font-weight: 900;
+      opacity: 0.07;
+      color: #000;
+      line-height: 1;
+    }
+    .comp-card h3 { font-size: 15px; font-weight: 800; margin-bottom: 8px; }
+    .comp-card p  { font-size: 13px; line-height: 1.65; }
+    .comp-card .cc-badge {
+      display: inline-block;
+      font-size: 10.5px;
+      font-weight: 700;
+      padding: 2px 10px;
+      border-radius: 999px;
+      margin-bottom: 10px;
+    }
+    .comp-card.c1 { background: #faf5ff; border: 1px solid #e9d5ff; }
+    .comp-card.c1 h3 { color: #7c3aed; }
+    .comp-card.c1 .cc-badge { background: #ede9fe; color: #6d28d9; }
+    .comp-card.c2 { background: #fff1f2; border: 1px solid #fecdd3; }
+    .comp-card.c2 h3 { color: #be123c; }
+    .comp-card.c2 .cc-badge { background: #ffe4e6; color: #e11d48; }
+    .comp-card.c3 { background: #f0fdfa; border: 1px solid #99f6e4; }
+    .comp-card.c3 h3 { color: #0f766e; }
+    .comp-card.c3 .cc-badge { background: #ccfbf1; color: #0d9488; }
+    .comp-card.c4 { background: #fefce8; border: 1px solid #fde68a; }
+    .comp-card.c4 h3 { color: #b45309; }
+    .comp-card.c4 .cc-badge { background: #fef3c7; color: #d97706; }
+    .comp-card.c5 { background: #eff6ff; border: 1px solid #bfdbfe; }
+    .comp-card.c5 h3 { color: #1d4ed8; }
+    .comp-card.c5 .cc-badge { background: #dbeafe; color: #2563eb; }
+    .comp-card.c6 { background: #fdf4ff; border: 1px solid #e9d5ff; }
+    .comp-card.c6 h3 { color: #9333ea; }
+    .comp-card.c6 .cc-badge { background: #f3e8ff; color: #9333ea; }
+
+    /* Compression visual diagram */
+    .comp-diagram {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 18px;
+      padding: 28px 24px;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+    .comp-diagram h3 {
+      font-size: 15px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 20px;
+    }
+    .compress-flow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .cf-box {
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      text-align: center;
+      min-width: 100px;
+    }
+    .cf-box.raw   { background: #fee2e2; color: #991b1b; border: 2px solid #fca5a5; }
+    .cf-box.token { background: #fef3c7; color: #92400e; border: 2px solid #fde68a; }
+    .cf-box.embed { background: #dbeafe; color: #1e40af; border: 2px solid #93c5fd; }
+    .cf-box.latent{ background: #f3e8ff; color: #6d28d9; border: 2px solid #c4b5fd; }
+    .cf-box small { display: block; font-size: 10.5px; font-weight: 400; margin-top: 4px; opacity: 0.8; }
+    .cf-arrow {
+      font-size: 22px;
+      color: #94a3b8;
+      font-weight: 300;
+    }
+    .cf-label {
+      font-size: 11px;
+      color: #64748b;
+      margin-top: 4px;
+      text-align: center;
+    }
+    .cf-col { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+
+    /* ====== FUTURE SECTION (Section 3) ====== */
+    .future-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    .future-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 22px 18px;
+      position: relative;
+      overflow: hidden;
+    }
+    .future-card::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 4px;
+      border-radius: 16px 16px 0 0;
+    }
+    .future-card.f1::after { background: linear-gradient(90deg, #06b6d4, #3b82f6); }
+    .future-card.f2::after { background: linear-gradient(90deg, #8b5cf6, #ec4899); }
+    .future-card.f3::after { background: linear-gradient(90deg, #10b981, #06b6d4); }
+    .future-card.f4::after { background: linear-gradient(90deg, #f59e0b, #ef4444); }
+    .future-card.f5::after { background: linear-gradient(90deg, #6366f1, #8b5cf6); }
+    .future-card.f6::after { background: linear-gradient(90deg, #14b8a6, #10b981); }
+    .future-card .fc-icon { font-size: 30px; margin-bottom: 10px; }
+    .future-card h4 { font-size: 14.5px; font-weight: 800; color: #0f172a; margin-bottom: 8px; }
+    .future-card p  { font-size: 12.5px; color: #475569; line-height: 1.65; }
+    .future-card .fc-year {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 10px;
+      background: #e0f2fe;
+      color: #0369a1;
+      border-radius: 999px;
+      margin-bottom: 8px;
+    }
+
+    /* Horizon roadmap */
+    .horizon-bar {
+      background: #f1f5f9;
+      border-radius: 14px;
+      padding: 22px 24px;
+      margin-top: 10px;
+    }
+    .horizon-bar h3 {
+      font-size: 14px;
+      font-weight: 700;
+      color: #334155;
+      margin-bottom: 18px;
+      text-align: center;
+    }
+    .hbar-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .hbar-row:last-child { margin-bottom: 0; }
+    .hbar-label {
+      width: 130px;
+      flex-shrink: 0;
+      font-size: 12.5px;
+      font-weight: 700;
+      color: #475569;
+      text-align: right;
+    }
+    .hbar-track {
+      flex: 1;
+      height: 28px;
+      background: #e2e8f0;
+      border-radius: 8px;
+      overflow: hidden;
+      position: relative;
+    }
+    .hbar-fill {
+      height: 100%;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #fff;
+      white-space: nowrap;
+    }
+    .hbar-fill.h1 { background: linear-gradient(90deg, #3b82f6, #06b6d4); width: 85%; }
+    .hbar-fill.h2 { background: linear-gradient(90deg, #8b5cf6, #ec4899); width: 60%; }
+    .hbar-fill.h3 { background: linear-gradient(90deg, #10b981, #3b82f6); width: 40%; }
+    .hbar-fill.h4 { background: linear-gradient(90deg, #f59e0b, #ef4444); width: 20%; }
+
+    /* ====== INSIGHT BOX ====== */
+    .insight-box {
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);
+      border-radius: 18px;
+      padding: 28px 30px;
+      color: #fff;
+      margin-top: 28px;
+    }
+    .insight-box h3 {
+      font-size: 17px;
+      font-weight: 800;
+      margin-bottom: 16px;
+      color: #a5f3fc;
+    }
+    .insight-list {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .insight-item {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      font-size: 13px;
+      line-height: 1.6;
+      color: rgba(255,255,255,0.85);
+    }
+    .insight-item .ii-icon {
+      font-size: 18px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    /* ====== FOOTER ====== */
+    footer {
+      text-align: center;
+      margin-top: 44px;
+      color: rgba(255,255,255,0.55);
+      font-size: 13px;
+    }
+
+    /* ====== RESPONSIVE ====== */
+    @media (max-width: 680px) {
+      header h1 { font-size: 26px; }
+      .section-card { padding: 26px 20px 30px; }
+      .factor-grid  { grid-template-columns: 1fr; }
+      .comp-grid    { grid-template-columns: 1fr; }
+      .future-grid  { grid-template-columns: 1fr; }
+      .insight-list { grid-template-columns: 1fr; }
+      .timeline-track { left: 64px; }
+      .hbar-label { width: 100px; font-size: 11px; }
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ====== HEADER ====== -->
+  <header>
+    <div class="badge">AI Technology Infographic · 2026</div>
+    <h1>生成AIの急激な進化と<br>情報圧縮テクノロジー</h1>
+    <p>なぜ生成AIはここまで速く進化したのか？その鍵を握る「情報圧縮」の技術革新と、これからの未来を解説します。</p>
+  </header>
+
+  <!-- ====== SECTION 1: なぜ急激に進化したか ====== -->
+  <div class="section-card blue">
+    <div class="section-head">
+      <span class="section-num">1</span>
+      <h2>生成AIはなぜ近年急激に進化したか</h2>
+      <span class="icon">🚀</span>
+    </div>
+
+    <!-- Timeline -->
+    <div class="timeline" style="padding-left:0; position:relative;">
+      <div class="timeline-track"></div>
+
+      <div class="tl-item">
+        <div class="tl-year">2017</div>
+        <div class="tl-dot" style="background:linear-gradient(135deg,#3b82f6,#06b6d4);">⚡</div>
+        <div class="tl-body">
+          <span class="tl-tag" style="background:#dbeafe;color:#1d4ed8;">転換点</span>
+          <h3>Transformer アーキテクチャの登場</h3>
+          <p>Google の論文「Attention is All You Need」が公開。Self-Attention 機構により、文章の長距離依存関係を並列に学習できるようになり、RNN の限界を突破。大規模モデルへの道が開かれた。</p>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-year">2018–<br>2019</div>
+        <div class="tl-dot" style="background:linear-gradient(135deg,#7c3aed,#ec4899);">🧠</div>
+        <div class="tl-body">
+          <span class="tl-tag" style="background:#f3e8ff;color:#7c3aed;">事前学習</span>
+          <h3>BERT・GPT-2 — 事前学習&ファインチューニング戦略</h3>
+          <p>大量テキストで汎用表現を学習し、タスクごとに微調整する「Transfer Learning」が確立。少量データでも高性能を実現できるようになり、AI 開発のコストが劇的に低下した。</p>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-year">2020</div>
+        <div class="tl-dot" style="background:linear-gradient(135deg,#10b981,#3b82f6);">📈</div>
+        <div class="tl-body">
+          <span class="tl-tag" style="background:#dcfce7;color:#15803d;">スケール</span>
+          <h3>GPT-3 — スケール則（Scaling Law）の実証</h3>
+          <p>パラメータ数・データ量・計算量を一定比率で増やすほどモデル性能が予測的に向上するという「Scaling Law」が実証された。1750 億パラメータの GPT-3 が Few-shot 学習で人間に迫る性能を示した。</p>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-year">2022</div>
+        <div class="tl-dot" style="background:linear-gradient(135deg,#f59e0b,#ef4444);">💬</div>
+        <div class="tl-body">
+          <span class="tl-tag" style="background:#fef3c7;color:#b45309;">人間フィードバック</span>
+          <h3>InstructGPT → ChatGPT — RLHF による整合性</h3>
+          <p>強化学習（RLHF）で人間の嗜好を報酬信号として取り込み、有益・無害・正直な応答を実現。ChatGPT が 5 日で 100 万ユーザーを獲得し、生成 AI が社会インフラへ。</p>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-year">2023–<br>2025</div>
+        <div class="tl-dot" style="background:linear-gradient(135deg,#06b6d4,#8b5cf6);">🌐</div>
+        <div class="tl-body">
+          <span class="tl-tag" style="background:#e0f2fe;color:#0369a1;">マルチモーダル</span>
+          <h3>GPT-4・Gemini・Claude 3 — マルチモーダル化と競争加速</h3>
+          <p>テキスト・画像・音声・動画を横断して処理する基盤モデルが登場。オープンソース（Llama 系）との競争が研究開発を加速させ、能力向上サイクルが急速に短縮された。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3大要因 -->
+    <div class="factor-grid">
+      <div class="factor-card">
+        <div class="f-icon">🖥️</div>
+        <h4>計算資源の爆発的増大</h4>
+        <p>GPU・TPU の並列計算能力が 2012 年比で 1000 倍以上向上。H100 など専用 AI チップが大規模学習を現実的なコストで可能にした。</p>
+      </div>
+      <div class="factor-card">
+        <div class="f-icon">🌍</div>
+        <h4>インターネット規模のデータ</h4>
+        <p>Common Crawl・Wikipedia・GitHub などで数兆トークン規模のテキストが利用可能に。多様なドメインの知識を単一モデルに集約できるようになった。</p>
+      </div>
+      <div class="factor-card">
+        <div class="f-icon">🔬</div>
+        <h4>アーキテクチャ革新の連鎖</h4>
+        <p>Transformer → Attention→ MoE（混合専門家）→ RLHF と革新が連鎖。オープン研究コミュニティとビッグテックが互いに競い合い改良サイクルを加速させた。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== SECTION 2: 情報圧縮の方法 ====== -->
+  <div class="section-card purple">
+    <div class="section-head">
+      <span class="section-num">2</span>
+      <h2>進化に必要だった情報圧縮の技術</h2>
+      <span class="icon">🗜️</span>
+    </div>
+
+    <!-- Compression flow diagram -->
+    <div class="comp-diagram">
+      <h3>生テキストから「意味の数値空間」へ — 圧縮パイプライン</h3>
+      <div class="compress-flow">
+        <div class="cf-col">
+          <div class="cf-box raw">生テキスト<small>「猫が好き」<br>数GB〜数TB</small></div>
+        </div>
+        <div class="cf-col">
+          <div class="cf-arrow">→</div>
+          <div class="cf-label">トークン化</div>
+        </div>
+        <div class="cf-col">
+          <div class="cf-box token">トークン列<small>[猫][が][好き]<br>語彙サイズ削減</small></div>
+        </div>
+        <div class="cf-col">
+          <div class="cf-arrow">→</div>
+          <div class="cf-label">埋め込み</div>
+        </div>
+        <div class="cf-col">
+          <div class="cf-box embed">埋め込みベクトル<small>[0.23, -1.4, ...]<br>密な意味表現</small></div>
+        </div>
+        <div class="cf-col">
+          <div class="cf-arrow">→</div>
+          <div class="cf-label">Attention圧縮</div>
+        </div>
+        <div class="cf-col">
+          <div class="cf-box latent">潜在表現<small>文脈を統合した<br>高次意味空間</small></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Compression cards -->
+    <div class="comp-grid">
+      <div class="comp-card c1">
+        <div class="cc-num">1</div>
+        <span class="cc-badge">基盤技術</span>
+        <h3>Attention（自己注意機構）</h3>
+        <p>文中の全単語ペア間の関連性をスコア化し、重要な情報だけを選択的に統合する仕組み。情報を「捨てるのではなく重み付け」することで、長文脈の本質を圧縮した表現を生成する。</p>
+      </div>
+      <div class="comp-card c2">
+        <div class="cc-num">2</div>
+        <span class="cc-badge">語彙圧縮</span>
+        <h3>BPE トークナイゼーション</h3>
+        <p>Byte Pair Encoding により頻出文字列を単一トークンに置き換える。例えば "running" → [run][ning] の 2 トークンに。語彙 5 万件で数兆単語のテキストを効率的に表現できる。</p>
+      </div>
+      <div class="comp-card c3">
+        <div class="cc-num">3</div>
+        <span class="cc-badge">次元圧縮</span>
+        <h3>埋め込みベクトル（Embedding）</h3>
+        <p>語彙数（〜10 万）次元のスパースな one-hot 表現を、数百〜数千次元の密なベクトルに圧縮。意味的に近い概念が空間上で近くなる「意味の幾何学」を自動的に学習する。</p>
+      </div>
+      <div class="comp-card c4">
+        <div class="cc-num">4</div>
+        <span class="cc-badge">モデル圧縮</span>
+        <h3>量子化（Quantization）</h3>
+        <p>浮動小数点 32bit の重みを 8bit・4bit・2bit に丸め込む。精度をわずかに犠牲にしてモデルサイズを最大 16 分の 1 に削減。VRAM が少ない環境での推論を可能にする。</p>
+      </div>
+      <div class="comp-card c5">
+        <div class="cc-num">5</div>
+        <span class="cc-badge">知識蒸留</span>
+        <h3>蒸留（Knowledge Distillation）</h3>
+        <p>大規模教師モデルの「出力分布」を小型の生徒モデルに学習させる。生徒は教師の内部表現の圧縮版を習得し、パラメータ数を 10 分の 1 以下にしながら同等の能力を達成できる。</p>
+      </div>
+      <div class="comp-card c6">
+        <div class="cc-num">6</div>
+        <span class="cc-badge">効率学習</span>
+        <h3>LoRA（低ランク適応）</h3>
+        <p>事前学習済み重みを固定したまま、低ランク行列のみを微調整する手法。更新パラメータ数を 0.1〜1% に圧縮しながらタスク固有の能力を獲得。GPU メモリ消費を大幅に削減する。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== SECTION 3: 今後の進化 ====== -->
+  <div class="section-card green">
+    <div class="section-head">
+      <span class="section-num">3</span>
+      <h2>情報圧縮の今後の進化</h2>
+      <span class="icon">🔮</span>
+    </div>
+
+    <div class="future-grid">
+      <div class="future-card f1">
+        <div class="fc-icon">🌀</div>
+        <span class="fc-year">進行中 〜 近未来</span>
+        <h4>状態空間モデル（SSM / Mamba）</h4>
+        <p>Transformer の二乗計算量問題を解決する新アーキテクチャ。長い文脈を固定サイズの「状態ベクトル」に圧縮しながら逐次処理するため、100 万トークン超のコンテキストを省メモリで扱える。</p>
+      </div>
+      <div class="future-card f2">
+        <div class="fc-icon">🕸️</div>
+        <span class="fc-year">近未来</span>
+        <h4>Mixture of Experts（MoE）の深化</h4>
+        <p>全パラメータの一部（専門家）だけを選択的に活性化するスパース計算。Gemini 1.5 や GPT-4 が採用。能力を維持しながら実効計算量を劇的に圧縮する「選択的圧縮」が主流化する。</p>
+      </div>
+      <div class="future-card f3">
+        <div class="fc-icon">🧬</div>
+        <span class="fc-year">中期（3〜7年）</span>
+        <h4>ニューロシンボリック圧縮</h4>
+        <p>ニューラルネットワークと記号的推論を融合し、知識をルール＋確率的表現で格納。膨大なパラメータ数なしに構造的知識を圧縮・再利用できる次世代アーキテクチャ。</p>
+      </div>
+      <div class="future-card f4">
+        <div class="fc-icon">⚛️</div>
+        <span class="fc-year">中期〜長期</span>
+        <h4>ハードウェア共設計圧縮</h4>
+        <p>モデルアーキテクチャとチップ設計を同時に最適化する「Hardware-Software Co-design」。アナログ計算・フォトニクス・ニューロモルフィックチップで、情報密度をさらに 100 倍以上高める。</p>
+      </div>
+      <div class="future-card f5">
+        <div class="fc-icon">🔗</div>
+        <span class="fc-year">中期（5〜10年）</span>
+        <h4>連続学習と動的圧縮</h4>
+        <p>新情報を学習するたびにモデル全体を再学習せず、差分だけを効率的に圧縮・統合する手法。人間の記憶のように重要度に応じて情報を動的に保持・忘却・再活性化する機構を実現する。</p>
+      </div>
+      <div class="future-card f6">
+        <div class="fc-icon">🧠</div>
+        <span class="fc-year">長期（10年〜）</span>
+        <h4>生物学的圧縮原理の実装</h4>
+        <p>スパースコーディング・グリッド細胞・海馬-新皮質転送など、脳の情報圧縮機構をAIに実装。現在の Transformer の 1,000 倍以上のエネルギー効率で人間レベルの汎用知能（AGI）を実現する可能性。</p>
+      </div>
+    </div>
+
+    <!-- Progress bars: maturity roadmap -->
+    <div class="horizon-bar">
+      <h3>技術成熟度ロードマップ（2026年時点の普及度）</h3>
+      <div class="hbar-row">
+        <div class="hbar-label">量子化・蒸留</div>
+        <div class="hbar-track">
+          <div class="hbar-fill h1">実用普及段階 ── 業界標準へ</div>
+        </div>
+      </div>
+      <div class="hbar-row">
+        <div class="hbar-label">MoE / SSM</div>
+        <div class="hbar-track">
+          <div class="hbar-fill h2">最前線モデルで採用拡大中</div>
+        </div>
+      </div>
+      <div class="hbar-row">
+        <div class="hbar-label">ニューロシンボリック</div>
+        <div class="hbar-track">
+          <div class="hbar-fill h3">研究フェーズ → 商用化初期</div>
+        </div>
+      </div>
+      <div class="hbar-row">
+        <div class="hbar-label">生物学的実装</div>
+        <div class="hbar-track">
+          <div class="hbar-fill h4">基礎研究段階</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Key Insight box -->
+    <div class="insight-box">
+      <h3>KEY INSIGHTS — 情報圧縮が生成AIの未来を決める</h3>
+      <div class="insight-list">
+        <div class="insight-item">
+          <span class="ii-icon">💡</span>
+          <span>生成AIの「知能」の本質は、膨大な情報からパターンを抽出し、少ないビット数に意味を凝縮する圧縮能力にある。</span>
+        </div>
+        <div class="insight-item">
+          <span class="ii-icon">📉</span>
+          <span>モデルを小さく・速くしながら能力を保つ圧縮技術の競争が、AIの民主化（エッジ端末への展開）を加速させる。</span>
+        </div>
+        <div class="insight-item">
+          <span class="ii-icon">🔄</span>
+          <span>Transformer の限界（二乗メモリ・固定コンテキスト）を突破するアーキテクチャ革新が、次の性能ブレークスルーを生む。</span>
+        </div>
+        <div class="insight-item">
+          <span class="ii-icon">🌱</span>
+          <span>人間の脳は 20W でスーパーコンピュータ以上の情報処理を行う。生物的圧縮原理の模倣がAGIへの最短経路かもしれない。</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>© 2026 Infographics Collection — 生成AIの進化と情報圧縮テクノロジー</p>
+  </footer>
+
+</div>
+</body>
+</html>
