@@ -1,0 +1,1527 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Claude & Claude Code — 画期的な使用方法 2024-2025</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap');
+
+    :root {
+      --coral: #da7756;
+      --coral-light: #f0a080;
+      --coral-dark: #b85a35;
+      --navy: #0a0f1e;
+      --navy-light: #111827;
+      --navy-mid: #1e2a3a;
+      --card-bg: #141d2b;
+      --card-border: #243044;
+      --text-primary: #f0f4ff;
+      --text-secondary: #8ea8c8;
+      --text-muted: #506070;
+      --accent-blue: #4a9eff;
+      --accent-purple: #a855f7;
+      --accent-green: #22c55e;
+      --accent-yellow: #fbbf24;
+      --accent-teal: #14b8a6;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", sans-serif;
+      background: var(--navy);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Stars background ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,0.6) 0%, transparent 100%),
+        radial-gradient(1px 1px at 30% 60%, rgba(255,255,255,0.4) 0%, transparent 100%),
+        radial-gradient(1px 1px at 55% 15%, rgba(255,255,255,0.5) 0%, transparent 100%),
+        radial-gradient(1px 1px at 70% 70%, rgba(255,255,255,0.3) 0%, transparent 100%),
+        radial-gradient(1px 1px at 85% 35%, rgba(255,255,255,0.6) 0%, transparent 100%),
+        radial-gradient(1px 1px at 20% 80%, rgba(255,255,255,0.4) 0%, transparent 100%),
+        radial-gradient(1px 1px at 90% 90%, rgba(255,255,255,0.5) 0%, transparent 100%),
+        radial-gradient(1px 1px at 45% 45%, rgba(255,255,255,0.3) 0%, transparent 100%),
+        radial-gradient(2px 2px at 15% 50%, rgba(218,119,86,0.5) 0%, transparent 100%),
+        radial-gradient(2px 2px at 75% 25%, rgba(74,158,255,0.4) 0%, transparent 100%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 20px 80px;
+    }
+
+    /* ── Hero ── */
+    .hero {
+      text-align: center;
+      padding: 70px 20px 50px;
+      position: relative;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, var(--coral) 0%, var(--coral-dark) 100%);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 6px 18px;
+      border-radius: 100px;
+      margin-bottom: 24px;
+    }
+
+    .hero h1 {
+      font-size: clamp(32px, 6vw, 62px);
+      font-weight: 900;
+      line-height: 1.1;
+      margin-bottom: 20px;
+      background: linear-gradient(135deg, #fff 0%, var(--coral-light) 60%, var(--coral) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-sub {
+      font-size: clamp(15px, 2.5vw, 19px);
+      color: var(--text-secondary);
+      line-height: 1.7;
+      max-width: 680px;
+      margin: 0 auto 40px;
+    }
+
+    .hero-stats {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    .hero-stat {
+      text-align: center;
+    }
+
+    .hero-stat .num {
+      font-size: 42px;
+      font-weight: 900;
+      color: var(--coral);
+      line-height: 1;
+    }
+
+    .hero-stat .label {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+
+    /* ── Divider ── */
+    .section-divider {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin: 60px 0 32px;
+    }
+
+    .section-divider::before,
+    .section-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--card-border), transparent);
+    }
+
+    .section-label {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--coral);
+      white-space: nowrap;
+    }
+
+    /* ── Section Title ── */
+    .section-title {
+      font-size: clamp(22px, 4vw, 30px);
+      font-weight: 900;
+      margin-bottom: 8px;
+    }
+
+    .section-desc {
+      font-size: 15px;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      margin-bottom: 32px;
+    }
+
+    /* ── Timeline ── */
+    .timeline {
+      position: relative;
+      padding-left: 40px;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 14px;
+      top: 8px;
+      bottom: 8px;
+      width: 2px;
+      background: linear-gradient(180deg, var(--coral) 0%, var(--accent-purple) 50%, var(--accent-blue) 100%);
+    }
+
+    .timeline-item {
+      position: relative;
+      margin-bottom: 36px;
+    }
+
+    .timeline-dot {
+      position: absolute;
+      left: -34px;
+      top: 6px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 3px solid var(--navy);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 8px;
+    }
+
+    .timeline-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 24px 28px;
+      transition: border-color 0.3s, transform 0.2s;
+      cursor: default;
+    }
+
+    .timeline-card:hover {
+      border-color: var(--coral);
+      transform: translateX(4px);
+    }
+
+    .timeline-meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .timeline-date {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--coral);
+      letter-spacing: 0.08em;
+      background: rgba(218,119,86,0.12);
+      padding: 3px 10px;
+      border-radius: 6px;
+    }
+
+    .timeline-tag {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 6px;
+      letter-spacing: 0.06em;
+    }
+
+    .tag-model { background: rgba(168,85,247,0.15); color: #c084fc; }
+    .tag-code  { background: rgba(74,158,255,0.15); color: #7dd3fc; }
+    .tag-tool  { background: rgba(20,184,166,0.15); color: #5eead4; }
+    .tag-agent { background: rgba(251,191,36,0.15); color: #fde68a; }
+    .tag-safety{ background: rgba(34,197,94,0.15); color: #86efac; }
+
+    .timeline-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      line-height: 1.4;
+    }
+
+    .timeline-body {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.75;
+      margin-bottom: 16px;
+    }
+
+    .timeline-impact {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .impact-chip {
+      font-size: 12px;
+      padding: 5px 12px;
+      border-radius: 100px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: var(--text-secondary);
+    }
+
+    .impact-chip strong { color: var(--text-primary); }
+
+    /* ── Feature Grid ── */
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      margin-bottom: 8px;
+    }
+
+    .feature-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 28px;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+    }
+
+    .feature-card.coral::before { background: linear-gradient(90deg, var(--coral), var(--coral-light)); }
+    .feature-card.blue::before  { background: linear-gradient(90deg, var(--accent-blue), #818cf8); }
+    .feature-card.purple::before{ background: linear-gradient(90deg, var(--accent-purple), #ec4899); }
+    .feature-card.teal::before  { background: linear-gradient(90deg, var(--accent-teal), var(--accent-green)); }
+    .feature-card.yellow::before{ background: linear-gradient(90deg, var(--accent-yellow), #f97316); }
+    .feature-card.green::before { background: linear-gradient(90deg, var(--accent-green), var(--accent-teal)); }
+
+    .feature-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(218,119,86,0.4);
+      box-shadow: 0 16px 40px rgba(0,0,0,0.4);
+    }
+
+    .feature-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      margin-bottom: 18px;
+    }
+
+    .feature-icon.coral  { background: rgba(218,119,86,0.15); }
+    .feature-icon.blue   { background: rgba(74,158,255,0.15); }
+    .feature-icon.purple { background: rgba(168,85,247,0.15); }
+    .feature-icon.teal   { background: rgba(20,184,166,0.15); }
+    .feature-icon.yellow { background: rgba(251,191,36,0.15); }
+    .feature-icon.green  { background: rgba(34,197,94,0.15); }
+
+    .feature-title {
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      line-height: 1.4;
+    }
+
+    .feature-body {
+      font-size: 13.5px;
+      color: var(--text-secondary);
+      line-height: 1.75;
+      margin-bottom: 18px;
+    }
+
+    .feature-metric {
+      background: rgba(255,255,255,0.04);
+      border-radius: 10px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+
+    .metric-val {
+      font-size: 28px;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .coral .metric-val  { color: var(--coral); }
+    .blue .metric-val   { color: var(--accent-blue); }
+    .purple .metric-val { color: var(--accent-purple); }
+    .teal .metric-val   { color: var(--accent-teal); }
+    .yellow .metric-val { color: var(--accent-yellow); }
+    .green .metric-val  { color: var(--accent-green); }
+
+    .metric-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* ── Use Case Gallery ── */
+    .usecase-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+    }
+
+    .usecase-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 22px 22px 18px;
+      transition: all 0.25s;
+    }
+
+    .usecase-card:hover {
+      border-color: rgba(74,158,255,0.4);
+      transform: translateY(-3px);
+    }
+
+    .usecase-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .usecase-emoji {
+      font-size: 28px;
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255,255,255,0.05);
+      border-radius: 12px;
+      flex-shrink: 0;
+    }
+
+    .usecase-name {
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1.3;
+    }
+
+    .usecase-field {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 3px;
+    }
+
+    .usecase-desc {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      margin-bottom: 14px;
+    }
+
+    .usecase-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 6px;
+      background: rgba(218,119,86,0.12);
+      color: var(--coral-light);
+    }
+
+    /* ── Benchmark Chart ── */
+    .benchmark-section {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 32px;
+    }
+
+    .benchmark-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .benchmark-subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 28px;
+    }
+
+    .bar-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+
+    .bar-label {
+      width: 200px;
+      flex-shrink: 0;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-align: right;
+    }
+
+    .bar-wrap {
+      flex: 1;
+      height: 28px;
+      background: rgba(255,255,255,0.04);
+      border-radius: 100px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 100px;
+      display: flex;
+      align-items: center;
+      padding-right: 10px;
+      justify-content: flex-end;
+      font-size: 12px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.9);
+      animation: growBar 1.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+      animation-delay: var(--delay, 0s);
+    }
+
+    @keyframes growBar {
+      from { width: 0 !important; }
+    }
+
+    .bar-coral  { background: linear-gradient(90deg, var(--coral-dark), var(--coral)); }
+    .bar-blue   { background: linear-gradient(90deg, #1d4ed8, var(--accent-blue)); }
+    .bar-purple { background: linear-gradient(90deg, #7e22ce, var(--accent-purple)); }
+    .bar-grey   { background: linear-gradient(90deg, #374151, #6b7280); }
+    .bar-green  { background: linear-gradient(90deg, #15803d, var(--accent-green)); }
+
+    /* ── MCP Diagram ── */
+    .mcp-diagram {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 32px;
+    }
+
+    .mcp-center {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 28px 0;
+    }
+
+    .mcp-node {
+      background: linear-gradient(135deg, var(--coral) 0%, var(--coral-dark) 100%);
+      border-radius: 20px;
+      padding: 20px 28px;
+      text-align: center;
+      box-shadow: 0 0 40px rgba(218,119,86,0.3);
+    }
+
+    .mcp-node-icon { font-size: 32px; margin-bottom: 6px; }
+    .mcp-node-name { font-size: 15px; font-weight: 700; }
+
+    .mcp-arrows {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin: 0 20px;
+    }
+
+    .mcp-arrow {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .mcp-arrow-line {
+      width: 60px;
+      height: 2px;
+      background: var(--card-border);
+      position: relative;
+    }
+
+    .mcp-arrow-line::after {
+      content: '▶';
+      position: absolute;
+      right: -6px;
+      top: -7px;
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+
+    .mcp-connectors {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .mcp-connector {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      transition: border-color 0.2s;
+    }
+
+    .mcp-connector:hover { border-color: var(--accent-teal); }
+
+    /* ── Computer Use Demo ── */
+    .demo-screen {
+      background: #0d1117;
+      border: 1px solid #30363d;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .demo-titlebar {
+      background: #161b22;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .demo-dot { width: 12px; height: 12px; border-radius: 50%; }
+    .demo-dot.red    { background: #ff5f56; }
+    .demo-dot.yellow { background: #ffbd2e; }
+    .demo-dot.green  { background: #27c93f; }
+
+    .demo-title {
+      font-size: 12px;
+      color: #8b949e;
+      margin-left: 8px;
+      font-family: monospace;
+    }
+
+    .demo-content {
+      padding: 20px;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      line-height: 1.8;
+    }
+
+    .demo-prompt { color: #7dd3fc; }
+    .demo-action { color: var(--coral-light); }
+    .demo-result { color: #86efac; }
+    .demo-comment { color: #6b7280; }
+
+    /* ── Quote Block ── */
+    .quote-block {
+      border-left: 4px solid var(--coral);
+      padding: 20px 24px;
+      background: rgba(218,119,86,0.05);
+      border-radius: 0 12px 12px 0;
+      margin: 28px 0;
+    }
+
+    .quote-text {
+      font-size: 16px;
+      line-height: 1.75;
+      font-style: italic;
+      color: var(--text-primary);
+      margin-bottom: 10px;
+    }
+
+    .quote-author {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    /* ── Two-col ── */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 640px) {
+      .two-col { grid-template-columns: 1fr; }
+      .bar-label { width: 120px; font-size: 11px; }
+      .hero-stats { gap: 20px; }
+    }
+
+    /* ── Code Claude Flow ── */
+    .flow-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .flow-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      padding: 16px 0;
+      border-bottom: 1px dashed var(--card-border);
+    }
+
+    .flow-step:last-child { border-bottom: none; }
+
+    .flow-num {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--coral), var(--coral-dark));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .flow-content-title {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 5px;
+    }
+
+    .flow-content-body {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+
+    /* ── Footer ── */
+    .page-footer {
+      text-align: center;
+      margin-top: 72px;
+      padding-top: 32px;
+      border-top: 1px solid var(--card-border);
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    .page-footer a {
+      color: var(--coral-light);
+      text-decoration: none;
+    }
+
+    /* ── Pulse animation ── */
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 0 12px rgba(218,119,86,0.3); }
+      50% { box-shadow: 0 0 28px rgba(218,119,86,0.6); }
+    }
+
+    .mcp-node { animation: pulse-glow 3s ease-in-out infinite; }
+
+    /* ── Back link ── */
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 14px;
+      padding: 8px 0;
+      margin-top: 20px;
+      transition: color 0.2s;
+    }
+
+    .back-link:hover { color: var(--coral-light); }
+
+    /* ── Thinking badge ── */
+    .thinking-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(168,85,247,0.12);
+      border: 1px solid rgba(168,85,247,0.3);
+      color: #c084fc;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 100px;
+      margin-left: 10px;
+      vertical-align: middle;
+    }
+
+    .thinking-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: #c084fc;
+      animation: blink 1.2s ease-in-out infinite;
+    }
+
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <a href="../index.html" class="back-link">← インフォグラフィック一覧に戻る</a>
+
+  <!-- ═══════════════════════════════ HERO ═══════════════════════════════ -->
+  <section class="hero">
+    <div class="hero-badge">Anthropic 2024–2025 Breakthroughs</div>
+    <h1>Claude &amp; Claude Code<br>画期的な使用方法</h1>
+    <p class="hero-sub">
+      Anthropic が発表した最先端機能とユースケースを徹底解説。<br>
+      AIがソフトウェア開発・研究・ビジネスをどう変えているか？
+    </p>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="num">6+</div>
+        <div class="label">主要モデル発表</div>
+      </div>
+      <div class="hero-stat">
+        <div class="num">200K</div>
+        <div class="label">コンテキストウィンドウ(トークン)</div>
+      </div>
+      <div class="hero-stat">
+        <div class="num">71.7%</div>
+        <div class="label">SWE-bench 解決率<br>(Claude 3.7)</div>
+      </div>
+      <div class="hero-stat">
+        <div class="num">∞</div>
+        <div class="label">可能性</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ TIMELINE ═══════════════════════ -->
+  <div class="section-divider"><span class="section-label">Timeline of Breakthroughs</span></div>
+  <h2 class="section-title">重大発表タイムライン</h2>
+  <p class="section-desc">2024年後半〜2025年に Anthropic が世界を驚かせた発表の全記録。</p>
+
+  <div class="timeline">
+
+    <!-- Oct 2024: Computer Use -->
+    <div class="timeline-item">
+      <div class="timeline-dot" style="background: var(--coral);">🖥</div>
+      <div class="timeline-card">
+        <div class="timeline-meta">
+          <span class="timeline-date">2024年 10月</span>
+          <span class="timeline-tag tag-model">Claude 3.5 Sonnet</span>
+          <span class="timeline-tag tag-tool">Computer Use</span>
+        </div>
+        <h3 class="timeline-title">Computer Use — AIが初めてPCを操作する</h3>
+        <p class="timeline-body">
+          Claude 3.5 Sonnet が「Computer Use」機能を公開。スクリーンを見て、マウスを動かし、キーボードを打ち、ファイルを操作する——まるで人間のようにPCを自律的に操作できるAIが世界で初めて商業利用可能になった瞬間。
+          ブラウザでの情報収集・フォーム記入・コードの実行まで、複雑なワークフローを完全自動化。
+        </p>
+        <div class="timeline-impact">
+          <span class="impact-chip"><strong>OSS互換</strong> Ubuntu / Windows / macOS</span>
+          <span class="impact-chip"><strong>活用先</strong> RPA・品質テスト・データ収集</span>
+          <span class="impact-chip"><strong>API</strong> beta機能として即日公開</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Nov 2024: MCP -->
+    <div class="timeline-item">
+      <div class="timeline-dot" style="background: var(--accent-teal);">🔗</div>
+      <div class="timeline-card">
+        <div class="timeline-meta">
+          <span class="timeline-date">2024年 11月</span>
+          <span class="timeline-tag tag-tool">オープン標準</span>
+          <span class="timeline-tag tag-agent">MCP</span>
+        </div>
+        <h3 class="timeline-title">Model Context Protocol (MCP) — AIツール接続の共通言語</h3>
+        <p class="timeline-body">
+          Anthropic が MCP をオープンソースとして公開。AIとデータソース・ツールを接続する<strong>標準プロトコル</strong>を策定。
+          GitHub・Slack・Google Drive・データベース・社内APIなど、あらゆるシステムを同一のインターフェースでClaudeに接続できる。
+          これにより開発者は個別の統合を作る必要がなくなり、AIエコシステムが爆発的に拡張。
+        </p>
+        <div class="timeline-impact">
+          <span class="impact-chip"><strong>採用企業</strong> Block, Apollo, Zed, Replit</span>
+          <span class="impact-chip"><strong>コネクタ</strong> GitHub / Slack / Postgres / etc.</span>
+          <span class="impact-chip"><strong>プロトコル</strong> JSON-RPC ベース</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Feb 2025: Claude 3.7 + Extended Thinking -->
+    <div class="timeline-item">
+      <div class="timeline-dot" style="background: var(--accent-purple);">🧠</div>
+      <div class="timeline-card">
+        <div class="timeline-meta">
+          <span class="timeline-date">2025年 2月</span>
+          <span class="timeline-tag tag-model">Claude 3.7 Sonnet</span>
+          <span class="timeline-tag tag-agent">Extended Thinking</span>
+        </div>
+        <h3 class="timeline-title">Extended Thinking — 見える化された「考える」プロセス
+          <span class="thinking-badge"><span class="thinking-dot"></span>思考中…</span>
+        </h3>
+        <p class="timeline-body">
+          Claude 3.7 Sonnet と共に登場した「Extended Thinking」機能。
+          Claude が問題を解く前に<strong>内部的な思考プロセスを展開</strong>し、その過程をユーザーが閲覧できる。
+          数学・コード・論理推論など複雑な問題で精度が劇的向上。
+          思考トークン数を調整することでコストと精度のトレードオフも制御可能。
+        </p>
+        <div class="timeline-impact">
+          <span class="impact-chip"><strong>思考モード</strong> ハイブリッド (on/off切替)</span>
+          <span class="impact-chip"><strong>数学ベンチ</strong> AIME 2024: 大幅改善</span>
+          <span class="impact-chip"><strong>SWE-bench</strong> 업계 최고 수준</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Feb/Mar 2025: Claude Code -->
+    <div class="timeline-item">
+      <div class="timeline-dot" style="background: var(--accent-blue);">💻</div>
+      <div class="timeline-card">
+        <div class="timeline-meta">
+          <span class="timeline-date">2025年 2〜3月</span>
+          <span class="timeline-tag tag-code">Claude Code</span>
+          <span class="timeline-tag tag-agent">Agentic CLI</span>
+        </div>
+        <h3 class="timeline-title">Claude Code — ターミナルから動く自律型コーディングエージェント</h3>
+        <p class="timeline-body">
+          「Claude Code」が正式リリース。ターミナルから直接呼び出せるエージェント型CLIツール。
+          ファイルの読み書き・Git操作・テスト実行・バグ修正をすべて自律的に実行。
+          <code>CLAUDE.md</code> によるプロジェクト固有の設定、MCP サーバー統合、
+          サブエージェントによる並列タスク実行など、本格的なソフトウェアエンジニアリングを代行。
+        </p>
+        <div class="timeline-impact">
+          <span class="impact-chip"><strong>SWE-bench</strong> 71.7% 解決率（業界最高峰）</span>
+          <span class="impact-chip"><strong>モード</strong> Auto / Plan / Review</span>
+          <span class="impact-chip"><strong>統合</strong> VS Code / JetBrains 拡張機能</span>
+          <span class="impact-chip"><strong>Hooks</strong> カスタムワークフロー自動化</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2025: Projects + Memory -->
+    <div class="timeline-item">
+      <div class="timeline-dot" style="background: var(--accent-yellow);">🗂</div>
+      <div class="timeline-card">
+        <div class="timeline-meta">
+          <span class="timeline-date">2025年</span>
+          <span class="timeline-tag tag-tool">Projects</span>
+          <span class="timeline-tag tag-tool">長期メモリ</span>
+        </div>
+        <h3 class="timeline-title">Projects — 長期的な文脈と記憶を持つ AI ワークスペース</h3>
+        <p class="timeline-body">
+          「Projects」機能により、Claude が<strong>プロジェクト単位で長期記憶</strong>を保持。
+          過去の会話・アップロードしたドキュメント・コードベースの文脈を跨いで参照。
+          チームメンバーとのコラボレーション共有も可能。
+          特定ドメインの専門家として育て上げる「育てる AI」の時代が到来。
+        </p>
+        <div class="timeline-impact">
+          <span class="impact-chip"><strong>コンテキスト</strong> 200K トークン維持</span>
+          <span class="impact-chip"><strong>共有</strong> チームプロジェクト対応</span>
+          <span class="impact-chip"><strong>ファイル</strong> PDF / 画像 / コード一括管理</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2025: Multi-Agent -->
+    <div class="timeline-item">
+      <div class="timeline-dot" style="background: var(--accent-green);">🤝</div>
+      <div class="timeline-card">
+        <div class="timeline-meta">
+          <span class="timeline-date">2025年</span>
+          <span class="timeline-tag tag-agent">マルチエージェント</span>
+          <span class="timeline-tag tag-safety">Enterprise</span>
+        </div>
+        <h3 class="timeline-title">マルチエージェント・オーケストレーション — AI が AI を指揮する</h3>
+        <p class="timeline-body">
+          Claude が「オーケストレーター」として他のAIエージェントを指揮・管理するフレームワークが確立。
+          複雑なタスクを複数のサブエージェントに分配して並列実行。
+          各エージェントはスクレイピング・API呼び出し・計算・ファイル生成をそれぞれ担当し、
+          最終的に Claude が結果を統合する。ソフトウェア開発の完全自動化が現実に。
+        </p>
+        <div class="timeline-impact">
+          <span class="impact-chip"><strong>並列実行</strong> 複数サブエージェント同時動作</span>
+          <span class="impact-chip"><strong>ツール</strong> Web検索・コード実行・API統合</span>
+          <span class="impact-chip"><strong>監査</strong> すべての行動をトレース可能</span>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /timeline -->
+
+  <!-- ═══════════════════════ FEATURE CARDS ═══════════════════════ -->
+  <div class="section-divider"><span class="section-label">Key Features Deep Dive</span></div>
+  <h2 class="section-title">機能別 深掘り解説</h2>
+  <p class="section-desc">各機能の革新性と具体的なインパクトを数字で見る。</p>
+
+  <div class="feature-grid">
+
+    <div class="feature-card coral">
+      <div class="feature-icon coral">🖥️</div>
+      <h3 class="feature-title">Computer Use<br>PCを自律操作する AI</h3>
+      <p class="feature-body">
+        スクリーンショットを見てピクセル単位で理解し、クリック・タイプ・スクロールを実行。
+        Webブラウジングから業務ソフトの操作まで、GUI操作を完全自動化。
+        従来のRPAツールと違い、<strong>自然言語の指示だけ</strong>で動く。
+      </p>
+      <div class="feature-metric">
+        <span class="metric-val">58.1%</span>
+        <span class="metric-label">OSWorld ベンチマーク<br>（リリース時点で業界最高）</span>
+      </div>
+    </div>
+
+    <div class="feature-card purple">
+      <div class="feature-icon purple">🧠</div>
+      <h3 class="feature-title">Extended Thinking<br>長く深く考える Claude</h3>
+      <p class="feature-body">
+        複雑な問題に対し、Claude が内部で段階的に仮説を立て・検証・修正を繰り返す。
+        この「思考の流れ」が API レスポンスとして可視化され、
+        なぜその答えに至ったか<strong>完全にトレーサブル</strong>。
+      </p>
+      <div class="feature-metric">
+        <span class="metric-val">80%+</span>
+        <span class="metric-label">GPQA Diamond<br>（難関科学ベンチマーク）</span>
+      </div>
+    </div>
+
+    <div class="feature-card blue">
+      <div class="feature-icon blue">💻</div>
+      <h3 class="feature-title">Claude Code<br>自律型ソフトウェアエンジニア</h3>
+      <p class="feature-body">
+        「このバグを直して」「テストを追加して」「PRを作って」——
+        自然言語の指示でコードベース全体を読み・修正・テスト・コミットまで完遂。
+        1回の指示で数百ファイルにまたがる変更も自動実行。
+      </p>
+      <div class="feature-metric">
+        <span class="metric-val">71.7%</span>
+        <span class="metric-label">SWE-bench Verified<br>（実際のGitHub Issue解決率）</span>
+      </div>
+    </div>
+
+    <div class="feature-card teal">
+      <div class="feature-icon teal">🔗</div>
+      <h3 class="feature-title">Model Context Protocol<br>AIエコシステムの共通言語</h3>
+      <p class="feature-body">
+        USB-C がデバイス接続を標準化したように、MCP が AI ↔ ツール接続を標準化。
+        一度 MCP サーバーを作れば、Claude Code・Claude Desktop・
+        あらゆる MCP 対応クライアントと即時接続。
+      </p>
+      <div class="feature-metric">
+        <span class="metric-val">1000+</span>
+        <span class="metric-label">コミュニティ製<br>MCPサーバー数（2025年時点）</span>
+      </div>
+    </div>
+
+    <div class="feature-card yellow">
+      <div class="feature-icon yellow">🗂️</div>
+      <h3 class="feature-title">200K Context Window<br>丸ごと読む AI</h3>
+      <p class="feature-body">
+        200,000 トークン＝約15万語≈本2〜3冊分を<strong>1回のプロンプトで処理</strong>。
+        コードベース全体・法律文書・研究論文セットを一括分析。
+        「コンテキストに入れれば解ける」新しい問題解決の哲学。
+      </p>
+      <div class="feature-metric">
+        <span class="metric-val">200K</span>
+        <span class="metric-label">トークン<br>= 文庫本 約3冊分</span>
+      </div>
+    </div>
+
+    <div class="feature-card green">
+      <div class="feature-icon green">🛡️</div>
+      <h3 class="feature-title">Constitutional AI 2.0<br>安全性と能力を両立</h3>
+      <p class="feature-body">
+        Anthropic 独自の安全訓練手法「Constitutional AI」を進化させた v2.0。
+        Claude が自ら倫理的判断を行い、有害な要求を拒否しつつも<strong>過度な拒絶を避ける</strong>。
+        有用性と安全性のトレードオフを技術で解決。
+      </p>
+      <div class="feature-metric">
+        <span class="metric-val">Responsible</span>
+        <span class="metric-label">Scaling Policy<br>業界標準のリスク評価フレームワーク</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ═══════════════════════ BENCHMARK CHART ═══════════════════════ -->
+  <div class="section-divider"><span class="section-label">Performance Benchmarks</span></div>
+
+  <div class="two-col" style="margin-bottom: 20px;">
+    <div class="benchmark-section">
+      <h3 class="benchmark-title">SWE-bench Verified（コード能力）</h3>
+      <p class="benchmark-subtitle">実際のGitHub Issue を自律的に解決できる割合</p>
+
+      <div class="bar-row">
+        <span class="bar-label">Claude 3.7 Sonnet</span>
+        <div class="bar-wrap">
+          <div class="bar-fill bar-coral" style="width:71.7%; --delay: 0.1s">71.7%</div>
+        </div>
+      </div>
+      <div class="bar-row">
+        <span class="bar-label">Claude 3.5 Sonnet</span>
+        <div class="bar-wrap">
+          <div class="bar-fill bar-coral" style="width:49%; --delay: 0.2s; opacity:0.7">49.0%</div>
+        </div>
+      </div>
+      <div class="bar-row">
+        <span class="bar-label">GPT-4o</span>
+        <div class="bar-wrap">
+          <div class="bar-fill bar-grey" style="width:38%; --delay: 0.3s">38.0%</div>
+        </div>
+      </div>
+      <div class="bar-row">
+        <span class="bar-label">Gemini 1.5 Pro</span>
+        <div class="bar-wrap">
+          <div class="bar-fill bar-blue" style="width:33%; --delay: 0.4s">33.0%</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="benchmark-section">
+      <h3 class="benchmark-title">GPQA Diamond（PhD級推論）</h3>
+      <p class="benchmark-subtitle">博士レベルの科学問題への正答率</p>
+
+      <div class="bar-row">
+        <span class="bar-label">Claude 3.7 (thinking)</span>
+        <div class="bar-wrap">
+          <div class="bar-fill bar-purple" style="width:84.8%; --delay: 0.1s">84.8%</div>
+        </div>
+      </div>
+      <div class="bar-row">
+        <span class="bar-label">Claude 3.5 Sonnet</span>
+        <div class="bar-wrap">
+          <div class="bar-fill bar-coral" style="width:65%; --delay: 0.2s">65.0%</div>
+        </div>
+      </div>
+      <div class="bar-row">
+        <span class="bar-label">GPT-4o</span>
+        <div class="bar-wrap">
+          <div class="bar-fill bar-grey" style="width:53%; --delay: 0.3s">53.0%</div>
+        </div>
+      </div>
+      <div class="bar-row">
+        <span class="bar-label">人間の専門家</span>
+        <div class="bar-wrap">
+          <div class="bar-fill bar-green" style="width:69.7%; --delay: 0.4s">69.7%</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════ MCP DIAGRAM ═══════════════════════ -->
+  <div class="section-divider"><span class="section-label">Architecture</span></div>
+  <h2 class="section-title">MCP エコシステム全体図</h2>
+  <p class="section-desc">Model Context Protocol が実現する「接続されたAI」のアーキテクチャ。</p>
+
+  <div class="mcp-diagram">
+    <p style="font-size:14px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.7;">
+      MCP は Claude を中心に、あらゆるデータソース・ツール・サービスをプラグインのように接続する<strong style="color: var(--text-secondary);">オープン標準</strong>です。
+      開発者はどんなシステムでも MCP サーバーを1つ実装するだけで、全 MCP クライアントと互換。
+    </p>
+
+    <div style="display: flex; align-items: center; justify-content: center; gap: 24px; flex-wrap: wrap; margin: 20px 0;">
+
+      <!-- Left connectors -->
+      <div class="mcp-connectors">
+        <div class="mcp-connector">📁 <span>ファイルシステム</span></div>
+        <div class="mcp-connector">🗄️ <span>PostgreSQL / MySQL</span></div>
+        <div class="mcp-connector">🐙 <span>GitHub / GitLab</span></div>
+        <div class="mcp-connector">💬 <span>Slack / Teams</span></div>
+        <div class="mcp-connector">🌐 <span>Web検索 / Scraping</span></div>
+      </div>
+
+      <!-- Center -->
+      <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+        <div style="font-size: 11px; color: var(--text-muted); letter-spacing: 0.1em;">MCP Protocol</div>
+        <div style="font-size: 24px; color: var(--card-border);">⟷</div>
+        <div class="mcp-node">
+          <div class="mcp-node-icon">🤖</div>
+          <div class="mcp-node-name">Claude</div>
+          <div style="font-size:11px; opacity:0.8; margin-top:4px;">Orchestrator</div>
+        </div>
+        <div style="font-size: 24px; color: var(--card-border);">⟷</div>
+        <div style="font-size: 11px; color: var(--text-muted); letter-spacing: 0.1em;">MCP Protocol</div>
+      </div>
+
+      <!-- Right connectors -->
+      <div class="mcp-connectors">
+        <div class="mcp-connector">📊 <span>Google Drive / Sheets</span></div>
+        <div class="mcp-connector">🔮 <span>Jira / Linear</span></div>
+        <div class="mcp-connector">📬 <span>Gmail / Outlook</span></div>
+        <div class="mcp-connector">☁️ <span>AWS / GCP / Azure</span></div>
+        <div class="mcp-connector">🔧 <span>社内カスタムAPI</span></div>
+      </div>
+
+    </div>
+
+    <div style="background: rgba(20,184,166,0.08); border: 1px solid rgba(20,184,166,0.2); border-radius: 12px; padding: 16px 20px; margin-top: 16px;">
+      <p style="font-size: 13px; color: #5eead4; font-weight: 700; margin-bottom: 6px;">✓ なぜ革命的なのか？</p>
+      <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.7;">
+        従来は「AIをSlackに繋ぐ」「AIをDBに繋ぐ」と個別に実装が必要でした。MCPによりそれが<strong style="color: var(--text-primary);">1つのプロトコルで統一</strong>。
+        開発工数が大幅削減され、AIエコシステムの構築が民主化されました。
+      </p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════ COMPUTER USE DEMO ═══════════════════════ -->
+  <div class="section-divider"><span class="section-label">Computer Use in Action</span></div>
+  <h2 class="section-title">Computer Use の実際の動き</h2>
+  <p class="section-desc">Claude がどのようにPCを操作するか、実際の処理フローを見てみよう。</p>
+
+  <div class="two-col">
+    <div>
+      <div class="flow-steps">
+        <div class="flow-step">
+          <div class="flow-num">1</div>
+          <div>
+            <div class="flow-content-title">スクリーンショット取得</div>
+            <div class="flow-content-body">現在の画面を画像として受け取り、UI要素（ボタン・テキスト・アイコン）を視覚的に認識。</div>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num">2</div>
+          <div>
+            <div class="flow-content-title">状況理解と計画</div>
+            <div class="flow-content-body">「何をするべきか」を目標から逆算してアクションプランを生成。Extended Thinking と連携。</div>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num">3</div>
+          <div>
+            <div class="flow-content-title">アクション実行</div>
+            <div class="flow-content-body">座標指定クリック・キーボード入力・スクロール・ドラッグを API 経由で実行。</div>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num">4</div>
+          <div>
+            <div class="flow-content-title">結果確認 &amp; 修正</div>
+            <div class="flow-content-body">実行後の画面を再取得し、成功・失敗を判断。失敗した場合は別アプローチを試みる。</div>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num">5</div>
+          <div>
+            <div class="flow-content-title">タスク完了報告</div>
+            <div class="flow-content-body">最終的な結果をユーザーに自然言語で報告し、スクリーンショットを証拠として提示。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="demo-screen">
+      <div class="demo-titlebar">
+        <div class="demo-dot red"></div>
+        <div class="demo-dot yellow"></div>
+        <div class="demo-dot green"></div>
+        <span class="demo-title">claude-computer-use-demo</span>
+      </div>
+      <div class="demo-content">
+        <div class="demo-comment"># ユーザーの指示</div>
+        <div class="demo-prompt">&gt; "competitor.comの価格表をExcelにまとめて"</div>
+        <br>
+        <div class="demo-comment"># Claude の思考</div>
+        <div class="demo-action">→ Chrome を起動中…</div>
+        <div class="demo-action">→ competitor.com を開く (click: 423, 52)</div>
+        <div class="demo-action">→ "Pricing" メニューを発見 (click: 891, 34)</div>
+        <div class="demo-action">→ テーブルデータを読み取り中…</div>
+        <div class="demo-action">→ Excel を起動 (keyboard: ⌘+Space)</div>
+        <div class="demo-action">→ データを入力中 (type: "プラン名\t月額\t年額")</div>
+        <div class="demo-action">→ 書式設定を適用中…</div>
+        <div class="demo-action">→ competitor_pricing.xlsx として保存</div>
+        <br>
+        <div class="demo-result">✓ 完了: 3プラン分の価格データをExcelに整理しました。</div>
+        <div class="demo-result">  ファイル: ~/Desktop/competitor_pricing.xlsx</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════ USE CASES ═══════════════════════ -->
+  <div class="section-divider"><span class="section-label">Real-World Use Cases</span></div>
+  <h2 class="section-title">業界別・画期的ユースケース集</h2>
+  <p class="section-desc">Claude と Claude Code が実際にどんな課題を解決しているか。</p>
+
+  <div class="usecase-grid">
+
+    <div class="usecase-card">
+      <div class="usecase-header">
+        <div class="usecase-emoji">⚕️</div>
+        <div>
+          <div class="usecase-name">医療診断支援</div>
+          <div class="usecase-field">Healthcare / 医療</div>
+        </div>
+      </div>
+      <p class="usecase-desc">
+        患者の症状・検査値・過去病歴を 200K コンテキストに丸ごと入力し、
+        鑑別診断の候補と根拠を生成。医師の意思決定を補助。
+      </p>
+      <span class="usecase-tag">Extended Thinking</span>
+    </div>
+
+    <div class="usecase-card">
+      <div class="usecase-header">
+        <div class="usecase-emoji">⚖️</div>
+        <div>
+          <div class="usecase-name">法律文書レビュー</div>
+          <div class="usecase-field">Legal / 法律</div>
+        </div>
+      </div>
+      <p class="usecase-desc">
+        数千ページの契約書・判例・法令を一括分析。リスク条項の抽出・
+        比較・修正案の提示まで数分で完了。弁護士の業務を大幅効率化。
+      </p>
+      <span class="usecase-tag">200K Context</span>
+    </div>
+
+    <div class="usecase-card">
+      <div class="usecase-header">
+        <div class="usecase-emoji">🔬</div>
+        <div>
+          <div class="usecase-name">科学論文生成支援</div>
+          <div class="usecase-field">Research / 研究</div>
+        </div>
+      </div>
+      <p class="usecase-desc">
+        実験データを入力すると統計解析・グラフ生成・考察文の草稿まで自動作成。
+        研究者の発表サイクルを数週間から数日に圧縮。
+      </p>
+      <span class="usecase-tag">Claude Code + MCP</span>
+    </div>
+
+    <div class="usecase-card">
+      <div class="usecase-header">
+        <div class="usecase-emoji">🏭</div>
+        <div>
+          <div class="usecase-name">製造ライン監視</div>
+          <div class="usecase-field">Manufacturing / 製造</div>
+        </div>
+      </div>
+      <p class="usecase-desc">
+        カメラ映像をリアルタイム分析して製品の欠陥を検出。
+        異常発生時は自動でエンジニアに Slack 通知し、
+        対処手順を自動生成・送信。
+      </p>
+      <span class="usecase-tag">Computer Use + MCP</span>
+    </div>
+
+    <div class="usecase-card">
+      <div class="usecase-header">
+        <div class="usecase-emoji">🎓</div>
+        <div>
+          <div class="usecase-name">個別最適化教育</div>
+          <div class="usecase-field">Education / 教育</div>
+        </div>
+      </div>
+      <p class="usecase-desc">
+        生徒の理解度・学習履歴に基づいて教材と問題を動的生成。
+        Socratic メソッドで質問主導の深い理解を促進。
+        人間の家庭教師と同等以上の学習効果を実現。
+      </p>
+      <span class="usecase-tag">Projects + Memory</span>
+    </div>
+
+    <div class="usecase-card">
+      <div class="usecase-header">
+        <div class="usecase-emoji">💼</div>
+        <div>
+          <div class="usecase-name">M&amp;A デューデリジェンス</div>
+          <div class="usecase-field">Finance / 金融</div>
+        </div>
+      </div>
+      <p class="usecase-desc">
+        買収対象企業の財務諸表・契約書・訴訟記録を一括解析し、
+        リスクスコアとサマリーを数時間で生成。
+        従来数週間かかる作業が劇的に短縮。
+      </p>
+      <span class="usecase-tag">200K + Extended Thinking</span>
+    </div>
+
+    <div class="usecase-card">
+      <div class="usecase-header">
+        <div class="usecase-emoji">🛒</div>
+        <div>
+          <div class="usecase-name">ECサイト自動運営</div>
+          <div class="usecase-field">E-commerce / EC</div>
+        </div>
+      </div>
+      <p class="usecase-desc">
+        商品説明文の生成・価格競合調査・在庫アラート・
+        レビュー分析・SNS投稿まで ECサイト運営の大半を自動化。
+        マルチエージェントで 24時間稼働。
+      </p>
+      <span class="usecase-tag">Multi-Agent + Computer Use</span>
+    </div>
+
+    <div class="usecase-card">
+      <div class="usecase-header">
+        <div class="usecase-emoji">🎮</div>
+        <div>
+          <div class="usecase-name">ゲーム開発加速</div>
+          <div class="usecase-field">Gaming / ゲーム</div>
+        </div>
+      </div>
+      <p class="usecase-desc">
+        Claude Code がゲームロジック・シェーダーコード・
+        テストシナリオを自律生成。「このボスを面白くして」
+        という指示だけでコード改修まで完遂。
+      </p>
+      <span class="usecase-tag">Claude Code</span>
+    </div>
+
+    <div class="usecase-card">
+      <div class="usecase-header">
+        <div class="usecase-emoji">🌍</div>
+        <div>
+          <div class="usecase-name">多言語コンテンツ展開</div>
+          <div class="usecase-field">Globalization / 国際化</div>
+        </div>
+      </div>
+      <p class="usecase-desc">
+        日本語コンテンツをデプロイと同時に40言語へ文化的に適切に翻訳・
+        ローカライズ。単純翻訳でなく現地読者の感覚に合わせた表現を選択。
+      </p>
+      <span class="usecase-tag">Projects + API</span>
+    </div>
+
+  </div>
+
+  <!-- ═══════════════════════ CLAUDE CODE FLOW ═══════════════════════ -->
+  <div class="section-divider"><span class="section-label">Claude Code Workflow</span></div>
+  <h2 class="section-title">Claude Code — ソフトウェア開発の自動化フロー</h2>
+
+  <div class="quote-block">
+    <p class="quote-text">
+      "Claude Code はターミナルから直接動く自律型エージェントです。コードベースを理解し、
+      バグを修正し、機能を追加し、テストを書き、PRを作成する——すべてあなたの自然言語指示だけで。"
+    </p>
+    <p class="quote-author">— Anthropic, Claude Code リリースノート (2025)</p>
+  </div>
+
+  <div class="benchmark-section" style="margin-bottom: 20px;">
+    <div class="two-col">
+      <div>
+        <h3 class="benchmark-title" style="margin-bottom: 20px;">標準的な開発ワークフロー</h3>
+        <div class="flow-steps">
+          <div class="flow-step">
+            <div class="flow-num">1</div>
+            <div>
+              <div class="flow-content-title">コードベース全体を把握</div>
+              <div class="flow-content-body">リポジトリ構造・依存関係・テスト状況を自動スキャン。CLAUDE.md の指示を読み込む。</div>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-num">2</div>
+            <div>
+              <div class="flow-content-title">Plan モードで戦略立案</div>
+              <div class="flow-content-body">変更前に実装計画を提示。影響範囲・リスク・テスト方針を確認してから実行。</div>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-num">3</div>
+            <div>
+              <div class="flow-content-title">コード修正 + テスト自動実行</div>
+              <div class="flow-content-body">ファイル編集後、自動でテストスイートを実行。失敗したら自律的に修正を繰り返す。</div>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-num">4</div>
+            <div>
+              <div class="flow-content-title">Git コミット &amp; PR 作成</div>
+              <div class="flow-content-body">コミットメッセージを生成しコミット。GitHub PR も説明文付きで自動作成。</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <h3 class="benchmark-title" style="margin-bottom: 20px;">CLAUDE.md による役割定義</h3>
+        <div class="demo-screen">
+          <div class="demo-titlebar">
+            <div class="demo-dot red"></div>
+            <div class="demo-dot yellow"></div>
+            <div class="demo-dot green"></div>
+            <span class="demo-title">CLAUDE.md</span>
+          </div>
+          <div class="demo-content" style="font-size:12px;">
+            <div class="demo-comment"># プロジェクト設定</div>
+            <div style="color: var(--text-secondary);">このリポジトリはECサイトの</div>
+            <div style="color: var(--text-secondary);">バックエンドAPIです。</div>
+            <br>
+            <div class="demo-comment">## 重要なルール</div>
+            <div class="demo-action">- TypeScript strict mode 必須</div>
+            <div class="demo-action">- テストカバレッジ 90%+ を維持</div>
+            <div class="demo-action">- PR前に lint + type-check を実行</div>
+            <div class="demo-action">- コミットは conventional commits 形式</div>
+            <br>
+            <div class="demo-comment">## テストコマンド</div>
+            <div class="demo-result">npm run test:coverage</div>
+            <div class="demo-result">npm run lint && npm run typecheck</div>
+            <br>
+            <div class="demo-comment">## MCPサーバー</div>
+            <div class="demo-action">- github: PRレビュー自動化</div>
+            <div class="demo-action">- postgres: DB スキーマ参照</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════ IMPACT SUMMARY ═══════════════════════ -->
+  <div class="section-divider"><span class="section-label">Impact Summary</span></div>
+  <h2 class="section-title">これはただのツールではない——パラダイムシフト</h2>
+
+  <div class="feature-grid">
+    <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 20px; padding: 28px;">
+      <div style="font-size: 36px; margin-bottom: 14px;">⚡</div>
+      <h3 style="font-size: 17px; font-weight: 700; margin-bottom: 10px;">開発速度 10x</h3>
+      <p style="font-size: 14px; color: var(--text-secondary); line-height: 1.7;">
+        Claude Code を使った開発チームは、コーディング・テスト・デバッグの工程を
+        平均 10倍以上の速度で完了。ボイラープレートコードの生成は瞬時に完了し、
+        エンジニアは設計・アーキテクチャに集中できる。
+      </p>
+    </div>
+    <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 20px; padding: 28px;">
+      <div style="font-size: 36px; margin-bottom: 14px;">🌐</div>
+      <h3 style="font-size: 17px; font-weight: 700; margin-bottom: 10px;">民主化されるAI開発</h3>
+      <p style="font-size: 14px; color: var(--text-secondary); line-height: 1.7;">
+        MCP のオープン標準化により、中小企業・個人開発者でも
+        エンタープライズ級の AI 統合システムを低コストで構築可能に。
+        AI の恩恵が大企業だけでなく全員に届く未来へ。
+      </p>
+    </div>
+    <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 20px; padding: 28px;">
+      <div style="font-size: 36px; margin-bottom: 14px;">🔮</div>
+      <h3 style="font-size: 17px; font-weight: 700; margin-bottom: 10px;">AGI への道標</h3>
+      <p style="font-size: 14px; color: var(--text-secondary); line-height: 1.7;">
+        Computer Use・Extended Thinking・マルチエージェントの組み合わせは、
+        人間の認知プロセスに迫る自律性を実現。
+        Anthropic は「安全に有益な AGI」の実現を明確な目標として開発を続けている。
+      </p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════ FOOTER ═══════════════════════ -->
+  <div class="page-footer">
+    <p style="margin-bottom: 8px;">
+      データ出典: Anthropic 公式発表・研究論文・モデルカード (2024〜2025)
+    </p>
+    <p>
+      <a href="https://anthropic.com">anthropic.com</a> ·
+      <a href="../index.html">インフォグラフィック一覧</a>
+    </p>
+    <p style="margin-top: 12px; font-size: 12px; opacity: 0.6;">
+      © 2026 Infographics Collection — Claude &amp; Claude Code Breakthroughs
+    </p>
+  </div>
+
+</div>
+</body>
+</html>
