@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vanilla JS Indicator Example</title>
+  <link rel="stylesheet" href="../shared/example.css" />
+</head>
+<body>
+  <main>
+    <h1>Vanilla: indicator 登録→描画→更新→破棄</h1>
+    <div class="panel">
+      <div class="controls">
+        <button id="renderBtn">render</button>
+        <button id="updateBtn">update</button>
+        <button id="disposeBtn" class="secondary">dispose</button>
+      </div>
+      <div id="chartRoot"></div>
+    </div>
+    <div class="panel">
+      <h2>Lifecycle log</h2>
+      <pre id="log" class="log"></pre>
+    </div>
+  </main>
+
+  <script type="module">
+    import {
+      createIndicatorRegistry,
+      createSma3Indicator,
+      createSampleData,
+      createIndicatorChart,
+    } from '../shared/indicator-core.js';
+
+    const logEl = document.querySelector('#log');
+    const chartRoot = document.querySelector('#chartRoot');
+    const registry = createIndicatorRegistry();
+    const data = createSampleData(16);
+
+    const registration = registry.registerIndicator(createSma3Indicator());
+    const indicator = registry.getIndicator('sample.sma3');
+    let chart = null;
+
+    function log(text) {
+      logEl.textContent = `${new Date().toLocaleTimeString()} ${text}\n${logEl.textContent}`;
+    }
+
+    function mount() {
+      if (chart) return;
+      chart = createIndicatorChart(chartRoot, indicator, data, (event, payload) => {
+        log(`${event}: ${JSON.stringify(payload)}`);
+      });
+    }
+
+    document.querySelector('#renderBtn').addEventListener('click', mount);
+    document.querySelector('#updateBtn').addEventListener('click', () => {
+      mount();
+      const next = [...data, { x: data.length + 1, close: Number((data.at(-1).close + 1.2).toFixed(2)) }];
+      data.push(next.at(-1));
+      chart.update(next);
+    });
+    document.querySelector('#disposeBtn').addEventListener('click', () => {
+      if (!chart) return;
+      chart.dispose();
+      chart = null;
+      registration.unregister();
+      log('unregister: sample.sma3');
+    });
+
+    mount();
+  </script>
+</body>
+</html>
