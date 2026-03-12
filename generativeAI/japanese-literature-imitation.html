@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>近代日本著名作家の文体模倣</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: "Noto Serif JP", "Hiragino Mincho ProN", "Yu Mincho", serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: linear-gradient(160deg, #0a0e2e 0%, #0d1b4b 40%, #0a1f3d 70%, #061229 100%);
+      color: #1b1f2a;
+      min-height: 100vh;
+    }
+
+    .wrap {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 44px 20px 72px;
+    }
+
+    /* ====== HEADER ====== */
+    header {
+      text-align: center;
+      margin-bottom: 48px;
+      color: #fff;
+    }
+    header .badge {
+      display: inline-block;
+      background: rgba(99,179,237,0.18);
+      border: 1px solid rgba(99,179,237,0.45);
+      border-radius: 999px;
+      padding: 5px 20px;
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      color: #90cdf4;
+      margin-bottom: 18px;
+    }
+    header h1 {
+      font-size: 34px;
+      font-weight: 800;
+      line-height: 1.35;
+      margin-bottom: 14px;
+      background: linear-gradient(90deg, #e0f2fe 0%, #bae6fd 50%, #a5f3fc 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    header p {
+      color: rgba(255,255,255,0.75);
+      font-size: 15px;
+      line-height: 1.7;
+    }
+
+    /* ====== PROMPT CARD ====== */
+    .prompt-card {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(99,179,237,0.3);
+      border-radius: 16px;
+      padding: 28px 32px;
+      margin-bottom: 40px;
+      color: #e2e8f0;
+    }
+    .prompt-card .label {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      background: rgba(99,179,237,0.25);
+      color: #90cdf4;
+      border-radius: 6px;
+      padding: 3px 10px;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      font-family: "Noto Sans JP", sans-serif;
+    }
+    .prompt-card .model-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .prompt-card .model-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(167,139,250,0.2);
+      border: 1px solid rgba(167,139,250,0.4);
+      border-radius: 999px;
+      padding: 4px 14px;
+      font-size: 12px;
+      color: #c4b5fd;
+      font-family: monospace;
+    }
+    .prompt-card blockquote {
+      font-size: 16px;
+      line-height: 1.9;
+      color: #e2e8f0;
+      border-left: 3px solid rgba(99,179,237,0.5);
+      padding-left: 18px;
+      font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", sans-serif;
+    }
+
+    /* ====== SECTION ====== */
+    .section {
+      background: #ffffff;
+      border-radius: 20px;
+      overflow: hidden;
+      margin-bottom: 32px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    }
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 22px 30px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .genre-tag {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+    .genre-tag.novel    { background: linear-gradient(135deg, #1e3a8a, #3b82f6); }
+    .genre-tag.essay    { background: linear-gradient(135deg, #065f46, #10b981); }
+    .genre-tag.critique { background: linear-gradient(135deg, #7c2d12, #ea580c); }
+    .genre-tag.poetry   { background: linear-gradient(135deg, #701a75, #d946ef); }
+    .genre-tag.opinion  { background: linear-gradient(135deg, #1c1917, #78716c); }
+
+    .section-meta h2 {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: #6b7280;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      font-family: "Noto Sans JP", sans-serif;
+    }
+    .section-meta h3 {
+      font-size: 21px;
+      font-weight: 800;
+      color: #111827;
+      font-family: "Noto Serif JP", "Hiragino Mincho ProN", serif;
+    }
+    .section-meta .author-desc {
+      font-size: 13px;
+      color: #6b7280;
+      margin-top: 3px;
+      font-family: "Noto Sans JP", sans-serif;
+    }
+
+    .section-body {
+      padding: 28px 30px;
+    }
+    .text-content {
+      font-size: 16px;
+      line-height: 2.1;
+      color: #1f2937;
+      white-space: pre-wrap;
+    }
+    .text-content.poetry {
+      font-size: 17px;
+      line-height: 2.4;
+      letter-spacing: 0.05em;
+    }
+
+    .style-note {
+      margin-top: 18px;
+      padding: 14px 18px;
+      background: #f3f4f6;
+      border-radius: 10px;
+      font-size: 13px;
+      color: #6b7280;
+      line-height: 1.7;
+      font-family: "Noto Sans JP", sans-serif;
+    }
+    .style-note strong {
+      color: #374151;
+    }
+
+    /* ====== FOOTER ====== */
+    footer {
+      text-align: center;
+      color: rgba(255,255,255,0.5);
+      font-size: 13px;
+      margin-top: 48px;
+      font-family: "Noto Sans JP", sans-serif;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="badge">生成AI × 近代日本文学</div>
+      <h1>近代日本著名作家の文体模倣</h1>
+      <p>小説・エッセイ・評論・詩歌・論説の各分野を代表する近代日本の作家を取り上げ、<br>生成AIがその文体を分析・模倣した短編文章を収録しています。</p>
+    </header>
+
+    <!-- Prompt & Model -->
+    <div class="prompt-card">
+      <div class="label">指示文 (Prompt)</div>
+      <blockquote>
+        小説、エッセイ、評論、詩歌、論説の各分野で近代日本で最も著名な作者を取り上げてその文体を模倣した短編の文章を作成して記載して下さい。
+      </blockquote>
+      <div class="model-row" style="margin-top:18px;">
+        <div class="label">使用モデル</div>
+        <div class="model-badge">✦ claude-sonnet-4-6</div>
+      </div>
+    </div>
+
+    <!-- 小説: 夏目漱石 -->
+    <div class="section">
+      <div class="section-header">
+        <div class="genre-tag novel">📖</div>
+        <div class="section-meta">
+          <h2>小説</h2>
+          <h3>夏目漱石（なつめ そうせき）</h3>
+          <div class="author-desc">1867–1916 ｜ 代表作：吾輩は猫である、こころ、三四郎</div>
+        </div>
+      </div>
+      <div class="section-body">
+        <div class="text-content">　私がその男に初めて会ったのは、東京の端にある古びた喫茶店においてであった。男は窓際の席に一人で座り、ガラス越しに降り続く雨をただ眺めていた。私が椅子を引いて腰を下ろしても、彼はこちらを見ようともしなかった。
+
+　こういう人間というものは、いつでも何か深いところに思いを沈めている。私はそう感じた。彼の目はたしかに雨を見ていたかもしれないが、その実、もっと遠い何かを見ていたに違いない。人が雨を眺めるとき、たいていは雨そのものではなく、自分の過去か、あるいは取り返しのつかない何かを見ているものだ。
+
+　私は黙ってコーヒーを注文した。蒸気の匂いが二人の間に漂い、やがて消えた。男もついに何も言わなかった。私たちはそのまま、互いを知らない人間として、同じ時間を雨の音とともに過ごした。これほど人間同士の孤独を感じさせる場面というものも、そうそうないと私は思った。</div>
+        <div class="style-note">
+          <strong>文体の特徴：</strong>一人称の内省的語り口、心理描写の細やかさ、他者観察を通じた人間の孤独への洞察。「です・ます」調と「だ・である」調の混在、長い一文の中に読者を引き込む構造。
+        </div>
+      </div>
+    </div>
+
+    <!-- エッセイ: 寺田寅彦 -->
+    <div class="section">
+      <div class="section-header">
+        <div class="genre-tag essay">✒️</div>
+        <div class="section-meta">
+          <h2>エッセイ</h2>
+          <h3>寺田寅彦（てらだ とらひこ）</h3>
+          <div class="author-desc">1878–1935 ｜ 代表作：柿の種、天災と国防、映画雑感</div>
+        </div>
+      </div>
+      <div class="section-body">
+        <div class="text-content">　台所の水道の蛇口から、一滴の水が落ちる瞬間をじっと見ていると、不思議に飽きることがない。
+
+　最初は水が丸く膨らみ、重力に引かれながら少しずつ形を変え、やがて細い首をくびれさせてから下へと落ちる。落ちた水は受け皿の水面を叩き、小さな波紋をひろげていく。この一連の所作の中に、表面張力から流体力学にいたるまで、物理学の美しい法則がひっそりと宿っている。
+
+　科学とは、こういう日常のどこにでも転がっている小さな奇跡を、当然のことと素通りせずに立ち止まって眺める習慣のことではないかと、私はよく思う。勉強机の上だけが学問の場ではない。茶碗の湯気も、夕焼けの色も、蚊の羽音も、みな宇宙の仕組みへの入り口である。</div>
+        <div class="style-note">
+          <strong>文体の特徴：</strong>科学者としての正確な観察眼と、温かみのある随筆的語り口の融合。日常の小事象から宇宙的な真理へと思索を広げる構成。平易な言葉で深い考察を展開するスタイル。
+        </div>
+      </div>
+    </div>
+
+    <!-- 評論: 小林秀雄 -->
+    <div class="section">
+      <div class="section-header">
+        <div class="genre-tag critique">🔍</div>
+        <div class="section-meta">
+          <h2>評論</h2>
+          <h3>小林秀雄（こばやし ひでお）</h3>
+          <div class="author-desc">1902–1983 ｜ 代表作：様々なる意匠、本居宣長、Xへの手紙</div>
+        </div>
+      </div>
+      <div class="section-body">
+        <div class="text-content">　文学とは何か、と問うことは容易い。だが答えを求めるや否や、我々は言語そのものの壁に突き当たる。
+
+　芸術は説明されるものではない。体験されるものだ。そして体験とは、論理の及ばぬところで起きる。批評家の仕事とは、その体験を言語によって再構成することだが、それは常に失敗を内包した企てである。なぜなら言語は事後的であり、体験の熱は言葉に乗せた瞬間に幾分か冷めてしまうからだ。
+
+　にもかかわらず、我々は書く。書かずにはいられない。それは言語の限界を知りながらも、その限界の手前で精一杯あがくことが、人間の知的誠実さの証しだからに他ならない。批評とは敗北の記録であり、同時に、その敗北に向かって全力で走ることの記録でもある。</div>
+        <div class="style-note">
+          <strong>文体の特徴：</strong>断定的で格調高い論述、逆接を多用した弁証法的展開。哲学的概念を圧縮した密度の高い文体。句点で区切られた短文の連打と、長い思索の文章が交互に現れる緊張感。
+        </div>
+      </div>
+    </div>
+
+    <!-- 詩歌: 与謝野晶子 -->
+    <div class="section">
+      <div class="section-header">
+        <div class="genre-tag poetry">🌸</div>
+        <div class="section-meta">
+          <h2>詩歌（短歌）</h2>
+          <h3>与謝野晶子（よさの あきこ）</h3>
+          <div class="author-desc">1878–1942 ｜ 代表作：みだれ髪、君死にたまふことなかれ、夏より秋へ</div>
+        </div>
+      </div>
+      <div class="section-body">
+        <div class="text-content poetry">君待つと　夜の深みに　燃ゆる身の
+恋の命は　春の野の火
+
+思ひ出は　紅く咲きたる　花ならず
+心の底に　沈む石なり
+
+春の夜よ　明けてくれるな　この闇を
+ふたりで分けて　暁まで</div>
+        <div class="style-note">
+          <strong>文体の特徴：</strong>情熱的・官能的な恋愛感情の直接的表現、女性の内面を大胆に開示する自己表現。古語と口語の混在、五・七・五・七・七のリズムの中に激しい感情を凝縮させる技法。
+        </div>
+      </div>
+    </div>
+
+    <!-- 論説: 福沢諭吉 -->
+    <div class="section">
+      <div class="section-header">
+        <div class="genre-tag opinion">🏛️</div>
+        <div class="section-meta">
+          <h2>論説</h2>
+          <h3>福沢諭吉（ふくざわ ゆきち）</h3>
+          <div class="author-desc">1835–1901 ｜ 代表作：学問のすゝめ、文明論之概略、西洋事情</div>
+        </div>
+      </div>
+      <div class="section-body">
+        <div class="text-content">　学問とは、独立の精神を養うことにある。
+
+　知識を得ることのみをもって学問と心得るは、誤りである。知識はあくまで道具に過ぎぬ。肝心なのは、その道具を手にした者が、自らの頭で考え、自らの判断で行動できるかどうかである。人の言葉をそのまま鵜呑みにし、書物に書かれた通りに行動するだけでは、それは学問ではなく、ただの物真似に過ぎない。
+
+　世の中は急速に変わりつつある。旧来の慣習が通じなくなる日は、思いのほか早く訪れる。そのような時代に生きる者は、変化を恐れるのではなく、変化を読む力を養わねばならぬ。学ぶことを止めた者は、時代の波に呑み込まれるのみである。天は人の上に人を造らず、人の下に人を造らずと言えり。されど学問の差は、人の差となって現れる。</div>
+        <div class="style-note">
+          <strong>文体の特徴：</strong>明快で論理的な啓蒙的散文、漢文訓読体の影響を受けつつも平易な語彙を好む。断定的な短文で結論を先に示し、その根拠を順に展開する演繹的構造。実用主義と合理主義の精神が文体に宿る。
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <p>生成モデル: claude-sonnet-4-6 ｜ 生成日: 2026年3月</p>
+    </footer>
+  </div>
+</body>
+</html>
