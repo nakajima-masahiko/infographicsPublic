@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3D周期表 / 3D Periodic Table</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+:root {
+  --bg-main: #020617;
+  --bg-card: #0f172a;
+  --bg-panel: #1e293b;
+  --bg-glass: rgba(15,23,42,0.7);
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #475569;
+  --border: rgba(148,163,184,0.15);
+  --accent: #38bdf8;
+  --accent-glow: rgba(56,189,248,0.3);
+  --cat-alkali: #ef4444;
+  --cat-alkaline: #f97316;
+  --cat-transition: #eab308;
+  --cat-post-transition: #22c55e;
+  --cat-metalloid: #14b8a6;
+  --cat-nonmetal: #3b82f6;
+  --cat-halogen: #8b5cf6;
+  --cat-noble: #ec4899;
+  --cat-lanthanide: #6366f1;
+  --cat-actinide: #a855f7;
+  --cat-unknown: #475569;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  background: var(--bg-main);
+  color: var(--text-primary);
+  font-family: 'Noto Sans JP', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+/* HEADER */
+#header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  background: rgba(15,23,42,0.9);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+#header h1 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--accent), #818cf8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+#langBtn {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  padding: 6px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+#langBtn:hover { background: var(--accent); color: #000; border-color: var(--accent); }
+/* MAIN LAYOUT */
+#app {
+  display: flex;
+  height: calc(100vh - 53px);
+  overflow: hidden;
+}
+#tablePane {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  min-width: 0;
+}
+#detailPane {
+  width: 360px;
+  min-width: 320px;
+  background: var(--bg-panel);
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  transition: transform 0.3s;
+}
+#detailPane.hidden { display: none; }
+/* PERIODIC TABLE GRID */
+#ptGrid {
+  display: grid;
+  grid-template-columns: repeat(18, minmax(0, 1fr));
+  grid-template-rows: repeat(10, auto);
+  gap: 3px;
+  width: 100%;
+  min-width: 700px;
+}
+/* ELEMENT CARD */
+.el-card {
+  position: relative;
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 3px 2px 2px;
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid transparent;
+  transition: all 0.15s;
+  overflow: hidden;
+  min-width: 0;
+}
+.el-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.12;
+  transition: opacity 0.15s;
+}
+.el-card:hover::before { opacity: 0.25; }
+.el-card:hover {
+  transform: scale(1.1);
+  z-index: 10;
+  box-shadow: 0 0 12px var(--cat-color, #888);
+  border-color: var(--cat-color, #888);
+}
+.el-card.selected {
+  border-color: white;
+  box-shadow: 0 0 16px white;
+  transform: scale(1.05);
+  z-index: 10;
+}
+.el-num { font-size: 0.45em; color: var(--text-secondary); line-height: 1; align-self: flex-start; padding-left: 2px; }
+.el-flag { font-size: 0.5em; position: absolute; top: 2px; right: 2px; line-height: 1; }
+.el-sym { font-size: 1.1em; font-weight: 700; line-height: 1; }
+.el-name { font-size: 0.38em; color: var(--text-secondary); line-height: 1; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 100%; text-align: center; }
+.el-mass { font-size: 0.35em; color: var(--text-muted); line-height: 1; }
+/* Category background colors */
+.cat-alkali { --cat-color: var(--cat-alkali); background: rgba(239,68,68,0.18); }
+.cat-alkali::before { background: var(--cat-alkali); }
+.cat-alkaline { --cat-color: var(--cat-alkaline); background: rgba(249,115,22,0.18); }
+.cat-alkaline::before { background: var(--cat-alkaline); }
+.cat-transition { --cat-color: var(--cat-transition); background: rgba(234,179,8,0.15); }
+.cat-transition::before { background: var(--cat-transition); }
+.cat-post-transition { --cat-color: var(--cat-post-transition); background: rgba(34,197,94,0.15); }
+.cat-post-transition::before { background: var(--cat-post-transition); }
+.cat-metalloid { --cat-color: var(--cat-metalloid); background: rgba(20,184,166,0.18); }
+.cat-metalloid::before { background: var(--cat-metalloid); }
+.cat-nonmetal { --cat-color: var(--cat-nonmetal); background: rgba(59,130,246,0.18); }
+.cat-nonmetal::before { background: var(--cat-nonmetal); }
+.cat-halogen { --cat-color: var(--cat-halogen); background: rgba(139,92,246,0.18); }
+.cat-halogen::before { background: var(--cat-halogen); }
+.cat-noble { --cat-color: var(--cat-noble); background: rgba(236,72,153,0.18); }
+.cat-noble::before { background: var(--cat-noble); }
+.cat-lanthanide { --cat-color: var(--cat-lanthanide); background: rgba(99,102,241,0.18); }
+.cat-lanthanide::before { background: var(--cat-lanthanide); }
+.cat-actinide { --cat-color: var(--cat-actinide); background: rgba(168,85,247,0.18); }
+.cat-actinide::before { background: var(--cat-actinide); }
+.cat-unknown { --cat-color: var(--cat-unknown); background: rgba(71,85,105,0.18); }
+.cat-unknown::before { background: var(--cat-unknown); }
+/* Spacer row */
+.pt-spacer {
+  grid-column: 1 / -1;
+  height: 10px;
+  grid-row: 8;
+}
+/* Lanthanide/Actinide labels */
+.pt-la-label, .pt-ac-label {
+  grid-column: 1 / 3;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 4px;
+  font-size: 0.55em;
+  color: var(--text-muted);
+}
+/* LEGEND */
+#legend {
+  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 10px;
+  background: var(--bg-card);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+}
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+/* DETAIL PANE */
+#detailHeader {
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-card);
+}
+#d3Container {
+  width: 100%;
+  height: 280px;
+  background: transparent;
+  position: relative;
+  overflow: hidden;
+}
+#d3Container canvas { display: block; }
+#elDetailCard {
+  padding: 16px;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+}
+#elDetailCard .big-sym {
+  font-size: 3.5rem;
+  font-weight: 800;
+  line-height: 1;
+}
+#elDetailCard .detail-num { font-size: 0.9rem; color: var(--text-secondary); }
+#elDetailCard .detail-name { font-size: 1.3rem; font-weight: 600; margin-top: 4px; }
+#elDetailCard .detail-mass { color: var(--text-secondary); font-size: 0.9rem; }
+#elDetailInfo {
+  padding: 16px;
+  font-size: 0.82rem;
+  line-height: 1.7;
+}
+#elDetailInfo .info-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--border);
+  gap: 8px;
+}
+#elDetailInfo .info-label { color: var(--text-muted); flex-shrink: 0; }
+#elDetailInfo .info-value { color: var(--text-primary); text-align: right; }
+#elDesc {
+  margin-top: 12px;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+#elEtym {
+  margin-top: 8px;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-style: italic;
+  line-height: 1.6;
+}
+#wikiLink {
+  display: inline-block;
+  margin-top: 12px;
+  padding: 6px 16px;
+  background: var(--accent);
+  color: #000;
+  text-decoration: none;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition: opacity 0.2s;
+}
+#wikiLink:hover { opacity: 0.8; }
+/* TOOLTIP */
+#tooltip {
+  position: fixed;
+  pointer-events: none;
+  z-index: 9999;
+  background: rgba(15,23,42,0.95);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  max-width: 260px;
+  font-size: 0.78rem;
+  line-height: 1.6;
+  display: none;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+}
+#tooltip .tt-header {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+#tooltip .tt-sym { font-size: 1.6rem; font-weight: 800; }
+#tooltip .tt-name { font-size: 1rem; font-weight: 600; }
+#tooltip .tt-num { font-size: 0.75rem; color: var(--text-muted); }
+#tooltip .tt-row { display: flex; justify-content: space-between; gap: 12px; }
+#tooltip .tt-label { color: var(--text-muted); }
+#tooltip .tt-etym { margin-top: 6px; color: var(--text-muted); font-style: italic; font-size: 0.75rem; }
+#tooltip .tt-desc { margin-top: 6px; color: var(--text-secondary); font-size: 0.75rem; border-top: 1px solid var(--border); padding-top: 6px; }
+/* PLACEHOLDER CELL */
+.pt-placeholder {
+  grid-column: 3;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.5em;
+  color: var(--text-muted);
+  border: 1px dashed var(--border);
+  aspect-ratio: 1;
+  cursor: default;
+}
+/* MOBILE */
+@media (max-width: 900px) {
+  #app { flex-direction: column; height: auto; overflow: visible; }
+  #tablePane { overflow-x: auto; height: auto; }
+  #detailPane {
+    width: 100%;
+    min-width: 0;
+    border-left: none;
+    border-top: 1px solid var(--border);
+  }
+  #detailPane.hidden { display: none; }
+  #ptGrid { min-width: 600px; }
+}
+/* Glow animation for selected */
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 10px var(--cat-color, #888); }
+  50% { box-shadow: 0 0 25px var(--cat-color, #888), 0 0 40px var(--cat-color, #888); }
+}
+.el-card.selected { animation: pulse-glow 2s infinite; }
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-main); }
+::-webkit-scrollbar-thumb { background: var(--bg-panel); border-radius: 3px; }
+</style>
+</head>
+<body>
+<div id="header">
+  <h1 id="pageTitle">⚛ 3D周期表 — 全118元素</h1>
+  <button id="langBtn" onclick="toggleLang()">EN</button>
+</div>
+<div id="app">
+  <div id="tablePane">
+    <div id="ptGrid"></div>
+    <div id="legend"></div>
+  </div>
+  <div id="detailPane" class="hidden">
+    <div id="d3Container"></div>
+    <div id="elDetailCard">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between">
+        <div>
+          <div class="detail-num"><span id="dNum"></span> &nbsp; <span id="dFlag"></span></div>
+          <div class="big-sym" id="dSym"></div>
+          <div class="detail-name" id="dName"></div>
+          <div class="detail-mass" id="dMass"></div>
+        </div>
+        <div id="dCatBadge" style="padding:3px 10px;border-radius:20px;font-size:0.75rem;font-weight:600;margin-top:4px;"></div>
+      </div>
+    </div>
+    <div id="elDetailInfo">
+      <div class="info-row"><span class="info-label" id="lbl-period">周期</span><span class="info-value" id="dPeriod"></span></div>
+      <div class="info-row"><span class="info-label" id="lbl-group">族</span><span class="info-value" id="dGroup"></span></div>
+      <div class="info-row"><span class="info-label" id="lbl-shells">電子配置</span><span class="info-value" id="dShells"></span></div>
+      <div class="info-row"><span class="info-label" id="lbl-disc">発見年</span><span class="info-value" id="dDisc"></span></div>
+      <div class="info-row"><span class="info-label" id="lbl-discby">発見者</span><span class="info-value" id="dDiscBy"></span></div>
+      <div id="elDesc"></div>
+      <div id="elEtym"></div>
+      <a id="wikiLink" href="#" target="_blank" rel="noopener">Wikipedia</a>
+    </div>
+  </div>
+</div>
+<div id="tooltip"></div>
+<script>
+// ─── ELEMENT DATA ──────────────────────────────────────────────────────────
+// [Z, symbol, nameJA, nameEN, mass, category, period, group, shells, discYear, discBy, flag, etymJA, etymEN, descJA, descEN]
+// category keys: alkali, alkaline, transition, post-transition, metalloid, nonmetal, halogen, noble, lanthanide, actinide, unknown
+const ELEMENTS = [
+  [1,"H","水素","Hydrogen",1.008,"nonmetal",1,1,[1],1766,"H.キャベンディッシュ","🇬🇧","ギリシャ語「水を生む」","Greek: hydro+genes (water-former)","最も軽く宇宙で最も豊富な元素","The lightest and most abundant element in the universe"],
+  [2,"He","ヘリウム","Helium",4.003,"noble",1,18,[2],1868,"J.ロキヤーほか","🇬🇧","ギリシャ神話の太陽神ヘリオス","Greek: Helios (sun god)","太陽スペクトルで発見された希ガス","Noble gas first detected in solar spectrum"],
+  [3,"Li","リチウム","Lithium",6.941,"alkali",2,1,[2,1],1817,"J.アルフェドソン","🇸🇪","ギリシャ語「石」","Greek: lithos (stone)","最も軽い固体金属","Lightest solid metal element"],
+  [4,"Be","ベリリウム","Beryllium",9.012,"alkaline",2,2,[2,2],1798,"L.N.ヴォークラン","🇫🇷","宝石ベリルから","From beryl gemstone","軽量・高剛性の金属","Light, stiff metal used in aerospace"],
+  [5,"B","ホウ素","Boron",10.81,"metalloid",2,13,[2,3],1808,"H.デービーほか","🇬🇧","アラビア語「ホウ砂」","Arabic: buraq (borax)","半金属、ガラスや半導体に使用","Metalloid used in glass and semiconductors"],
+  [6,"C","炭素","Carbon",12.011,"nonmetal",2,14,[2,4],null,"古代","🌍","ラテン語「炭」","Latin: carbo (charcoal)","有機化合物の基本元素","Basis of all organic chemistry"],
+  [7,"N","窒素","Nitrogen",14.007,"nonmetal",2,15,[2,5],1772,"D.ラザフォード","🏴󠁧󠁢󠁳󠁣󠁴󠁿","ギリシャ語「硝石を生む」","Greek: nitron+genes (niter-former)","大気の78%を占める","Makes up 78% of the atmosphere"],
+  [8,"O","酸素","Oxygen",15.999,"nonmetal",2,16,[2,6],1774,"J.プリーストリー","🇬🇧","ギリシャ語「酸を生む」","Greek: oxys+genes (acid-former)","生命に不可欠な元素","Essential for life and combustion"],
+  [9,"F","フッ素","Fluorine",18.998,"halogen",2,17,[2,7],1886,"H.モワッサン","🇫🇷","ラテン語「流れる石」","Latin: fluere (to flow)","最も電気陰性度の高い元素","Most electronegative element"],
+  [10,"Ne","ネオン","Neon",20.180,"noble",2,18,[2,8],1898,"W.ラムゼーほか","🇬🇧","ギリシャ語「新しい」","Greek: neos (new)","放電管で赤橙色に発光","Glows red-orange in discharge tubes"],
+  [11,"Na","ナトリウム","Sodium",22.990,"alkali",3,1,[2,8,1],1807,"H.デービー","🇬🇧","ラテン語 natrium","Latin: natrium","食塩の主成分","Key component of table salt"],
+  [12,"Mg","マグネシウム","Magnesium",24.305,"alkaline",3,2,[2,8,2],1755,"J.ブラック","🏴󠁧󠁢󠁳󠁣󠁴󠁿","マグネシア地方から","From Magnesia region, Greece","軽量構造材料として使用","Lightweight structural metal"],
+  [13,"Al","アルミニウム","Aluminium",26.982,"post-transition",3,13,[2,8,3],1825,"H.C.エルステッド","🇩🇰","ミョウバン(alumen)から","From alumen (alum)","地殻で最も豊富な金属","Most abundant metal in Earth's crust"],
+  [14,"Si","ケイ素","Silicon",28.086,"metalloid",3,14,[2,8,4],1824,"J.J.ベルセリウス","🇸🇪","ラテン語「火打ち石」","Latin: silex (flint)","半導体産業の基盤元素","Basis of semiconductor industry"],
+  [15,"P","リン","Phosphorus",30.974,"nonmetal",3,15,[2,8,5],1669,"H.ブランド","🇩🇪","ギリシャ語「光を運ぶ」","Greek: phosphoros (light-bearer)","DNA・ATPの構成元素","Component of DNA and ATP"],
+  [16,"S","硫黄","Sulfur",32.06,"nonmetal",3,16,[2,8,6],null,"古代","🌍","ラテン語 sulphur","Latin: sulphur","火山地帯に多く産出","Common near volcanic areas"],
+  [17,"Cl","塩素","Chlorine",35.45,"halogen",3,17,[2,8,7],1774,"C.W.シェーレ","🇸🇪","ギリシャ語「黄緑色」","Greek: chloros (yellow-green)","消毒・漂白に使用","Used for disinfection and bleaching"],
+  [18,"Ar","アルゴン","Argon",39.948,"noble",3,18,[2,8,8],1894,"J.W.レイリーほか","🇬🇧","ギリシャ語「怠惰な」","Greek: argos (idle/lazy)","大気の約1%を占める希ガス","Noble gas making up ~1% of atmosphere"],
+  [19,"K","カリウム","Potassium",39.098,"alkali",4,1,[2,8,8,1],1807,"H.デービー","🇬🇧","オランダ語 potaschen","Dutch: potaschen (pot ash)","植物の必須ミネラル","Essential mineral for plant growth"],
+  [20,"Ca","カルシウム","Calcium",40.078,"alkaline",4,2,[2,8,8,2],1808,"H.デービー","🇬🇧","ラテン語「石灰石」","Latin: calx (limestone)","骨・歯の主成分","Main component of bones and teeth"],
+  [21,"Sc","スカンジウム","Scandium",44.956,"transition",4,3,[2,8,9,2],1879,"L.F.ニルソン","🇸🇪","スカンジナビアから","From Scandinavia","航空宇宙合金に使用","Used in aerospace alloys"],
+  [22,"Ti","チタン","Titanium",47.867,"transition",4,4,[2,8,10,2],1791,"W.グレゴー","🇬🇧","ギリシャ神話のタイタン","Greek Titans (mythological)","高強度・軽量・耐食性","High strength, lightweight, corrosion-resistant"],
+  [23,"V","バナジウム","Vanadium",50.942,"transition",4,5,[2,8,11,2],1830,"N.G.セフストロム","🇸🇪","北欧女神ヴァナディス","Norse goddess Vanadis","スチール強化剤として使用","Used as steel hardening agent"],
+  [24,"Cr","クロム","Chromium",51.996,"transition",4,6,[2,8,13,1],1798,"L.N.ヴォークラン","🇫🇷","ギリシャ語「色」","Greek: chroma (color)","メッキや顔料に使用","Used in plating and pigments"],
+  [25,"Mn","マンガン","Manganese",54.938,"transition",4,7,[2,8,13,2],1774,"J.G.ガーン","🇸🇪","マグネシア地方から","From Magnesia region","製鋼の脱酸剤として重要","Important deoxidizer in steel making"],
+  [26,"Fe","鉄","Iron",55.845,"transition",4,8,[2,8,14,2],null,"古代","🌍","アングロサクソン語 iren","Anglo-Saxon: iren","地球の核の主成分","Main component of Earth's core"],
+  [27,"Co","コバルト","Cobalt",58.933,"transition",4,9,[2,8,15,2],1735,"G.ブラント","🇸🇪","ドイツ語「悪霊」","German: Kobold (goblin)","青色顔料・磁性材料に使用","Used in blue pigments and magnets"],
+  [28,"Ni","ニッケル","Nickel",58.693,"transition",4,10,[2,8,16,2],1751,"A.F.クロンステット","🇸🇪","ドイツ語「悪魔の銅」","German: Nickel (devil's copper)","ステンレス鋼・電池に使用","Used in stainless steel and batteries"],
+  [29,"Cu","銅","Copper",63.546,"transition",4,11,[2,8,18,1],null,"古代","🌍","ラテン語 cuprum","Latin: cuprum (from Cyprus)","電気配線の主要材料","Primary material for electrical wiring"],
+  [30,"Zn","亜鉛","Zinc",65.38,"transition",4,12,[2,8,18,2],1746,"A.S.マルグラーフ","🇩🇪","ドイツ語 Zink","German: Zink","メッキ・真鍮の成分","Used in galvanizing and brass"],
+  [31,"Ga","ガリウム","Gallium",69.723,"post-transition",4,13,[2,8,18,3],1875,"P.E.L.ド・ボワボードラン","🇫🇷","ラテン語「フランス」","Latin: Gallia (France)","半導体・LED材料","Used in semiconductors and LEDs"],
+  [32,"Ge","ゲルマニウム","Germanium",72.630,"metalloid",4,14,[2,8,18,4],1886,"C.A.ウィンクラー","🇩🇪","ラテン語「ドイツ」","Latin: Germania (Germany)","光ファイバー・半導体に使用","Used in fiber optics and semiconductors"],
+  [33,"As","ヒ素","Arsenic",74.922,"metalloid",4,15,[2,8,18,5],null,"古代","🌍","ペルシャ語「金色」","Persian: zarnikh (gold-colored)","毒性が強い半金属","Highly toxic metalloid"],
+  [34,"Se","セレン","Selenium",78.971,"nonmetal",4,16,[2,8,18,6],1817,"J.J.ベルセリウス","🇸🇪","ギリシャ語「月」","Greek: Selene (moon)","光電セルや半導体に使用","Used in photocells and semiconductors"],
+  [35,"Br","臭素","Bromine",79.904,"halogen",4,17,[2,8,18,7],1826,"A.J.バラール","🇫🇷","ギリシャ語「悪臭」","Greek: bromos (stench)","常温で液体の非金属","Non-metal that is liquid at room temperature"],
+  [36,"Kr","クリプトン","Krypton",83.798,"noble",4,18,[2,8,18,8],1898,"W.ラムゼーほか","🇬🇧","ギリシャ語「隠れた」","Greek: kryptos (hidden)","希ガスランプに使用","Used in noble gas lamps"],
+  [37,"Rb","ルビジウム","Rubidium",85.468,"alkali",5,1,[2,8,18,8,1],1861,"R.ブンゼン","🇩🇪","ラテン語「深紅色」","Latin: rubidus (deep red)","原子時計に使用","Used in atomic clocks"],
+  [38,"Sr","ストロンチウム","Strontium",87.62,"alkaline",5,2,[2,8,18,8,2],1790,"A.クロフォード","🇬🇧","スコットランドの村名","From Strontian, Scotland","花火の赤色炎に使用","Used for red color in fireworks"],
+  [39,"Y","イットリウム","Yttrium",88.906,"transition",5,3,[2,8,18,9,2],1794,"J.ガドリン","🇫🇮","スウェーデンの村イッテルビー","From Ytterby, Sweden","LEDや超伝導体に使用","Used in LEDs and superconductors"],
+  [40,"Zr","ジルコニウム","Zirconium",91.224,"transition",5,4,[2,8,18,10,2],1789,"M.H.クラプロート","🇩🇪","アラビア語「金のような色」","Arabic: zargun (gold-colored)","原子炉の被覆管に使用","Used as nuclear reactor cladding"],
+  [41,"Nb","ニオブ","Niobium",92.906,"transition",5,5,[2,8,18,12,1],1801,"C.ハチェット","🇬🇧","ギリシャ神話のニオベ","Greek: Niobe (daughter of Tantalus)","超合金・超伝導体に使用","Used in superalloys and superconductors"],
+  [42,"Mo","モリブデン","Molybdenum",95.95,"transition",5,6,[2,8,18,13,1],1781,"P.J.イェルム","🇸🇪","ギリシャ語「鉛に似た石」","Greek: molybdos (lead-like)","高耐熱合金に使用","Used in high-temperature alloys"],
+  [43,"Tc","テクネチウム","Technetium",98,"transition",5,7,[2,8,18,13,2],1937,"C.ペリエほか","🇮🇹","ギリシャ語「人工の」","Greek: technetos (artificial)","初の人工元素、医療診断に使用","First artificial element, used in medical imaging"],
+  [44,"Ru","ルテニウム","Ruthenium",101.07,"transition",5,8,[2,8,18,15,1],1844,"K.K.クラウス","🇷🇺","ラテン語「ロシア」","Latin: Ruthenia (Russia)","触媒・電子部品に使用","Used in catalysts and electronics"],
+  [45,"Rh","ロジウム","Rhodium",102.906,"transition",5,9,[2,8,18,16,1],1803,"W.H.ウォラストン","🇬🇧","ギリシャ語「バラ色」","Greek: rhodon (rose)","自動車触媒に使用","Used in automotive catalysts"],
+  [46,"Pd","パラジウム","Palladium",106.42,"transition",5,10,[2,8,18,18],1803,"W.H.ウォラストン","🇬🇧","小惑星パラスから","From asteroid Pallas","水素吸蔵・触媒に使用","Used for hydrogen storage and catalysts"],
+  [47,"Ag","銀","Silver",107.868,"transition",5,11,[2,8,18,18,1],null,"古代","🌍","アングロサクソン語 siolfur","Anglo-Saxon: siolfur","電気伝導率最高の金属","Metal with highest electrical conductivity"],
+  [48,"Cd","カドミウム","Cadmium",112.414,"transition",5,12,[2,8,18,18,2],1817,"F.ストロマイヤー","🇩🇪","ラテン語「カラミン」","Latin: cadmia (calamine)","ニカド電池・顔料に使用","Used in nickel-cadmium batteries and pigments"],
+  [49,"In","インジウム","Indium",114.818,"post-transition",5,13,[2,8,18,18,3],1863,"F.ライヒほか","🇩🇪","インジゴ色スペクトルから","From indigo spectral line","LCD・タッチパネルに使用","Used in LCD displays and touchscreens"],
+  [50,"Sn","スズ","Tin",118.710,"post-transition",5,14,[2,8,18,18,4],null,"古代","🌍","ラテン語 stannum","Latin: stannum","缶詰めのメッキや半田に使用","Used in canning and soldering"],
+  [51,"Sb","アンチモン","Antimony",121.760,"metalloid",5,15,[2,8,18,18,5],null,"古代","🌍","ギリシャ語「単独でない」","Greek: anti+monos (not alone)","難燃剤・合金に使用","Used in flame retardants and alloys"],
+  [52,"Te","テルル","Tellurium",127.60,"metalloid",5,16,[2,8,18,18,6],1782,"F.J.ミュラー","🇦🇹","ラテン語「地球」","Latin: tellus (Earth)","太陽電池・光ディスクに使用","Used in solar cells and optical discs"],
+  [53,"I","ヨウ素","Iodine",126.904,"halogen",5,17,[2,8,18,18,7],1811,"B.クールトワ","🇫🇷","ギリシャ語「紫色」","Greek: ioeides (violet)","消毒・甲状腺ホルモンに必要","Essential for disinfection and thyroid function"],
+  [54,"Xe","キセノン","Xenon",131.293,"noble",5,18,[2,8,18,18,8],1898,"W.ラムゼーほか","🇬🇧","ギリシャ語「見知らぬ」","Greek: xenos (stranger)","フラッシュランプ・推進剤に使用","Used in flash lamps and ion propulsion"],
+  [55,"Cs","セシウム","Caesium",132.905,"alkali",6,1,[2,8,18,18,8,1],1860,"R.ブンゼン","🇩🇪","ラテン語「空色」","Latin: caesius (sky blue)","原子時計に使用、秒の定義の基準","Used in atomic clocks, defines the SI second"],
+  [56,"Ba","バリウム","Barium",137.327,"alkaline",6,2,[2,8,18,18,8,2],1808,"H.デービー","🇬🇧","ギリシャ語「重い」","Greek: barys (heavy)","X線造影剤に使用","Used as X-ray contrast agent"],
+  [57,"La","ランタン","Lanthanum",138.905,"lanthanide",6,null,[2,8,18,18,9,2],1839,"C.G.モサンデル","🇸🇪","ギリシャ語「隠れている」","Greek: lanthanein (to lie hidden)","希土類磁石・レンズに使用","Used in rare-earth magnets and lenses"],
+  [58,"Ce","セリウム","Cerium",140.116,"lanthanide",6,null,[2,8,18,19,9,2],1803,"B.ヒジンガーほか","🇸🇪","小惑星セレスから","From asteroid Ceres","触媒・研磨材に使用","Used in catalysts and polishing"],
+  [59,"Pr","プラセオジム","Praseodymium",140.908,"lanthanide",6,null,[2,8,18,21,8,2],1885,"C.A.ウェルスバッハ","🇦🇹","ギリシャ語「ネギ色の双子」","Greek: prasios+didymos (green twin)","強力磁石・着色ガラスに使用","Used in strong magnets and colored glass"],
+  [60,"Nd","ネオジム","Neodymium",144.242,"lanthanide",6,null,[2,8,18,22,8,2],1885,"C.A.ウェルスバッハ","🇦🇹","ギリシャ語「新しい双子」","Greek: neos+didymos (new twin)","最強クラスの永久磁石に使用","Used in strongest permanent magnets"],
+  [61,"Pm","プロメチウム","Promethium",145,"lanthanide",6,null,[2,8,18,23,8,2],1945,"J.マリンスキーほか","🇺🇸","ギリシャ神話のプロメテウス","Greek: Prometheus (titan)","核電池・蛍光体に使用","Used in nuclear batteries and phosphors"],
+  [62,"Sm","サマリウム","Samarium",150.36,"lanthanide",6,null,[2,8,18,24,8,2],1879,"P.E.L.ド・ボワボードラン","🇫🇷","サマルスキー鉱物から","From mineral samarskite","永久磁石・原子炉制御棒に使用","Used in permanent magnets and reactor control rods"],
+  [63,"Eu","ユウロピウム","Europium",151.964,"lanthanide",6,null,[2,8,18,25,8,2],1901,"E.A.デマルセー","🇫🇷","ヨーロッパから","From Europe","蛍光体・ユーロ紙幣の偽造防止に使用","Used in phosphors and euro banknote security"],
+  [64,"Gd","ガドリニウム","Gadolinium",157.25,"lanthanide",6,null,[2,8,18,25,9,2],1880,"J.C.ガリサール","🇨🇭","化学者ガドリンにちなむ","After chemist Gadolin","MRI造影剤・原子炉に使用","Used in MRI contrast agents and reactors"],
+  [65,"Tb","テルビウム","Terbium",158.925,"lanthanide",6,null,[2,8,18,27,8,2],1843,"C.G.モサンデル","🇸🇪","スウェーデンのイッテルビーから","From Ytterby, Sweden","蛍光体・磁性材料に使用","Used in phosphors and magnetic materials"],
+  [66,"Dy","ジスプロシウム","Dysprosium",162.500,"lanthanide",6,null,[2,8,18,28,8,2],1886,"P.E.L.ド・ボワボードラン","🇫🇷","ギリシャ語「近づきがたい」","Greek: dysprositos (hard to get)","高性能磁石に使用","Used in high-performance magnets"],
+  [67,"Ho","ホルミウム","Holmium",164.930,"lanthanide",6,null,[2,8,18,29,8,2],1878,"M.デラフォンテーヌ","🇨🇭","ラテン語でストックホルム","Latin: Holmia (Stockholm)","磁性材料・レーザーに使用","Used in magnetic materials and lasers"],
+  [68,"Er","エルビウム","Erbium",167.259,"lanthanide",6,null,[2,8,18,30,8,2],1843,"C.G.モサンデル","🇸🇪","スウェーデンのイッテルビーから","From Ytterby, Sweden","光ファイバー増幅器に使用","Used in fiber optic amplifiers"],
+  [69,"Tm","ツリウム","Thulium",168.934,"lanthanide",6,null,[2,8,18,31,8,2],1879,"P.T.クレーベ","🇸🇪","伝説の北国トゥーレから","From Thule (legendary northern land)","X線源・外科レーザーに使用","Used as X-ray source and surgical laser"],
+  [70,"Yb","イッテルビウム","Ytterbium",173.054,"lanthanide",6,null,[2,8,18,32,8,2],1878,"J.C.ガリサール","🇨🇭","スウェーデンのイッテルビーから","From Ytterby, Sweden","光ファイバー・原子時計に使用","Used in fiber lasers and atomic clocks"],
+  [71,"Lu","ルテチウム","Lutetium",174.967,"lanthanide",6,null,[2,8,18,32,9,2],1907,"G.ユルバン","🇫🇷","ラテン語「パリ」","Latin: Lutetia (Paris)","PETスキャン・触媒に使用","Used in PET scans and catalysts"],
+  [72,"Hf","ハフニウム","Hafnium",178.49,"transition",6,4,[2,8,18,32,10,2],1923,"D.コスター","🇳🇱","ラテン語「コペンハーゲン」","Latin: Hafnia (Copenhagen)","原子炉制御棒に使用","Used in nuclear reactor control rods"],
+  [73,"Ta","タンタル","Tantalum",180.948,"transition",6,5,[2,8,18,32,11,2],1802,"A.G.エケベルク","🇸🇪","ギリシャ神話のタンタロス","Greek: Tantalus (mythological)","コンデンサ・医療器具に使用","Used in capacitors and medical implants"],
+  [74,"W","タングステン","Tungsten",183.84,"transition",6,6,[2,8,18,32,12,2],1783,"J.J.エルユアル","🇪🇸","スウェーデン語「重い石」","Swedish: tung+sten (heavy stone)","電球のフィラメントに使用","Used in light bulb filaments"],
+  [75,"Re","レニウム","Rhenium",186.207,"transition",6,7,[2,8,18,32,13,2],1925,"W.ノダック","🇩🇪","ラテン語「ライン川」","Latin: Rhenus (Rhine)","ジェットエンジン合金に使用","Used in jet engine superalloys"],
+  [76,"Os","オスミウム","Osmium",190.23,"transition",6,8,[2,8,18,32,14,2],1803,"S.テナント","🇬🇧","ギリシャ語「臭い」","Greek: osme (smell)","最も密度の高い元素","Densest naturally occurring element"],
+  [77,"Ir","イリジウム","Iridium",192.217,"transition",6,9,[2,8,18,32,15,2],1803,"S.テナント","🇬🇧","ギリシャ語「虹」","Greek: iris (rainbow)","白金族で最も耐食性が高い","Most corrosion-resistant platinum group metal"],
+  [78,"Pt","白金","Platinum",195.084,"transition",6,10,[2,8,18,32,17,1],null,"古代","🌍","スペイン語「小さな銀」","Spanish: platina (little silver)","触媒・宝飾品・医療に使用","Used in catalysts, jewelry, and medicine"],
+  [79,"Au","金","Gold",196.967,"transition",6,11,[2,8,18,32,18,1],null,"古代","🌍","アングロサクソン語 geolo","Anglo-Saxon: geolo (yellow)","貨幣・宝飾・電子部品に使用","Used in currency, jewelry, and electronics"],
+  [80,"Hg","水銀","Mercury",200.592,"transition",6,12,[2,8,18,32,18,2],null,"古代","🌍","惑星マーキュリーから","From planet Mercury","常温で液体の唯一の金属","Only metal liquid at room temperature"],
+  [81,"Tl","タリウム","Thallium",204.38,"post-transition",6,13,[2,8,18,32,18,3],1861,"W.クルックス","🇬🇧","ギリシャ語「若い芽」","Greek: thallos (green shoot)","電子部品・ガラスに使用","Used in electronics and specialty glass"],
+  [82,"Pb","鉛","Lead",207.2,"post-transition",6,14,[2,8,18,32,18,4],null,"古代","🌍","ラテン語 plumbum","Latin: plumbum","蓄電池・放射線遮蔽に使用","Used in batteries and radiation shielding"],
+  [83,"Bi","ビスマス","Bismuth",208.980,"post-transition",6,15,[2,8,18,32,18,5],1540,"C.シュネーフォゲル","🇩🇪","ドイツ語「白い金属」","German: wismut (white metal)","医薬品・低融点合金に使用","Used in medicines and low-melting alloys"],
+  [84,"Po","ポロニウム","Polonium",209,"post-transition",6,16,[2,8,18,32,18,6],1898,"M.キュリー","🇵🇱","キュリー夫人の祖国ポーランドから","From Poland (Marie Curie's homeland)","放射性元素、静電除去に使用","Radioactive, used in static eliminators"],
+  [85,"At","アスタチン","Astatine",210,"halogen",6,17,[2,8,18,32,18,7],1940,"D.コルソンほか","🇺🇸","ギリシャ語「不安定な」","Greek: astatos (unstable)","放射性ハロゲン、がん治療研究に使用","Radioactive halogen studied for cancer therapy"],
+  [86,"Rn","ラドン","Radon",222,"noble",6,18,[2,8,18,32,18,8],1900,"F.E.ドーン","🇩🇪","放射線 radiumから","From radium (radioactive)","放射性希ガス、肺がんリスクあり","Radioactive noble gas, lung cancer risk"],
+  [87,"Fr","フランシウム","Francium",223,"alkali",7,1,[2,8,18,32,18,8,1],1939,"M.ペレー","🇫🇷","フランスから","From France","最も不安定な天然元素","Most unstable naturally occurring element"],
+  [88,"Ra","ラジウム","Radium",226,"alkaline",7,2,[2,8,18,32,18,8,2],1898,"M.キュリーほか","🇵🇱","ラテン語「放射線」","Latin: radius (ray)","放射性元素、かつて夜光塗料に使用","Radioactive, once used in luminous paint"],
+  [89,"Ac","アクチニウム","Actinium",227,"actinide",7,null,[2,8,18,32,18,9,2],1899,"A.L.ドビエルヌ","🇫🇷","ギリシャ語「光線」","Greek: aktis (ray/beam)","放射性元素、アクチニド系列の先頭","First of the actinide series"],
+  [90,"Th","トリウム","Thorium",232.038,"actinide",7,null,[2,8,18,32,18,10,2],1829,"J.J.ベルセリウス","🇸🇪","北欧神話の雷神トール","Norse: Thor (god of thunder)","核燃料として研究中","Studied as nuclear fuel"],
+  [91,"Pa","プロトアクチニウム","Protactinium",231.036,"actinide",7,null,[2,8,18,32,20,9,2],1913,"K.ファヤンスほか","🇩🇪","ギリシャ語「アクチニウムの前」","Greek: protos+actinium (before actinium)","核反応でウランから生成","Produced from uranium in nuclear reactions"],
+  [92,"U","ウラン","Uranium",238.029,"actinide",7,null,[2,8,18,32,21,9,2],1789,"M.H.クラプロート","🇩🇪","惑星ウラノスから","From planet Uranus","核燃料の主要元素","Primary element for nuclear fuel"],
+  [93,"Np","ネプツニウム","Neptunium",237,"actinide",7,null,[2,8,18,32,22,9,2],1940,"E.M.マクミランほか","🇺🇸","惑星ネプチューンから","From planet Neptune","ウランより重い初の超ウラン元素","First transuranic element heavier than uranium"],
+  [94,"Pu","プルトニウム","Plutonium",244,"actinide",7,null,[2,8,18,32,24,8,2],1940,"G.T.シーボーグほか","🇺🇸","惑星プルートから","From planet Pluto","核兵器・原子力発電に使用","Used in nuclear weapons and power generation"],
+  [95,"Am","アメリシウム","Americium",243,"actinide",7,null,[2,8,18,32,25,8,2],1944,"G.T.シーボーグほか","🇺🇸","アメリカ大陸から","From the Americas","煙感知器に使用","Used in smoke detectors"],
+  [96,"Cm","キュリウム","Curium",247,"actinide",7,null,[2,8,18,32,25,9,2],1944,"G.T.シーボーグほか","🇺🇸","キュリー夫妻にちなむ","After Pierre and Marie Curie","宇宙探査機の熱源に使用","Used as heat source in space probes"],
+  [97,"Bk","バークリウム","Berkelium",247,"actinide",7,null,[2,8,18,32,27,8,2],1949,"G.T.シーボーグほか","🇺🇸","バークレー市から","From Berkeley, California","加速器で生成される合成元素","Synthetic element produced in accelerators"],
+  [98,"Cf","カリホルニウム","Californium",251,"actinide",7,null,[2,8,18,32,28,8,2],1950,"G.T.シーボーグほか","🇺🇸","カリフォルニア州から","From California","中性子線源として使用","Used as neutron source"],
+  [99,"Es","アインスタイニウム","Einsteinium",252,"actinide",7,null,[2,8,18,32,29,8,2],1952,"G.T.シーボーグほか","🇺🇸","アインシュタインにちなむ","After Albert Einstein","水爆実験の残骸から発見","Discovered in hydrogen bomb debris"],
+  [100,"Fm","フェルミウム","Fermium",257,"actinide",7,null,[2,8,18,32,30,8,2],1952,"G.T.シーボーグほか","🇺🇸","エンリコ・フェルミにちなむ","After Enrico Fermi","超ウラン元素、合成のみ","Transuranic, only produced synthetically"],
+  [101,"Md","メンデレビウム","Mendelevium",258,"actinide",7,null,[2,8,18,32,31,8,2],1955,"G.T.シーボーグほか","🇺🇸","メンデレーエフにちなむ","After Dmitri Mendeleev","元素発見が非常に困難","Extremely difficult to produce"],
+  [102,"No","ノーベリウム","Nobelium",259,"actinide",7,null,[2,8,18,32,32,8,2],1958,"G.T.シーボーグほか","🇺🇸","アルフレッド・ノーベルにちなむ","After Alfred Nobel","半減期数分の不安定元素","Unstable with half-life of minutes"],
+  [103,"Lr","ローレンシウム","Lawrencium",262,"actinide",7,null,[2,8,18,32,32,8,3],1961,"A.ギオルソほか","🇺🇸","アーネスト・ローレンスにちなむ","After Ernest Lawrence","アクチニド系列最後の元素","Last element of the actinide series"],
+  [104,"Rf","ラザホージウム","Rutherfordium",267,"transition",7,4,[2,8,18,32,32,10,2],1969,"G.N.フリョロフほか","🇷🇺","アーネスト・ラザフォードにちなむ","After Ernest Rutherford","超重元素、人工合成のみ","Superheavy element, only synthetic"],
+  [105,"Db","ドブニウム","Dubnium",268,"transition",7,5,[2,8,18,32,32,11,2],1970,"G.N.フリョロフほか","🇷🇺","ドゥブナ研究所から","From Dubna, Russia","超重元素、原子炉で合成","Superheavy element produced in reactors"],
+  [106,"Sg","シーボーギウム","Seaborgium",271,"transition",7,6,[2,8,18,32,32,12,2],1974,"A.ギオルソほか","🇺🇸","グレン・シーボーグにちなむ","After Glenn T. Seaborg","存命中に元素名が付いた初の人物","First person named in an element while alive"],
+  [107,"Bh","ボーリウム","Bohrium",272,"transition",7,7,[2,8,18,32,32,13,2],1981,"G.ミュンツェンベルクほか","🇩🇪","ニールス・ボーアにちなむ","After Niels Bohr","超重元素、半減期1秒未満","Superheavy, half-life under 1 second"],
+  [108,"Hs","ハッシウム","Hassium",270,"transition",7,8,[2,8,18,32,32,14,2],1984,"P.アルムブルスターほか","🇩🇪","ドイツのヘッセン州から","From Hessen (Hassia), Germany","超重元素","Superheavy element"],
+  [109,"Mt","マイトネリウム","Meitnerium",276,"unknown",7,9,[2,8,18,32,32,15,2],1982,"P.アルムブルスターほか","🇩🇪","リーゼ・マイトナーにちなむ","After Lise Meitner","超重元素、性質ほぼ不明","Superheavy, properties largely unknown"],
+  [110,"Ds","ダームスタチウム","Darmstadtium",281,"unknown",7,10,[2,8,18,32,32,17,1],1994,"S.ホフマンほか","🇩🇪","ダルムシュタット市から","From Darmstadt, Germany","超重元素","Superheavy element"],
+  [111,"Rg","レントゲニウム","Roentgenium",280,"unknown",7,11,[2,8,18,32,32,18,1],1994,"S.ホフマンほか","🇩🇪","ヴィルヘルム・レントゲンにちなむ","After Wilhelm Röntgen","超重元素","Superheavy element"],
+  [112,"Cn","コペルニシウム","Copernicium",285,"transition",7,12,[2,8,18,32,32,18,2],1996,"S.ホフマンほか","🇩🇪","コペルニクスにちなむ","After Nicolaus Copernicus","常温でガス状と推定","Predicted to be gaseous at room temperature"],
+  [113,"Nh","ニホニウム","Nihonium",284,"unknown",7,13,[2,8,18,32,32,18,3],2004,"森田浩介ほか","🇯🇵","日本語「日本」","Japanese: Nihon (Japan)","日本で発見された最初の元素","First element discovered in Japan"],
+  [114,"Fl","フレロビウム","Flerovium",289,"unknown",7,14,[2,8,18,32,32,18,4],1998,"G.N.フリョロフほか","🇷🇺","フリョロフ研究所から","From Flerov Laboratory, Russia","超重元素","Superheavy element"],
+  [115,"Mc","モスコビウム","Moscovium",288,"unknown",7,15,[2,8,18,32,32,18,5],2003,"Yu.Ts.オガネシアンほか","🇷🇺","モスクワ州から","From Moscow Oblast, Russia","超重元素","Superheavy element"],
+  [116,"Lv","リバモリウム","Livermorium",293,"unknown",7,16,[2,8,18,32,32,18,6],2000,"Yu.Ts.オガネシアンほか","🇷🇺","リバモア研究所から","From Livermore, California","超重元素","Superheavy element"],
+  [117,"Ts","テネシン","Tennessine",294,"unknown",7,17,[2,8,18,32,32,18,7],2010,"Yu.Ts.オガネシアンほか","🇷🇺","テネシー州から","From Tennessee","超重元素","Superheavy element"],
+  [118,"Og","オガネソン","Oganesson",294,"noble",7,18,[2,8,18,32,32,18,8],2002,"Yu.Ts.オガネシアンほか","🇷🇺","ユーリー・オガネシアンにちなむ","After Yuri Oganessian","最重の命名済み元素","Heaviest named element"]
+];
+
+// Index by Z
+const ELEM = {};
+ELEMENTS.forEach(e => { ELEM[e[0]] = e; });
+
+// ─── PERIODIC TABLE POSITIONS ──────────────────────────────────────────────
+// [Z, row, col]  (1-indexed; lanthanides row 9, actinides row 10)
+const POSITIONS = [];
+function setPos(z, row, col) { POSITIONS.push([z, row, col]); }
+// Period 1
+setPos(1,1,1); setPos(2,1,18);
+// Period 2
+setPos(3,2,1); setPos(4,2,2);
+for(let i=0;i<6;i++) setPos(5+i,2,13+i);
+// Period 3
+setPos(11,3,1); setPos(12,3,2);
+for(let i=0;i<6;i++) setPos(13+i,3,13+i);
+// Period 4
+setPos(19,4,1); setPos(20,4,2);
+for(let i=0;i<10;i++) setPos(21+i,4,3+i);
+for(let i=0;i<6;i++) setPos(31+i,4,13+i);
+// Period 5
+setPos(37,5,1); setPos(38,5,2);
+for(let i=0;i<10;i++) setPos(39+i,5,3+i);
+for(let i=0;i<6;i++) setPos(49+i,5,13+i);
+// Period 6
+setPos(55,6,1); setPos(56,6,2);
+setPos(71,6,3); // Lu
+for(let i=0;i<10;i++) setPos(72+i,6,4+i);
+for(let i=0;i<6;i++) setPos(81+i,6,13+i);
+// Period 7
+setPos(87,7,1); setPos(88,7,2);
+setPos(103,7,3); // Lr
+for(let i=0;i<10;i++) setPos(104+i,7,4+i);
+for(let i=0;i<6;i++) setPos(113+i,7,13+i);
+// Lanthanides row 9
+for(let i=0;i<15;i++) setPos(57+i,9,3+i);
+// Actinides row 10
+for(let i=0;i<15;i++) setPos(89+i,10,3+i);
+
+const POS_MAP = {};
+POSITIONS.forEach(([z,r,c]) => { POS_MAP[z] = [r,c]; });
+
+// ─── LANGUAGE STATE ────────────────────────────────────────────────────────
+let lang = 'ja';
+function toggleLang() {
+  lang = lang === 'ja' ? 'en' : 'ja';
+  document.getElementById('langBtn').textContent = lang === 'ja' ? 'EN' : 'JA';
+  document.getElementById('pageTitle').textContent = lang === 'ja' ? '⚛ 3D周期表 — 全118元素' : '⚛ 3D Periodic Table — All 118 Elements';
+  // update labels
+  document.getElementById('lbl-period').textContent = lang === 'ja' ? '周期' : 'Period';
+  document.getElementById('lbl-group').textContent = lang === 'ja' ? '族' : 'Group';
+  document.getElementById('lbl-shells').textContent = lang === 'ja' ? '電子配置' : 'Electron Config';
+  document.getElementById('lbl-disc').textContent = lang === 'ja' ? '発見年' : 'Discovered';
+  document.getElementById('lbl-discby').textContent = lang === 'ja' ? '発見者' : 'Discoverer';
+  // update all el-name spans
+  document.querySelectorAll('.el-name').forEach(el => {
+    const z = parseInt(el.closest('.el-card').dataset.z);
+    const e = ELEM[z];
+    el.textContent = lang === 'ja' ? e[2] : e[3];
+  });
+  // update legend
+  renderLegend();
+  // re-render detail if open
+  if (currentZ) showDetail(currentZ);
+}
+
+// ─── CATEGORY CONFIG ───────────────────────────────────────────────────────
+const CATS = {
+  'alkali':          { css: 'cat-alkali',          ja: 'アルカリ金属',  en: 'Alkali Metals' },
+  'alkaline':        { css: 'cat-alkaline',         ja: 'アルカリ土類', en: 'Alkaline Earth' },
+  'transition':      { css: 'cat-transition',       ja: '遷移金属',     en: 'Transition Metals' },
+  'post-transition': { css: 'cat-post-transition',  ja: '後遷移金属',   en: 'Post-Transition' },
+  'metalloid':       { css: 'cat-metalloid',        ja: '半金属',       en: 'Metalloids' },
+  'nonmetal':        { css: 'cat-nonmetal',         ja: '非金属',       en: 'Nonmetals' },
+  'halogen':         { css: 'cat-halogen',          ja: 'ハロゲン',     en: 'Halogens' },
+  'noble':           { css: 'cat-noble',            ja: '希ガス',       en: 'Noble Gases' },
+  'lanthanide':      { css: 'cat-lanthanide',       ja: 'ランタニド',   en: 'Lanthanides' },
+  'actinide':        { css: 'cat-actinide',         ja: 'アクチニド',   en: 'Actinides' },
+  'unknown':         { css: 'cat-unknown',          ja: '未分類',       en: 'Unknown' },
+};
+const CAT_COLORS = {
+  'alkali':'#ef4444','alkaline':'#f97316','transition':'#eab308',
+  'post-transition':'#22c55e','metalloid':'#14b8a6','nonmetal':'#3b82f6',
+  'halogen':'#8b5cf6','noble':'#ec4899','lanthanide':'#6366f1',
+  'actinide':'#a855f7','unknown':'#475569'
+};
+
+// ─── BUILD GRID ────────────────────────────────────────────────────────────
+function buildGrid() {
+  const grid = document.getElementById('ptGrid');
+  grid.innerHTML = '';
+  // Place elements
+  ELEMENTS.forEach(e => {
+    const [z,sym,nameJA,nameEN,mass,cat] = e;
+    const pos = POS_MAP[z];
+    if (!pos) return;
+    const [row, col] = pos;
+    const div = document.createElement('div');
+    div.className = `el-card ${CATS[cat].css}`;
+    div.dataset.z = z;
+    div.style.gridRow = row;
+    div.style.gridColumn = col;
+    div.innerHTML = `
+      <span class="el-num">${z}</span>
+      <span class="el-flag">${e[11]}</span>
+      <span class="el-sym">${sym}</span>
+      <span class="el-name">${lang==='ja'?nameJA:nameEN}</span>
+      <span class="el-mass">${typeof mass==='number'?mass.toFixed(mass<10?3:mass<100?3:3):mass}</span>
+    `;
+    div.addEventListener('click', () => selectElement(z));
+    div.addEventListener('mouseenter', (ev) => showTooltip(ev, z));
+    div.addEventListener('mouseleave', hideTooltip);
+    div.addEventListener('mousemove', moveTooltip);
+    grid.appendChild(div);
+  });
+
+  // Spacer
+  const spacer = document.createElement('div');
+  spacer.className = 'pt-spacer';
+  grid.appendChild(spacer);
+
+  // Lanthanide placeholder in row 6, col 3
+  const laph = document.createElement('div');
+  laph.className = 'pt-placeholder';
+  laph.style.gridRow = 6;
+  laph.style.gridColumn = 3;
+  laph.textContent = '57-71';
+  grid.appendChild(laph);
+
+  // Actinide placeholder in row 7, col 3
+  const acph = document.createElement('div');
+  acph.className = 'pt-placeholder';
+  acph.style.gridRow = 7;
+  acph.style.gridColumn = 3;
+  acph.textContent = '89-103';
+  grid.appendChild(acph);
+
+  // Lanthanide label row 9, cols 1-2
+  const laLabel = document.createElement('div');
+  laLabel.className = 'pt-la-label';
+  laLabel.style.gridRow = 9;
+  laLabel.style.gridColumn = '1/3';
+  laLabel.textContent = '57La→71Lu';
+  grid.appendChild(laLabel);
+
+  const acLabel = document.createElement('div');
+  acLabel.className = 'pt-ac-label';
+  acLabel.style.gridRow = 10;
+  acLabel.style.gridColumn = '1/3';
+  acLabel.textContent = '89Ac→103Lr';
+  grid.appendChild(acLabel);
+}
+
+// ─── LEGEND ────────────────────────────────────────────────────────────────
+function renderLegend() {
+  const leg = document.getElementById('legend');
+  leg.innerHTML = Object.entries(CATS).map(([k,v]) =>
+    `<div class="legend-item">
+       <div class="legend-dot" style="background:${CAT_COLORS[k]}"></div>
+       <span>${lang==='ja'?v.ja:v.en}</span>
+     </div>`
+  ).join('');
+}
+
+// ─── TOOLTIP ───────────────────────────────────────────────────────────────
+const tooltip = document.getElementById('tooltip');
+let tooltipVisible = false;
+
+function showTooltip(ev, z) {
+  const e = ELEM[z];
+  const cat = CATS[e[5]];
+  tooltip.innerHTML = `
+    <div class="tt-header">
+      <span class="tt-sym" style="color:${CAT_COLORS[e[5]]}">${e[1]}</span>
+      <div>
+        <div class="tt-name">${lang==='ja'?e[2]:e[3]}</div>
+        <div class="tt-num">#${e[0]} &nbsp; ${e[11]}</div>
+      </div>
+    </div>
+    <div class="tt-row"><span class="tt-label">${lang==='ja'?'原子量':'Mass'}</span><span>${e[4]}</span></div>
+    <div class="tt-row"><span class="tt-label">${lang==='ja'?'分類':'Category'}</span><span>${lang==='ja'?cat.ja:cat.en}</span></div>
+    <div class="tt-row"><span class="tt-label">${lang==='ja'?'電子配置':'Shells'}</span><span>${e[8].join('-')}</span></div>
+    ${e[9]?`<div class="tt-row"><span class="tt-label">${lang==='ja'?'発見':'Disc.'}</span><span>${e[9]}</span></div>`:''}
+    <div class="tt-etym">${lang==='ja'?e[12]:e[13]}</div>
+    <div class="tt-desc">${lang==='ja'?e[14]:e[15]}</div>
+  `;
+  tooltip.style.display = 'block';
+  tooltipVisible = true;
+  posTooltip(ev);
+}
+
+function posTooltip(ev) {
+  const tw = tooltip.offsetWidth, th = tooltip.offsetHeight;
+  let x = ev.clientX + 14, y = ev.clientY + 14;
+  if (x + tw > window.innerWidth - 8) x = ev.clientX - tw - 14;
+  if (y + th > window.innerHeight - 8) y = ev.clientY - th - 14;
+  tooltip.style.left = x + 'px';
+  tooltip.style.top = y + 'px';
+}
+function moveTooltip(ev) { if (tooltipVisible) posTooltip(ev); }
+function hideTooltip() { tooltip.style.display = 'none'; tooltipVisible = false; }
+
+// ─── DETAIL PANEL ──────────────────────────────────────────────────────────
+let currentZ = null;
+
+function selectElement(z) {
+  // Deselect old
+  document.querySelectorAll('.el-card.selected').forEach(c => c.classList.remove('selected'));
+  const card = document.querySelector(`.el-card[data-z="${z}"]`);
+  if (card) card.classList.add('selected');
+  currentZ = z;
+  showDetail(z);
+  hideTooltip();
+}
+
+function showDetail(z) {
+  const e = ELEM[z];
+  const cat = CATS[e[5]];
+  const color = CAT_COLORS[e[5]];
+  document.getElementById('detailPane').classList.remove('hidden');
+  document.getElementById('dNum').textContent = `#${e[0]}`;
+  document.getElementById('dFlag').textContent = e[11];
+  document.getElementById('dSym').textContent = e[1];
+  document.getElementById('dSym').style.color = color;
+  document.getElementById('dName').textContent = lang==='ja' ? e[2] : e[3];
+  document.getElementById('dMass').textContent = `${lang==='ja'?'原子量':'Atomic mass'}: ${e[4]}`;
+  const badge = document.getElementById('dCatBadge');
+  badge.textContent = lang==='ja' ? cat.ja : cat.en;
+  badge.style.background = color + '33';
+  badge.style.color = color;
+  badge.style.border = `1px solid ${color}55`;
+  document.getElementById('dPeriod').textContent = e[6] || '—';
+  document.getElementById('dGroup').textContent = e[7] || '—';
+  document.getElementById('dShells').textContent = e[8].join(' - ');
+  document.getElementById('dDisc').textContent = e[9] ? e[9] : (lang==='ja'?'古代':'Ancient');
+  document.getElementById('dDiscBy').textContent = e[10];
+  document.getElementById('elDesc').textContent = lang==='ja' ? e[14] : e[15];
+  document.getElementById('elEtym').textContent = (lang==='ja'?'語源：':'Etymology: ') + (lang==='ja'?e[12]:e[13]);
+  const wl = document.getElementById('wikiLink');
+  wl.href = lang==='ja'
+    ? `https://ja.wikipedia.org/wiki/${encodeURIComponent(e[2])}`
+    : `https://en.wikipedia.org/wiki/${encodeURIComponent(e[3])}`;
+  wl.textContent = 'Wikipedia';
+  // Build 3D model
+  build3D(z);
+}
+
+// ─── THREE.JS 3D BOHR MODEL ────────────────────────────────────────────────
+let renderer, scene, camera, animId;
+const SHELL_CONFIG = [[2],[2,8],[2,8,8],[2,8,18,8],[2,8,18,18,8],[2,8,18,32,18,8],[2,8,18,32,32,18,8]];
+
+function build3D(z) {
+  const container = document.getElementById('d3Container');
+  // Cleanup previous
+  if (renderer) {
+    cancelAnimationFrame(animId);
+    renderer.dispose();
+    container.innerHTML = '';
+    renderer = null;
+  }
+
+  const W = container.clientWidth || 340;
+  const H = 280;
+  scene = new THREE.Scene();
+  camera = new THREE.PerspectiveCamera(50, W/H, 0.1, 1000);
+  camera.position.set(0, 0, 14);
+
+  renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  renderer.setPixelRatio(window.devicePixelRatio);
+  renderer.setSize(W, H);
+  renderer.setClearColor(0x000000, 0);
+  container.appendChild(renderer.domElement);
+
+  // Lighting
+  const ambient = new THREE.AmbientLight(0xffffff, 0.4);
+  scene.add(ambient);
+  const point = new THREE.PointLight(0xffffff, 1.2, 60);
+  point.position.set(5, 5, 10);
+  scene.add(point);
+  const point2 = new THREE.PointLight(0xff6633, 0.6, 40);
+  point2.position.set(-5, -5, 5);
+  scene.add(point2);
+
+  // Nucleus
+  const nucleusR = 0.3 + Math.log(z + 1) * 0.18;
+  const nucGeo = new THREE.SphereGeometry(nucleusR, 32, 32);
+  const nucMat = new THREE.MeshPhongMaterial({
+    color: 0xff4400, emissive: 0xff2200, emissiveIntensity: 0.5,
+    shininess: 80
+  });
+  const nucleus = new THREE.Mesh(nucGeo, nucMat);
+  scene.add(nucleus);
+
+  // Shells + electrons
+  const shells = ELEM[z][8];
+  const electrons = [];
+  const maxShells = shells.length;
+  shells.forEach((count, si) => {
+    const shellR = 1.5 + si * 1.5;
+    // Torus ring
+    const torusGeo = new THREE.TorusGeometry(shellR, 0.04, 8, 80);
+    const torusMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.25 });
+    // Tilt each ring slightly
+    const torus = new THREE.Mesh(torusGeo, torusMat);
+    torus.rotation.x = Math.PI/2 + (si * 0.3);
+    torus.rotation.y = si * 0.5;
+    scene.add(torus);
+
+    // Electrons
+    const eCount = Math.min(count, 8); // show max 8 per shell visually
+    for (let ei = 0; ei < eCount; ei++) {
+      const eGeo = new THREE.SphereGeometry(0.1, 12, 12);
+      const eMat = new THREE.MeshPhongMaterial({
+        color: 0x00ddff, emissive: 0x0099cc, emissiveIntensity: 0.6, shininess: 100
+      });
+      const eMesh = new THREE.Mesh(eGeo, eMat);
+      scene.add(eMesh);
+      electrons.push({ mesh: eMesh, shellR, si, angle: (ei / eCount) * Math.PI * 2, tiltX: Math.PI/2 + (si*0.3), tiltY: si*0.5 });
+    }
+  });
+
+  // Mouse drag rotation
+  let isDragging = false, prevX = 0, prevY = 0;
+  const rotGroup = new THREE.Group();
+  scene.add(rotGroup);
+  // Move nucleus + shells + electrons into rotGroup
+  scene.children.filter(c => c !== ambient && c !== point && c !== point2).forEach(c => {
+    scene.remove(c);
+    rotGroup.add(c);
+  });
+
+  const canvas = renderer.domElement;
+  canvas.addEventListener('mousedown', e => { isDragging = true; prevX = e.clientX; prevY = e.clientY; });
+  canvas.addEventListener('mousemove', e => {
+    if (!isDragging) return;
+    rotGroup.rotation.y += (e.clientX - prevX) * 0.01;
+    rotGroup.rotation.x += (e.clientY - prevY) * 0.01;
+    prevX = e.clientX; prevY = e.clientY;
+  });
+  canvas.addEventListener('mouseup', () => isDragging = false);
+  canvas.addEventListener('mouseleave', () => isDragging = false);
+  // Touch
+  canvas.addEventListener('touchstart', e => { isDragging = true; prevX = e.touches[0].clientX; prevY = e.touches[0].clientY; });
+  canvas.addEventListener('touchmove', e => {
+    if (!isDragging) return;
+    rotGroup.rotation.y += (e.touches[0].clientX - prevX) * 0.01;
+    rotGroup.rotation.x += (e.touches[0].clientY - prevY) * 0.01;
+    prevX = e.touches[0].clientX; prevY = e.touches[0].clientY;
+    e.preventDefault();
+  }, { passive: false });
+  canvas.addEventListener('touchend', () => isDragging = false);
+
+  // Animate
+  let t = 0;
+  function animate() {
+    animId = requestAnimationFrame(animate);
+    t += 0.016;
+    // Auto-rotate slowly when not dragging
+    if (!isDragging) rotGroup.rotation.y += 0.005;
+    // Orbit electrons
+    electrons.forEach(({ mesh, shellR, si, angle }) => {
+      const speed = 0.8 / (si + 1);
+      const a = angle + t * speed;
+      mesh.position.x = shellR * Math.cos(a);
+      mesh.position.z = shellR * Math.sin(a) * Math.cos(si * 0.3);
+      mesh.position.y = shellR * Math.sin(a) * Math.sin(si * 0.3);
+    });
+    renderer.render(scene, camera);
+  }
+  animate();
+}
+
+// ─── INIT ───────────────────────────────────────────────────────────────────
+buildGrid();
+renderLegend();
+// Click H by default
+selectElement(1);
+</script>
+</body>
+</html>
