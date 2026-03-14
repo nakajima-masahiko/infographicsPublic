@@ -786,6 +786,10 @@ function build3D(z) {
   point2.position.set(-5, -5, 5);
   scene.add(point2);
 
+  // Rotating content group (nucleus + shells + electrons)
+  const rotGroup = new THREE.Group();
+  scene.add(rotGroup);
+
   // Nucleus
   const nucleusR = 0.3 + Math.log(z + 1) * 0.18;
   const nucGeo = new THREE.SphereGeometry(nucleusR, 32, 32);
@@ -794,12 +798,11 @@ function build3D(z) {
     shininess: 80
   });
   const nucleus = new THREE.Mesh(nucGeo, nucMat);
-  scene.add(nucleus);
+  rotGroup.add(nucleus);
 
   // Shells + electrons
   const shells = ELEM[z][8];
   const electrons = [];
-  const maxShells = shells.length;
   shells.forEach((count, si) => {
     const shellR = 1.5 + si * 1.5;
     // Torus ring
@@ -809,7 +812,7 @@ function build3D(z) {
     const torus = new THREE.Mesh(torusGeo, torusMat);
     torus.rotation.x = Math.PI/2 + (si * 0.3);
     torus.rotation.y = si * 0.5;
-    scene.add(torus);
+    rotGroup.add(torus);
 
     // Electrons
     const eCount = Math.min(count, 8); // show max 8 per shell visually
@@ -819,20 +822,13 @@ function build3D(z) {
         color: 0x00ddff, emissive: 0x0099cc, emissiveIntensity: 0.6, shininess: 100
       });
       const eMesh = new THREE.Mesh(eGeo, eMat);
-      scene.add(eMesh);
-      electrons.push({ mesh: eMesh, shellR, si, angle: (ei / eCount) * Math.PI * 2, tiltX: Math.PI/2 + (si*0.3), tiltY: si*0.5 });
+      rotGroup.add(eMesh);
+      electrons.push({ mesh: eMesh, shellR, si, angle: (ei / eCount) * Math.PI * 2 });
     }
   });
 
   // Mouse drag rotation
   let isDragging = false, prevX = 0, prevY = 0;
-  const rotGroup = new THREE.Group();
-  scene.add(rotGroup);
-  // Move nucleus + shells + electrons into rotGroup
-  scene.children.filter(c => c !== ambient && c !== point && c !== point2).forEach(c => {
-    scene.remove(c);
-    rotGroup.add(c);
-  });
 
   const canvas = renderer.domElement;
   canvas.addEventListener('mousedown', e => { isDragging = true; prevX = e.clientX; prevY = e.clientY; });
