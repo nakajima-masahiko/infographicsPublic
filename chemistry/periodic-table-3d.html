@@ -392,6 +392,141 @@ html, body {
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: var(--bg-main); }
 ::-webkit-scrollbar-thumb { background: var(--bg-panel); border-radius: 3px; }
+
+/* ─── MODE BUTTON ACTIVE ────────────────────────────────────────────── */
+#controls button.mode-active {
+  background: var(--accent);
+  color: #000;
+  border-color: var(--accent);
+}
+
+/* ─── TERRAIN MODE ──────────────────────────────────────────────────── */
+#terrainContainer {
+  display: none;
+  width: 100%;
+  height: 500px;
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+  background: #020617;
+  border: 1px solid var(--border);
+  margin-bottom: 12px;
+}
+#terrainContainer canvas { display: block; }
+#terrainLegend {
+  display: none;
+  margin-bottom: 12px;
+  padding: 10px 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.78rem;
+}
+#terrainLegend h3 { font-size: 0.85rem; margin-bottom: 6px; color: var(--accent); }
+#terrainLegend p { font-size: 0.72rem; color: var(--text-secondary); margin-bottom: 6px; }
+.terrain-scale {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.terrain-gradient {
+  flex: 1;
+  height: 10px;
+  border-radius: 5px;
+  background: linear-gradient(to right, #ef4444, #eab308, #3b82f6);
+}
+
+/* ─── COSMIC MODE ───────────────────────────────────────────────────── */
+#cosmicContainer {
+  display: none;
+  width: 100%;
+  padding: 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 12px;
+}
+#cosmicContainer h2 {
+  font-size: 1rem;
+  margin-bottom: 16px;
+  color: var(--accent);
+  text-align: center;
+}
+.cosmic-group {
+  margin-bottom: 16px;
+  border-radius: 8px;
+  padding: 14px;
+  position: relative;
+  overflow: hidden;
+}
+.cosmic-group-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.cosmic-group-subtitle {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+}
+.cosmic-elements {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.cosmic-el {
+  padding: 4px 7px;
+  border-radius: 5px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s, opacity 0.4s ease;
+  opacity: 0;
+  transform: translateY(10px);
+}
+.cosmic-el.visible { opacity: 1; transform: translateY(0); }
+.cosmic-el:hover { transform: scale(1.15); }
+.cosmic-big-bang  { background: rgba(59,130,246,0.25);  border: 1px solid rgba(59,130,246,0.5);  color: #93c5fd; }
+.cosmic-stellar   { background: rgba(234,179,8,0.25);   border: 1px solid rgba(234,179,8,0.5);   color: #fde047; }
+.cosmic-supernova { background: rgba(239,68,68,0.25);   border: 1px solid rgba(239,68,68,0.5);   color: #fca5a5; }
+.cosmic-human     { background: rgba(168,85,247,0.25);  border: 1px solid rgba(168,85,247,0.5);  color: #d8b4fe; }
+.cosmic-group-bigbang  { background: rgba(59,130,246,0.07);  border: 1px solid rgba(59,130,246,0.2); }
+.cosmic-group-stellar  { background: rgba(234,179,8,0.07);   border: 1px solid rgba(234,179,8,0.2); }
+.cosmic-group-supernova{ background: rgba(239,68,68,0.07);   border: 1px solid rgba(239,68,68,0.2); }
+.cosmic-group-human    { background: rgba(168,85,247,0.07);  border: 1px solid rgba(168,85,247,0.2); }
+.cosmic-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  display: inline-block; flex-shrink: 0;
+}
+
+/* ─── TECHNOLOGY MODE ───────────────────────────────────────────────── */
+#techLegend {
+  display: none;
+  margin-bottom: 12px;
+  padding: 10px 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+#techLegend h3 { font-size: 0.85rem; margin-bottom: 8px; color: var(--accent); }
+.tech-legend-items { display: flex; flex-wrap: wrap; gap: 6px; }
+.tech-legend-item {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 0.72rem; padding: 3px 8px;
+  border-radius: 20px; border: 1px solid var(--border);
+}
+.tech-icon { font-size: 0.9rem; }
+.tt-tech { margin-top: 6px; border-top: 1px solid var(--border); padding-top: 6px; }
+.tt-tech-title { font-size: 0.72rem; font-weight: 600; color: var(--accent); margin-bottom: 4px; }
+.tt-tech-items { display: flex; flex-wrap: wrap; gap: 4px; }
+.tt-tech-badge {
+  font-size: 0.7rem; padding: 1px 7px;
+  border-radius: 10px; border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.07);
+}
 </style>
 </head>
 <body>
@@ -402,6 +537,18 @@ html, body {
 <div id="app">
   <div id="tablePane">
     <div id="ptGrid"></div>
+    <div id="terrainContainer"></div>
+    <div id="terrainLegend">
+      <h3>Chemical Terrain / 化学地形</h3>
+      <p>Height = Atomic Radius &nbsp;|&nbsp; Color = Electronegativity (Low → High)</p>
+      <div class="terrain-scale">
+        <span style="font-size:0.7rem;color:#ef4444">Low EN</span>
+        <div class="terrain-gradient"></div>
+        <span style="font-size:0.7rem;color:#3b82f6">High EN</span>
+      </div>
+    </div>
+    <div id="cosmicContainer"></div>
+    <div id="techLegend"></div>
     <div id="legend"></div>
     <div id="controls">
       <label for="catFilter" id="lbl-filter">分類フィルター</label>
@@ -409,6 +556,9 @@ html, body {
         <option value="all">すべて</option>
       </select>
       <button id="motionBtn" type="button">回転: ON</button>
+      <button id="terrainBtn" type="button">Terrain</button>
+      <button id="cosmicBtn" type="button">Cosmic Origin</button>
+      <button id="techBtn" type="button">Technology</button>
     </div>
     <div id="studyPanel">
       <h2 id="studyTitle">学習ポイント</h2>
@@ -692,6 +842,9 @@ function toggleLang() {
   populateFilter();
   // re-render detail if open
   if (currentZ) showDetail(currentZ);
+  // update dynamic mode views if active
+  if (typeof cosmicMode !== 'undefined' && cosmicMode) buildCosmicView();
+  if (typeof techMode !== 'undefined' && techMode) buildTechLegend();
 }
 
 function updateStaticLabels() {
@@ -865,6 +1018,7 @@ function showTooltip(ev, z) {
   tooltip.style.display = 'block';
   tooltipVisible = true;
   posTooltip(ev);
+  appendTechInfo(z);
 }
 
 function posTooltip(ev) {
@@ -1071,6 +1225,431 @@ document.getElementById('catFilter').addEventListener('change', (ev) => {
 });
 document.getElementById('motionBtn').addEventListener('click', toggleMotion);
 window.addEventListener('resize', handleResize);
+
+// ═══════════════════════════════════════════════════════════════════════════
+// TERRAIN MODE
+// ═══════════════════════════════════════════════════════════════════════════
+const ATOMIC_RADIUS = {
+  H:53,  He:31,  Li:167, Be:112, B:87,  C:67,  N:56,  O:48,  F:42,  Ne:38,
+  Na:190,Mg:145, Al:118, Si:111, P:98,  S:88,  Cl:79, Ar:71,
+  K:243, Ca:194, Sc:184, Ti:176, V:171, Cr:166,Mn:161,Fe:156,Co:152,
+  Ni:149,Cu:145, Zn:142, Ga:136, Ge:125,As:114,Se:103,Br:94, Kr:88,
+  Rb:265,Sr:219, Y:212,  Zr:206, Nb:198,Mo:190,Tc:183,Ru:178,Rh:173,
+  Pd:169,Ag:165, Cd:161, In:156, Sn:145,Sb:133,Te:123,I:115, Xe:108,
+  Cs:298,Ba:253, La:226, Ce:210, Pr:247,Nd:206,Pm:205,Sm:185,Eu:185,
+  Gd:180,Tb:175, Dy:175, Ho:175, Er:175,Tm:175,Yb:175,Lu:175,
+  Hf:208,Ta:200, W:193,  Re:188, Os:185,Ir:180,Pt:177,Au:174,Hg:171,
+  Tl:156,Pb:154, Bi:143, Po:135, At:127,Rn:120,
+  Fr:300,Ra:265, Ac:215, Th:206, Pa:200,U:196, Np:190,Pu:187,Am:180,
+  Cm:169,Bk:168, Cf:168, Es:165, Fm:167,Md:173,No:176,Lr:161
+};
+const ELECTRONEGATIVITY = {
+  H:2.20, He:0,   Li:0.98,Be:1.57,B:2.04, C:2.55, N:3.04, O:3.44, F:3.98, Ne:0,
+  Na:0.93,Mg:1.31,Al:1.61,Si:1.90,P:2.19, S:2.58, Cl:3.16,Ar:0,
+  K:0.82, Ca:1.00,Sc:1.36,Ti:1.54,V:1.63, Cr:1.66,Mn:1.55,Fe:1.83,Co:1.88,
+  Ni:1.91,Cu:1.90,Zn:1.65,Ga:1.81,Ge:2.01,As:2.18,Se:2.55,Br:2.96,Kr:3.00,
+  Rb:0.82,Sr:0.95,Y:1.22, Zr:1.33,Nb:1.60,Mo:2.16,Tc:1.90,Ru:2.20,Rh:2.28,
+  Pd:2.20,Ag:1.93,Cd:1.69,In:1.78,Sn:1.96,Sb:2.05,Te:2.10,I:2.66, Xe:2.60,
+  Cs:0.79,Ba:0.89,La:1.10,Ce:1.12,Pr:1.13,Nd:1.14,Pm:1.13,Sm:1.17,Eu:1.20,
+  Gd:1.20,Tb:1.10,Dy:1.22,Ho:1.23,Er:1.24,Tm:1.25,Yb:1.10,Lu:1.27,
+  Hf:1.30,Ta:1.50,W:2.36, Re:1.90,Os:2.20,Ir:2.20,Pt:2.28,Au:2.54,Hg:2.00,
+  Tl:1.62,Pb:2.33,Bi:2.02,Po:2.00,At:2.20,Rn:2.20,
+  Fr:0.70,Ra:0.90,Ac:1.10,Th:1.30,Pa:1.50,U:1.38, Np:1.36,Pu:1.28,Am:1.30,
+  Cm:1.30,Bk:1.30,Cf:1.30,Es:1.30,Fm:1.30,Md:1.30,No:1.30,Lr:1.30
+};
+
+let terrainMode = false;
+let terrainRenderer = null, terrainScene = null, terrainCamera = null, terrainAnimId = null;
+
+function getAtomicRadius(sym) {
+  if (ATOMIC_RADIUS[sym]) return ATOMIC_RADIUS[sym];
+  const el = ELEMENTS.find(e => e[1] === sym);
+  if (!el) return 150;
+  const period = el[6] || 4;
+  const group = el[7] || 9;
+  return Math.max(50, 250 - (group || 9) * 8 + period * 12);
+}
+
+function getElectronegativity(sym) {
+  return ELECTRONEGATIVITY[sym] !== undefined ? ELECTRONEGATIVITY[sym] : 1.5;
+}
+
+function enToColor(en) {
+  // 0 = red, ~4 = blue, linear interpolation
+  const frac = Math.min(1, Math.max(0, en / 4.0));
+  // Red(239,68,68) → Yellow(234,179,8) at 0.5 → Blue(59,130,246) at 1.0
+  let r, g, b;
+  if (frac < 0.5) {
+    const t = frac * 2;
+    r = Math.round(239 + (234 - 239) * t);
+    g = Math.round(68  + (179 - 68)  * t);
+    b = Math.round(68  + (8   - 68)  * t);
+  } else {
+    const t = (frac - 0.5) * 2;
+    r = Math.round(234 + (59  - 234) * t);
+    g = Math.round(179 + (130 - 179) * t);
+    b = Math.round(8   + (246 - 8)   * t);
+  }
+  return (r << 16) | (g << 8) | b;
+}
+
+function toggleTerrain() {
+  terrainMode = !terrainMode;
+  const btn = document.getElementById('terrainBtn');
+  const container = document.getElementById('terrainContainer');
+  const terrLegend = document.getElementById('terrainLegend');
+  const ptGrid = document.getElementById('ptGrid');
+  const legendEl = document.getElementById('legend');
+  if (terrainMode) {
+    if (cosmicMode) toggleCosmic();
+    if (techMode) toggleTech();
+    btn.classList.add('mode-active');
+    ptGrid.style.display = 'none';
+    legendEl.style.display = 'none';
+    container.style.display = 'block';
+    terrLegend.style.display = 'block';
+    buildTerrainScene();
+  } else {
+    btn.classList.remove('mode-active');
+    ptGrid.style.display = '';
+    legendEl.style.display = '';
+    container.style.display = 'none';
+    terrLegend.style.display = 'none';
+    destroyTerrainScene();
+  }
+}
+
+function buildTerrainScene() {
+  const container = document.getElementById('terrainContainer');
+  if (terrainRenderer) destroyTerrainScene();
+
+  const W = container.clientWidth || 800;
+  const H = 500;
+  terrainScene = new THREE.Scene();
+  terrainScene.fog = new THREE.FogExp2(0x020617, 0.012);
+
+  terrainCamera = new THREE.PerspectiveCamera(45, W / H, 0.1, 300);
+  terrainCamera.position.set(0, 22, 42);
+  terrainCamera.lookAt(0, 2, 0);
+
+  terrainRenderer = new THREE.WebGLRenderer({ antialias: true });
+  terrainRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  terrainRenderer.setSize(W, H);
+  terrainRenderer.setClearColor(0x020617);
+  container.appendChild(terrainRenderer.domElement);
+
+  // Lighting
+  const ambient = new THREE.AmbientLight(0xffffff, 0.4);
+  terrainScene.add(ambient);
+  const dirLight = new THREE.DirectionalLight(0xffffff, 1.1);
+  dirLight.position.set(15, 30, 20);
+  terrainScene.add(dirLight);
+  const fillLight = new THREE.DirectionalLight(0x3b82f6, 0.3);
+  fillLight.position.set(-15, 10, -10);
+  terrainScene.add(fillLight);
+
+  // Base grid floor
+  const gridHelper = new THREE.GridHelper(70, 70, 0x1e293b, 0x1e293b);
+  terrainScene.add(gridHelper);
+
+  const cols = 18;
+  const rows = 7;
+  const spacing = 3.5;
+  const offsetX = -(cols - 1) * spacing / 2;
+  const offsetZ = -(rows - 1) * spacing / 2;
+
+  ELEMENTS.forEach(e => {
+    const [z, sym, , , , , period, group] = e;
+    if (!period || !group) return; // lanthanides/actinides skip — no group defined
+    const col = group - 1;
+    const row = period - 1;
+
+    const rawH = getAtomicRadius(sym);
+    const h = Math.max(0.3, rawH / 38);
+    const en = getElectronegativity(sym);
+    const color = enToColor(en);
+
+    // Column body
+    const geo = new THREE.BoxGeometry(spacing * 0.72, h, spacing * 0.72);
+    const mat = new THREE.MeshPhongMaterial({
+      color, emissive: color, emissiveIntensity: 0.12,
+      shininess: 55, transparent: true, opacity: 0.9
+    });
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.position.set(
+      offsetX + col * spacing,
+      h / 2,
+      offsetZ + row * spacing
+    );
+    mesh.userData = { z, sym };
+    terrainScene.add(mesh);
+
+    // Top cap (glowing sphere)
+    const topGeo = new THREE.SphereGeometry(0.18, 8, 8);
+    const topMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.7 });
+    const topMesh = new THREE.Mesh(topGeo, topMat);
+    topMesh.position.set(mesh.position.x, h + 0.22, mesh.position.z);
+    terrainScene.add(topMesh);
+  });
+
+  // Orbit camera animation
+  let orbitAngle = 0;
+  function terrainAnimate() {
+    terrainAnimId = requestAnimationFrame(terrainAnimate);
+    orbitAngle += 0.004;
+    terrainCamera.position.x = Math.sin(orbitAngle) * 42;
+    terrainCamera.position.z = Math.cos(orbitAngle) * 42;
+    terrainCamera.position.y = 22 + Math.sin(orbitAngle * 0.4) * 4;
+    terrainCamera.lookAt(0, 2, 0);
+    terrainRenderer.render(terrainScene, terrainCamera);
+  }
+  terrainAnimate();
+}
+
+function destroyTerrainScene() {
+  if (terrainAnimId) { cancelAnimationFrame(terrainAnimId); terrainAnimId = null; }
+  if (terrainRenderer) {
+    terrainRenderer.dispose();
+    const c = document.getElementById('terrainContainer');
+    c.innerHTML = '';
+    terrainRenderer = null; terrainScene = null; terrainCamera = null;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// COSMIC MODE
+// ═══════════════════════════════════════════════════════════════════════════
+const COSMIC_ORIGINS = {
+  BIG_BANG: {
+    elements: [1, 2],
+    color: '#3b82f6', bgClass: 'cosmic-group-bigbang', elClass: 'cosmic-big-bang', dot: '#60a5fa',
+    titleJA: '🌌 ビッグバン元素合成',
+    titleEN: '🌌 Big Bang Nucleosynthesis',
+    subtitleJA: '宇宙誕生直後（約138億年前）—水素とヘリウムが生成',
+    subtitleEN: 'Formed moments after the Big Bang (~13.8 billion years ago)'
+  },
+  STELLAR_FUSION: {
+    elements: [3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,
+               19,20,21,22,23,24,25,26],
+    color: '#eab308', bgClass: 'cosmic-group-stellar', elClass: 'cosmic-stellar', dot: '#fde047',
+    titleJA: '⭐ 恒星内核融合',
+    titleEN: '⭐ Stellar Nucleosynthesis',
+    subtitleJA: '恒星の核融合反応によって数十億年かけて生成（Li〜Fe付近）',
+    subtitleEN: 'Forged in stellar cores over billions of years (Li through Fe region)'
+  },
+  SUPERNOVA: {
+    elements: [27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,
+               47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,
+               67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83],
+    color: '#ef4444', bgClass: 'cosmic-group-supernova', elClass: 'cosmic-supernova', dot: '#fca5a5',
+    titleJA: '💥 超新星爆発・中性子星合体',
+    titleEN: '💥 Supernovae & Neutron Star Mergers',
+    subtitleJA: '超新星爆発のr-process（速中性子捕獲）で重元素が生成',
+    subtitleEN: 'Heavy elements created in violent stellar explosions via rapid neutron capture'
+  },
+  HUMAN_SYNTHESIS: {
+    elements: [],
+    color: '#a855f7', bgClass: 'cosmic-group-human', elClass: 'cosmic-human', dot: '#d8b4fe',
+    titleJA: '🔬 放射性崩壊・人工合成',
+    titleEN: '🔬 Radioactive Decay & Human Synthesis',
+    subtitleJA: '自然放射性崩壊産物、または加速器で人工合成された元素',
+    subtitleEN: 'Naturally via radioactive decay, or synthesized in particle accelerators'
+  }
+};
+// Compute human synthesis elements (those not assigned to other groups)
+(function() {
+  const assigned = new Set();
+  ['BIG_BANG','STELLAR_FUSION','SUPERNOVA'].forEach(k =>
+    COSMIC_ORIGINS[k].elements.forEach(z => assigned.add(z))
+  );
+  ELEMENTS.forEach(e => { if (!assigned.has(e[0])) COSMIC_ORIGINS.HUMAN_SYNTHESIS.elements.push(e[0]); });
+})();
+
+let cosmicMode = false;
+
+function toggleCosmic() {
+  cosmicMode = !cosmicMode;
+  const btn = document.getElementById('cosmicBtn');
+  const container = document.getElementById('cosmicContainer');
+  const ptGrid = document.getElementById('ptGrid');
+  const legendEl = document.getElementById('legend');
+  if (cosmicMode) {
+    if (terrainMode) toggleTerrain();
+    if (techMode) toggleTech();
+    btn.classList.add('mode-active');
+    ptGrid.style.display = 'none';
+    legendEl.style.display = 'none';
+    container.style.display = 'block';
+    buildCosmicView();
+  } else {
+    btn.classList.remove('mode-active');
+    ptGrid.style.display = '';
+    legendEl.style.display = '';
+    container.style.display = 'none';
+  }
+}
+
+function buildCosmicView() {
+  const container = document.getElementById('cosmicContainer');
+  const isJA = lang === 'ja';
+  let html = `<h2>${isJA ? '🌌 元素の宇宙的起源' : '🌌 Cosmic Origins of Elements'}</h2>`;
+  ['BIG_BANG','STELLAR_FUSION','SUPERNOVA','HUMAN_SYNTHESIS'].forEach(key => {
+    const orig = COSMIC_ORIGINS[key];
+    html += `
+      <div class="cosmic-group ${orig.bgClass}">
+        <div class="cosmic-group-title">
+          <span class="cosmic-dot" style="background:${orig.dot}"></span>
+          <span>${isJA ? orig.titleJA : orig.titleEN}</span>
+        </div>
+        <div class="cosmic-group-subtitle">${isJA ? orig.subtitleJA : orig.subtitleEN}</div>
+        <div class="cosmic-elements" id="cosmic-group-${key}">`;
+    orig.elements.forEach(z => {
+      const e = ELEM[z];
+      if (!e) return;
+      html += `<span class="cosmic-el ${orig.elClass}" data-z="${z}"
+        title="${isJA ? e[2] : e[3]}" onclick="selectElement(${z})">${e[1]}</span>`;
+    });
+    html += `</div></div>`;
+  });
+  container.innerHTML = html;
+
+  // Animate elements in timeline order with staggered delay per group
+  ['BIG_BANG','STELLAR_FUSION','SUPERNOVA','HUMAN_SYNTHESIS'].forEach((key, gi) => {
+    const baseDelay = gi * 350;
+    container.querySelectorAll(`#cosmic-group-${key} .cosmic-el`).forEach((el, i) => {
+      setTimeout(() => el.classList.add('visible'), baseDelay + i * 25);
+    });
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// TECHNOLOGY MODE
+// ═══════════════════════════════════════════════════════════════════════════
+const TECH_GROUPS = {
+  BATTERY: {
+    elements: [3,6,8,25,27,28,30,82], // Li,C,O,Mn,Co,Ni,Zn,Pb
+    color: '#22c55e', icon: '🔋',
+    nameJA: 'バッテリー', nameEN: 'Battery'
+  },
+  SEMICONDUCTOR: {
+    elements: [5,14,31,32,33,48,49,52,53], // B,Si,Ga,Ge,As,Cd,In,Te,I
+    color: '#38bdf8', icon: '💻',
+    nameJA: '半導体', nameEN: 'Semiconductor'
+  },
+  MAGNET: {
+    elements: [26,27,28,60,62,66,57,65], // Fe,Co,Ni,Nd,Sm,Dy,La,Tb
+    color: '#f97316', icon: '🧲',
+    nameJA: '磁石', nameEN: 'Magnet'
+  },
+  CATALYST: {
+    elements: [78,45,77,46,44,58,76,47], // Pt,Rh,Ir,Pd,Ru,Ce,Os,Ag
+    color: '#eab308', icon: '⚗️',
+    nameJA: '触媒', nameEN: 'Catalyst'
+  },
+  NUCLEAR: {
+    elements: [92,94,90,72,48,64,5,47], // U,Pu,Th,Hf,Cd,Gd,B,Ag
+    color: '#a855f7', icon: '☢️',
+    nameJA: '核燃料/遮蔽', nameEN: 'Nuclear'
+  },
+  BIOLOGY: {
+    elements: [26,20,12,15,53,30,29,34,7,8,16,11,19], // Fe,Ca,Mg,P,I,Zn,Cu,Se,N,O,S,Na,K
+    color: '#ec4899', icon: '🧬',
+    nameJA: '生体医療', nameEN: 'Biology'
+  }
+};
+
+// Reverse lookup: Z → list of tech group keys
+const TECH_BY_Z = {};
+Object.entries(TECH_GROUPS).forEach(([key, tg]) => {
+  tg.elements.forEach(z => {
+    if (!TECH_BY_Z[z]) TECH_BY_Z[z] = [];
+    TECH_BY_Z[z].push(key);
+  });
+});
+
+let techMode = false;
+
+function toggleTech() {
+  techMode = !techMode;
+  const btn = document.getElementById('techBtn');
+  const techLeg = document.getElementById('techLegend');
+  if (techMode) {
+    if (terrainMode) toggleTerrain();
+    if (cosmicMode) toggleCosmic();
+    btn.classList.add('mode-active');
+    techLeg.style.display = 'block';
+    buildTechLegend();
+    applyTechHighlight();
+  } else {
+    btn.classList.remove('mode-active');
+    techLeg.style.display = 'none';
+    removeTechHighlight();
+  }
+}
+
+function applyTechHighlight() {
+  document.querySelectorAll('.el-card').forEach(card => {
+    const z = parseInt(card.dataset.z);
+    const groups = TECH_BY_Z[z];
+    if (groups && groups.length > 0) {
+      const tg = TECH_GROUPS[groups[0]];
+      card.style.opacity = '1';
+      card.style.filter = 'none';
+      card.style.boxShadow = `0 0 10px ${tg.color}99, 0 0 22px ${tg.color}44`;
+      card.style.borderColor = tg.color;
+    } else {
+      card.style.opacity = '0.15';
+      card.style.filter = 'grayscale(0.9)';
+      card.style.boxShadow = 'none';
+      card.style.borderColor = '';
+    }
+  });
+}
+
+function removeTechHighlight() {
+  document.querySelectorAll('.el-card').forEach(card => {
+    card.style.opacity = '';
+    card.style.filter = '';
+    card.style.boxShadow = '';
+    card.style.borderColor = '';
+  });
+  applyCategoryFilter();
+}
+
+function buildTechLegend() {
+  const leg = document.getElementById('techLegend');
+  const isJA = lang === 'ja';
+  let html = `<h3>${isJA ? 'テクノロジーマップ' : 'Technology Map'}</h3><div class="tech-legend-items">`;
+  Object.entries(TECH_GROUPS).forEach(([, tg]) => {
+    html += `<div class="tech-legend-item" style="border-color:${tg.color}55;color:${tg.color}">
+      <span class="tech-icon">${tg.icon}</span>
+      <span>${isJA ? tg.nameJA : tg.nameEN}</span>
+    </div>`;
+  });
+  html += '</div>';
+  leg.innerHTML = html;
+}
+
+function appendTechInfo(z) {
+  const groups = TECH_BY_Z[z];
+  if (!groups || !groups.length) return;
+  const isJA = lang === 'ja';
+  const title = isJA ? 'テクノロジー用途' : 'Technology Uses';
+  const badgesHTML = groups.map(key => {
+    const tg = TECH_GROUPS[key];
+    return `<span class="tt-tech-badge" style="border-color:${tg.color}55;color:${tg.color}">${tg.icon} ${isJA ? tg.nameJA : tg.nameEN}</span>`;
+  }).join('');
+  const div = document.createElement('div');
+  div.className = 'tt-tech';
+  div.innerHTML = `<div class="tt-tech-title">${title}</div><div class="tt-tech-items">${badgesHTML}</div>`;
+  tooltip.appendChild(div);
+}
+
+// ─── INIT NEW FEATURES ──────────────────────────────────────────────────────
+document.getElementById('terrainBtn').addEventListener('click', toggleTerrain);
+document.getElementById('cosmicBtn').addEventListener('click', toggleCosmic);
+document.getElementById('techBtn').addEventListener('click', toggleTech);
+
 // Click H by default
 selectElement(1);
 </script>
