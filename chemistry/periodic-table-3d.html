@@ -195,6 +195,58 @@ html, body {
   border-radius: 8px;
   border: 1px solid var(--border);
 }
+#studyPanel {
+  margin-top: 12px;
+  padding: 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+#studyPanel h2 {
+  font-size: 0.95rem;
+  margin-bottom: 8px;
+}
+#studyPanel ul {
+  margin-left: 1.2em;
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  line-height: 1.7;
+}
+#controls {
+  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  padding: 10px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+#controls label {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+#controls select,
+#controls button {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  border-radius: 6px;
+  padding: 5px 8px;
+  font-size: 0.78rem;
+}
+#controls button {
+  cursor: pointer;
+}
+.el-card:focus-visible,
+#langBtn:focus-visible,
+#controls button:focus-visible,
+#controls select:focus-visible,
+#wikiLink:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
 .legend-item {
   display: flex;
   align-items: center;
@@ -351,6 +403,17 @@ html, body {
   <div id="tablePane">
     <div id="ptGrid"></div>
     <div id="legend"></div>
+    <div id="controls">
+      <label for="catFilter" id="lbl-filter">分類フィルター</label>
+      <select id="catFilter">
+        <option value="all">すべて</option>
+      </select>
+      <button id="motionBtn" type="button">回転: ON</button>
+    </div>
+    <div id="studyPanel">
+      <h2 id="studyTitle">学習ポイント</h2>
+      <ul id="studyList"></ul>
+    </div>
   </div>
   <div id="detailPane" class="hidden">
     <div id="d3Container"></div>
@@ -547,16 +610,76 @@ POSITIONS.forEach(([z,r,c]) => { POS_MAP[z] = [r,c]; });
 
 // ─── LANGUAGE STATE ────────────────────────────────────────────────────────
 let lang = 'ja';
+let selectedCategory = 'all';
+let motionEnabled = true;
+
+const UI_TEXT = {
+  ja: {
+    title: '⚛ 3D周期表 — 全118元素',
+    lblPeriod: '周期',
+    lblGroup: '族',
+    lblShells: '電子配置',
+    lblDisc: '発見年',
+    lblDiscBy: '発見者',
+    lblFilter: '分類フィルター',
+    all: 'すべて',
+    motionOn: '回転: ON',
+    motionOff: '回転: OFF',
+    studyTitle: '学習ポイント',
+    studyTips: [
+      '周期が進むほど（左→右）原子半径は小さくなる傾向があります。',
+      '同じ族では最外殻電子数が似るため、化学的性質が似ます。',
+      '金属は左下、非金属は右上に多く分布します。',
+      'この3Dモデルは学習用の簡略化（ボーア型）です。実際の電子雲とは異なります。'
+    ],
+    spacerLA: '57La→71Lu',
+    spacerAC: '89Ac→103Lr',
+    placeholderAncient: '古代',
+    wiki: 'Wikipedia',
+    mass: '原子量',
+    category: '分類',
+    shells: '電子配置',
+    discoveredShort: '発見',
+    etymology: '語源：'
+  },
+  en: {
+    title: '⚛ 3D Periodic Table — All 118 Elements',
+    lblPeriod: 'Period',
+    lblGroup: 'Group',
+    lblShells: 'Electron Config',
+    lblDisc: 'Discovered',
+    lblDiscBy: 'Discoverer',
+    lblFilter: 'Category Filter',
+    all: 'All',
+    motionOn: 'Rotation: ON',
+    motionOff: 'Rotation: OFF',
+    studyTitle: 'Study Notes',
+    studyTips: [
+      'Across a period (left→right), atomic radius tends to decrease.',
+      'Elements in the same group have similar valence electrons and similar chemistry.',
+      'Metals are concentrated in the lower-left, nonmetals in the upper-right.',
+      'This 3D model is a simplified Bohr-style visualization, not a quantum electron cloud.'
+    ],
+    spacerLA: '57La→71Lu',
+    spacerAC: '89Ac→103Lr',
+    placeholderAncient: 'Ancient',
+    wiki: 'Wikipedia',
+    mass: 'Mass',
+    category: 'Category',
+    shells: 'Shells',
+    discoveredShort: 'Disc.',
+    etymology: 'Etymology: '
+  }
+};
+
+function t(key) {
+  return UI_TEXT[lang][key];
+}
+
 function toggleLang() {
   lang = lang === 'ja' ? 'en' : 'ja';
   document.getElementById('langBtn').textContent = lang === 'ja' ? 'EN' : 'JA';
-  document.getElementById('pageTitle').textContent = lang === 'ja' ? '⚛ 3D周期表 — 全118元素' : '⚛ 3D Periodic Table — All 118 Elements';
-  // update labels
-  document.getElementById('lbl-period').textContent = lang === 'ja' ? '周期' : 'Period';
-  document.getElementById('lbl-group').textContent = lang === 'ja' ? '族' : 'Group';
-  document.getElementById('lbl-shells').textContent = lang === 'ja' ? '電子配置' : 'Electron Config';
-  document.getElementById('lbl-disc').textContent = lang === 'ja' ? '発見年' : 'Discovered';
-  document.getElementById('lbl-discby').textContent = lang === 'ja' ? '発見者' : 'Discoverer';
+  updateStaticLabels();
   // update all el-name spans
   document.querySelectorAll('.el-name').forEach(el => {
     const z = parseInt(el.closest('.el-card').dataset.z);
@@ -565,8 +688,25 @@ function toggleLang() {
   });
   // update legend
   renderLegend();
+  renderStudyPanel();
+  populateFilter();
   // re-render detail if open
   if (currentZ) showDetail(currentZ);
+}
+
+function updateStaticLabels() {
+  document.getElementById('pageTitle').textContent = t('title');
+  document.getElementById('lbl-period').textContent = t('lblPeriod');
+  document.getElementById('lbl-group').textContent = t('lblGroup');
+  document.getElementById('lbl-shells').textContent = t('lblShells');
+  document.getElementById('lbl-disc').textContent = t('lblDisc');
+  document.getElementById('lbl-discby').textContent = t('lblDiscBy');
+  document.getElementById('lbl-filter').textContent = t('lblFilter');
+  document.getElementById('motionBtn').textContent = motionEnabled ? t('motionOn') : t('motionOff');
+}
+
+function formatMass(mass) {
+  return typeof mass === 'number' ? mass.toFixed(3).replace(/\.000$/, '') : mass;
 }
 
 // ─── CATEGORY CONFIG ───────────────────────────────────────────────────────
@@ -602,7 +742,10 @@ function buildGrid() {
     const [row, col] = pos;
     const div = document.createElement('div');
     div.className = `el-card ${CATS[cat].css}`;
+    div.setAttribute('tabindex', '0');
+    div.setAttribute('role', 'button');
     div.dataset.z = z;
+    div.dataset.cat = cat;
     div.style.gridRow = row;
     div.style.gridColumn = col;
     div.innerHTML = `
@@ -610,9 +753,15 @@ function buildGrid() {
       <span class="el-flag">${e[11]}</span>
       <span class="el-sym">${sym}</span>
       <span class="el-name">${lang==='ja'?nameJA:nameEN}</span>
-      <span class="el-mass">${typeof mass==='number'?mass.toFixed(mass<10?3:mass<100?3:3):mass}</span>
+      <span class="el-mass">${formatMass(mass)}</span>
     `;
     div.addEventListener('click', () => selectElement(z));
+    div.addEventListener('keydown', (ev) => {
+      if (ev.key === 'Enter' || ev.key === ' ') {
+        ev.preventDefault();
+        selectElement(z);
+      }
+    });
     div.addEventListener('mouseenter', (ev) => showTooltip(ev, z));
     div.addEventListener('mouseleave', hideTooltip);
     div.addEventListener('mousemove', moveTooltip);
@@ -645,15 +794,17 @@ function buildGrid() {
   laLabel.className = 'pt-la-label';
   laLabel.style.gridRow = 9;
   laLabel.style.gridColumn = '1/3';
-  laLabel.textContent = '57La→71Lu';
+  laLabel.textContent = t('spacerLA');
   grid.appendChild(laLabel);
 
   const acLabel = document.createElement('div');
   acLabel.className = 'pt-ac-label';
   acLabel.style.gridRow = 10;
   acLabel.style.gridColumn = '1/3';
-  acLabel.textContent = '89Ac→103Lr';
+  acLabel.textContent = t('spacerAC');
   grid.appendChild(acLabel);
+
+  applyCategoryFilter();
 }
 
 // ─── LEGEND ────────────────────────────────────────────────────────────────
@@ -665,6 +816,28 @@ function renderLegend() {
        <span>${lang==='ja'?v.ja:v.en}</span>
      </div>`
   ).join('');
+}
+
+function populateFilter() {
+  const select = document.getElementById('catFilter');
+  const current = selectedCategory;
+  select.innerHTML = `<option value="all">${t('all')}</option>` + Object.entries(CATS).map(([k,v]) =>
+    `<option value="${k}">${lang==='ja' ? v.ja : v.en}</option>`
+  ).join('');
+  select.value = current;
+}
+
+function applyCategoryFilter() {
+  document.querySelectorAll('.el-card').forEach(card => {
+    const show = selectedCategory === 'all' || card.dataset.cat === selectedCategory;
+    card.style.opacity = show ? '1' : '0.22';
+    card.style.filter = show ? 'none' : 'grayscale(0.6)';
+  });
+}
+
+function renderStudyPanel() {
+  document.getElementById('studyTitle').textContent = t('studyTitle');
+  document.getElementById('studyList').innerHTML = t('studyTips').map(tip => `<li>${tip}</li>`).join('');
 }
 
 // ─── TOOLTIP ───────────────────────────────────────────────────────────────
@@ -682,10 +855,10 @@ function showTooltip(ev, z) {
         <div class="tt-num">#${e[0]} &nbsp; ${e[11]}</div>
       </div>
     </div>
-    <div class="tt-row"><span class="tt-label">${lang==='ja'?'原子量':'Mass'}</span><span>${e[4]}</span></div>
-    <div class="tt-row"><span class="tt-label">${lang==='ja'?'分類':'Category'}</span><span>${lang==='ja'?cat.ja:cat.en}</span></div>
-    <div class="tt-row"><span class="tt-label">${lang==='ja'?'電子配置':'Shells'}</span><span>${e[8].join('-')}</span></div>
-    ${e[9]?`<div class="tt-row"><span class="tt-label">${lang==='ja'?'発見':'Disc.'}</span><span>${e[9]}</span></div>`:''}
+    <div class="tt-row"><span class="tt-label">${t('mass')}</span><span>${e[4]}</span></div>
+    <div class="tt-row"><span class="tt-label">${t('category')}</span><span>${lang==='ja'?cat.ja:cat.en}</span></div>
+    <div class="tt-row"><span class="tt-label">${t('shells')}</span><span>${e[8].join('-')}</span></div>
+    ${e[9]?`<div class="tt-row"><span class="tt-label">${t('discoveredShort')}</span><span>${e[9]}</span></div>`:''}
     <div class="tt-etym">${lang==='ja'?e[12]:e[13]}</div>
     <div class="tt-desc">${lang==='ja'?e[14]:e[15]}</div>
   `;
@@ -737,15 +910,15 @@ function showDetail(z) {
   document.getElementById('dPeriod').textContent = e[6] || '—';
   document.getElementById('dGroup').textContent = e[7] || '—';
   document.getElementById('dShells').textContent = e[8].join(' - ');
-  document.getElementById('dDisc').textContent = e[9] ? e[9] : (lang==='ja'?'古代':'Ancient');
+  document.getElementById('dDisc').textContent = e[9] ? e[9] : t('placeholderAncient');
   document.getElementById('dDiscBy').textContent = e[10];
   document.getElementById('elDesc').textContent = lang==='ja' ? e[14] : e[15];
-  document.getElementById('elEtym').textContent = (lang==='ja'?'語源：':'Etymology: ') + (lang==='ja'?e[12]:e[13]);
+  document.getElementById('elEtym').textContent = t('etymology') + (lang==='ja'?e[12]:e[13]);
   const wl = document.getElementById('wikiLink');
   wl.href = lang==='ja'
     ? `https://ja.wikipedia.org/wiki/${encodeURIComponent(e[2])}`
     : `https://en.wikipedia.org/wiki/${encodeURIComponent(e[3])}`;
-  wl.textContent = 'Wikipedia';
+  wl.textContent = t('wiki');
   // Build 3D model
   build3D(z);
 }
@@ -857,7 +1030,7 @@ function build3D(z) {
     animId = requestAnimationFrame(animate);
     t += 0.016;
     // Auto-rotate slowly when not dragging
-    if (!isDragging) rotGroup.rotation.y += 0.005;
+    if (motionEnabled && !isDragging) rotGroup.rotation.y += 0.005;
     // Orbit electrons
     electrons.forEach(({ mesh, shellR, si, angle }) => {
       const speed = 0.8 / (si + 1);
@@ -871,9 +1044,33 @@ function build3D(z) {
   animate();
 }
 
+function toggleMotion() {
+  motionEnabled = !motionEnabled;
+  document.getElementById('motionBtn').textContent = motionEnabled ? t('motionOn') : t('motionOff');
+}
+
+function handleResize() {
+  if (!renderer || !camera) return;
+  const container = document.getElementById('d3Container');
+  const W = container.clientWidth || 340;
+  const H = 280;
+  camera.aspect = W / H;
+  camera.updateProjectionMatrix();
+  renderer.setSize(W, H);
+}
+
 // ─── INIT ───────────────────────────────────────────────────────────────────
 buildGrid();
 renderLegend();
+populateFilter();
+renderStudyPanel();
+updateStaticLabels();
+document.getElementById('catFilter').addEventListener('change', (ev) => {
+  selectedCategory = ev.target.value;
+  applyCategoryFilter();
+});
+document.getElementById('motionBtn').addEventListener('click', toggleMotion);
+window.addEventListener('resize', handleResize);
 // Click H by default
 selectElement(1);
 </script>
