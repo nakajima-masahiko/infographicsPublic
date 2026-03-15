@@ -393,6 +393,27 @@ html, body {
 ::-webkit-scrollbar-track { background: var(--bg-main); }
 ::-webkit-scrollbar-thumb { background: var(--bg-panel); border-radius: 3px; }
 
+/* ─── QUIZ LAB LINK BUTTON ──────────────────────────────────────────── */
+#quizLabBtn {
+  display: inline-block;
+  text-decoration: none;
+  background: linear-gradient(135deg, rgba(56,189,248,0.15), rgba(129,140,248,0.15));
+  border: 1px solid rgba(56,189,248,0.5);
+  color: var(--accent);
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 0.78rem;
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+#quizLabBtn:hover {
+  background: linear-gradient(135deg, rgba(56,189,248,0.35), rgba(129,140,248,0.35));
+  border-color: var(--accent);
+  box-shadow: 0 0 8px var(--accent-glow);
+}
 /* ─── MODE BUTTON ACTIVE ────────────────────────────────────────────── */
 #controls button.mode-active {
   background: var(--accent);
@@ -559,6 +580,7 @@ html, body {
       <button id="terrainBtn" type="button">Terrain</button>
       <button id="cosmicBtn" type="button">Cosmic Origin</button>
       <button id="techBtn" type="button">Technology</button>
+      <a href="./periodic-quiz-lab.html" id="quizLabBtn" type="button">Quiz Lab</a>
     </div>
     <div id="studyPanel">
       <h2 id="studyTitle">学習ポイント</h2>
