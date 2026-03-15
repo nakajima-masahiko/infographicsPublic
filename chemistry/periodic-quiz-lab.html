@@ -1,0 +1,1498 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>元素クイズラボ / Chemistry Quiz Lab</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ─────────────────────────────────────────────────────────────────────────────
+   VARIABLES & RESET
+───────────────────────────────────────────────────────────────────────────── */
+:root {
+  --bg-main:    #020617;
+  --bg-card:    #0f172a;
+  --bg-panel:   #1e293b;
+  --bg-glass:   rgba(15,23,42,0.7);
+  --text-primary:   #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted:     #475569;
+  --border:     rgba(148,163,184,0.15);
+  --accent:     #38bdf8;
+  --accent2:    #818cf8;
+  --accent-glow: rgba(56,189,248,0.3);
+  --success:    #22c55e;
+  --danger:     #ef4444;
+  --warning:    #f59e0b;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  background: var(--bg-main);
+  color: var(--text-primary);
+  font-family: 'Noto Sans JP', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   SCROLLBAR
+───────────────────────────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-main); }
+::-webkit-scrollbar-thumb { background: var(--bg-panel); border-radius: 3px; }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   HEADER
+───────────────────────────────────────────────────────────────────────────── */
+#header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  background: rgba(15,23,42,0.95);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+#header-left { display: flex; align-items: center; gap: 12px; }
+#backBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  text-decoration: none;
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 5px 10px;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+#backBtn:hover { color: var(--accent); border-color: var(--accent); }
+#header h1 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  white-space: nowrap;
+}
+#header-right { display: flex; align-items: center; gap: 8px; }
+#langBtn {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  padding: 6px 14px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+#langBtn:hover { background: var(--accent); color: #000; border-color: var(--accent); }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   MAIN LAYOUT
+───────────────────────────────────────────────────────────────────────────── */
+#main {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px 16px 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   INTRO CARD / ELEMENT OF THE DAY
+───────────────────────────────────────────────────────────────────────────── */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px 24px;
+}
+.card-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.card-subtitle {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+#eotd {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+#eotd-symbol {
+  width: 80px;
+  height: 80px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(135deg, #0f172a, #1e293b);
+  border: 2px solid var(--accent);
+  box-shadow: 0 0 16px var(--accent-glow);
+  flex-shrink: 0;
+}
+#eotd-symbol small { font-size: 0.6rem; font-weight: 400; color: var(--text-secondary); margin-top: 2px; }
+#eotd-info { flex: 1; min-width: 180px; }
+#eotd-name { font-size: 1.1rem; font-weight: 700; margin-bottom: 4px; }
+#eotd-fact { font-size: 0.84rem; color: var(--text-secondary); line-height: 1.65; }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   MODE SELECTOR
+───────────────────────────────────────────────────────────────────────────── */
+#mode-selector {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 12px;
+}
+.mode-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 14px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.22s;
+  font-family: inherit;
+  color: var(--text-primary);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.mode-btn:hover {
+  border-color: var(--accent);
+  box-shadow: 0 0 12px var(--accent-glow);
+  background: var(--bg-panel);
+}
+.mode-btn.active {
+  border-color: var(--accent);
+  background: linear-gradient(135deg, rgba(56,189,248,0.12), rgba(129,140,248,0.12));
+  box-shadow: 0 0 14px var(--accent-glow);
+}
+.mode-btn .mode-icon { font-size: 1.6rem; }
+.mode-btn .mode-name { font-size: 0.95rem; font-weight: 700; }
+.mode-btn .mode-desc { font-size: 0.76rem; color: var(--text-secondary); line-height: 1.5; }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   QUIZ AREA
+───────────────────────────────────────────────────────────────────────────── */
+#quiz-area { display: none; }
+#quiz-area.visible { display: block; }
+
+#score-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.score-chip {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 5px 14px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.score-chip span { color: var(--accent); font-size: 1rem; }
+#timer-chip { color: var(--warning); }
+#timer-chip span { color: var(--warning); }
+
+#question-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 24px;
+}
+#question-badge {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 20px;
+  margin-bottom: 12px;
+  background: rgba(56,189,248,0.12);
+  border: 1px solid rgba(56,189,248,0.3);
+  color: var(--accent);
+}
+#question-text {
+  font-size: 1.05rem;
+  font-weight: 600;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+#choices {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+@media (max-width: 480px) { #choices { grid-template-columns: 1fr; } }
+
+.choice-btn {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 13px 16px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  text-align: left;
+  transition: all 0.18s;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  line-height: 1.4;
+}
+.choice-btn:hover:not(:disabled) {
+  border-color: var(--accent);
+  background: rgba(56,189,248,0.1);
+}
+.choice-btn:disabled { cursor: not-allowed; }
+.choice-btn.correct {
+  border-color: var(--success);
+  background: rgba(34,197,94,0.15);
+  color: var(--success);
+}
+.choice-btn.wrong {
+  border-color: var(--danger);
+  background: rgba(239,68,68,0.1);
+  color: var(--danger);
+}
+.choice-letter {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+#feedback-box {
+  margin-top: 16px;
+  padding: 14px 18px;
+  border-radius: 10px;
+  font-size: 0.88rem;
+  line-height: 1.65;
+  display: none;
+}
+#feedback-box.correct {
+  background: rgba(34,197,94,0.1);
+  border: 1px solid rgba(34,197,94,0.35);
+  color: #86efac;
+}
+#feedback-box.wrong {
+  background: rgba(239,68,68,0.08);
+  border: 1px solid rgba(239,68,68,0.3);
+  color: #fca5a5;
+}
+#feedback-result { font-weight: 700; font-size: 1rem; margin-bottom: 5px; }
+
+.badge-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+  margin-right: 5px;
+  margin-top: 8px;
+  background: rgba(129,140,248,0.15);
+  border: 1px solid rgba(129,140,248,0.3);
+  color: var(--accent2);
+}
+
+#next-btn {
+  margin-top: 16px;
+  padding: 11px 24px;
+  background: var(--accent);
+  color: #000;
+  border: none;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.92rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: none;
+  transition: all 0.18s;
+}
+#next-btn:hover { background: #7dd3fc; }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   MATCH PAIRS
+───────────────────────────────────────────────────────────────────────────── */
+#match-area { display: none; }
+#match-area.visible { display: block; }
+
+.match-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 16px;
+}
+@media (max-width: 480px) {
+  .match-columns { grid-template-columns: 1fr; }
+}
+.match-col-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  margin-bottom: 8px;
+}
+.match-item {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: all 0.18s;
+  margin-bottom: 8px;
+  text-align: center;
+  user-select: none;
+}
+.match-item:hover:not(.matched):not(.disabled) {
+  border-color: var(--accent);
+  background: rgba(56,189,248,0.1);
+}
+.match-item.selected {
+  border-color: var(--accent2);
+  background: rgba(129,140,248,0.15);
+  box-shadow: 0 0 8px rgba(129,140,248,0.4);
+}
+.match-item.matched {
+  border-color: var(--success);
+  background: rgba(34,197,94,0.12);
+  color: var(--success);
+  cursor: default;
+  opacity: 0.75;
+}
+.match-item.wrong-flash {
+  border-color: var(--danger);
+  background: rgba(239,68,68,0.12);
+  animation: wrongFlash 0.5s ease;
+}
+@keyframes wrongFlash {
+  0%,100% { transform: translateX(0); }
+  20%,60% { transform: translateX(-5px); }
+  40%,80% { transform: translateX(5px); }
+}
+
+#match-result {
+  margin-top: 16px;
+  padding: 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  text-align: center;
+  display: none;
+}
+#match-result .big-score { font-size: 2rem; font-weight: 700; color: var(--accent); }
+#match-result .result-msg { font-size: 0.9rem; color: var(--text-secondary); margin-top: 6px; }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   FAST CHALLENGE RESULT
+───────────────────────────────────────────────────────────────────────────── */
+#result-panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 28px 24px;
+  text-align: center;
+  display: none;
+}
+#result-panel.visible { display: block; }
+#result-rank { font-size: 1.6rem; font-weight: 700; color: var(--accent); margin-bottom: 8px; }
+#result-score-big { font-size: 3rem; font-weight: 700; margin-bottom: 4px; }
+#result-msg { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 18px; line-height: 1.6; }
+#result-achievements { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 18px; }
+.achievement-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 20px;
+  background: rgba(56,189,248,0.12);
+  border: 1px solid rgba(56,189,248,0.3);
+  color: var(--accent);
+}
+#play-again-btn, #back-to-menu-btn {
+  padding: 11px 24px;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.92rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.18s;
+  border: none;
+  margin: 4px;
+}
+#play-again-btn { background: var(--accent); color: #000; }
+#play-again-btn:hover { background: #7dd3fc; }
+#back-to-menu-btn { background: var(--bg-panel); color: var(--text-primary); border: 1px solid var(--border); }
+#back-to-menu-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   LEARNING SUMMARY
+───────────────────────────────────────────────────────────────────────────── */
+#learning-panel { display: none; }
+#learning-panel.visible { display: block; }
+.learn-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+.learn-item:last-child { border-bottom: none; }
+.learn-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 2px; }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   TIMER BAR
+───────────────────────────────────────────────────────────────────────────── */
+#timer-bar-wrap {
+  height: 5px;
+  background: var(--bg-panel);
+  border-radius: 3px;
+  margin-bottom: 14px;
+  overflow: hidden;
+  display: none;
+}
+#timer-bar {
+  height: 100%;
+  background: var(--warning);
+  width: 100%;
+  transition: width 1s linear, background 0.5s;
+  border-radius: 3px;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   RESPONSIVE TWEAKS
+───────────────────────────────────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  #main { padding: 16px 12px 50px; gap: 16px; }
+  .card { padding: 16px; }
+  #question-card { padding: 18px 14px; }
+  #question-text { font-size: 0.95rem; }
+  .choice-btn { font-size: 0.85rem; padding: 11px 12px; }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header id="header">
+  <div id="header-left">
+    <a href="./periodic-table-3d.html" id="backBtn">&#8592; <span data-ja="元素周期表へ" data-en="Periodic Table">元素周期表へ</span></a>
+    <h1 data-ja="元素クイズラボ" data-en="Chemistry Quiz Lab">元素クイズラボ</h1>
+  </div>
+  <div id="header-right">
+    <button id="langBtn" type="button">EN</button>
+  </div>
+</header>
+
+<!-- MAIN -->
+<div id="main">
+
+  <!-- ELEMENT OF THE DAY -->
+  <div class="card" id="eotd-card">
+    <div class="card-title">⚗️ <span data-ja="今日の元素" data-en="Element of the Day">今日の元素</span></div>
+    <div id="eotd">
+      <div id="eotd-symbol">
+        <span id="eotd-sym-text">?</span>
+        <small id="eotd-num-text"></small>
+      </div>
+      <div id="eotd-info">
+        <div id="eotd-name"></div>
+        <div id="eotd-fact"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INTRO CARD -->
+  <div class="card" id="intro-card">
+    <div class="card-title">🔬 <span data-ja="クイズラボへようこそ" data-en="Welcome to the Quiz Lab">クイズラボへようこそ</span></div>
+    <p class="card-subtitle" data-ja="元素がどこに多く存在するか、どんなテクノロジーに使われているかをクイズで楽しく学ぼう。モードを選んでスタート！" data-en="Learn where elements are most common and what technologies depend on them — through fun quizzes. Pick a mode and start!">
+      元素がどこに多く存在するか、どんなテクノロジーに使われているかをクイズで楽しく学ぼう。モードを選んでスタート！
+    </p>
+  </div>
+
+  <!-- MODE SELECTOR -->
+  <div id="mode-selector">
+    <button class="mode-btn" data-mode="abundance" type="button">
+      <span class="mode-icon">🌌</span>
+      <span class="mode-name" data-ja="存在度クイズ" data-en="Abundance Quiz">存在度クイズ</span>
+      <span class="mode-desc" data-ja="この元素はどこに多い？宇宙・地殻・海洋・大気・人体から選ぼう。" data-en="Where is this element most common? Universe, crust, ocean, atmosphere, or human body?">この元素はどこに多い？宇宙・地殻・海洋・大気・人体から選ぼう。</span>
+    </button>
+    <button class="mode-btn" data-mode="technology" type="button">
+      <span class="mode-icon">💻</span>
+      <span class="mode-name" data-ja="テクノロジークイズ" data-en="Technology Quiz">テクノロジークイズ</span>
+      <span class="mode-desc" data-ja="この元素はどんな技術に使われている？バッテリーから半導体まで。" data-en="What technology uses this element? From batteries to semiconductors.">この元素はどんな技術に使われている？バッテリーから半導体まで。</span>
+    </button>
+    <button class="mode-btn" data-mode="match" type="button">
+      <span class="mode-icon">🧲</span>
+      <span class="mode-name" data-ja="マッチペア" data-en="Match Pairs">マッチペア</span>
+      <span class="mode-desc" data-ja="元素とその役割を正しく組み合わせよう。クリックして選択！" data-en="Match each element to its role. Click to select pairs!">元素とその役割を正しく組み合わせよう。クリックして選択！</span>
+    </button>
+    <button class="mode-btn" data-mode="fast" type="button">
+      <span class="mode-icon">⏱️</span>
+      <span class="mode-name" data-ja="高速チャレンジ" data-en="Fast Challenge">高速チャレンジ</span>
+      <span class="mode-desc" data-ja="60秒で何問答えられる？全モードのミックス問題に挑戦！" data-en="How many can you answer in 60 seconds? Mixed questions from all modes!">60秒で何問答えられる？全モードのミックス問題に挑戦！</span>
+    </button>
+  </div>
+
+  <!-- QUIZ AREA (MC modes) -->
+  <div id="quiz-area">
+    <div id="score-bar">
+      <div class="score-chip">✅ <span data-ja="正解" data-en="Correct">正解</span>: <span id="sc-correct">0</span></div>
+      <div class="score-chip">❌ <span data-ja="不正解" data-en="Wrong">不正解</span>: <span id="sc-wrong">0</span></div>
+      <div class="score-chip">🔥 <span data-ja="連続正解" data-en="Streak">連続正解</span>: <span id="sc-streak">0</span></div>
+      <div class="score-chip" id="timer-chip" style="display:none">⏱ <span id="sc-timer">60</span>s</div>
+    </div>
+    <div id="timer-bar-wrap"><div id="timer-bar"></div></div>
+    <div id="question-card">
+      <div id="question-badge"></div>
+      <div id="question-text"></div>
+      <div id="choices"></div>
+      <div id="feedback-box">
+        <div id="feedback-result"></div>
+        <div id="feedback-text"></div>
+        <div id="feedback-badges"></div>
+      </div>
+      <button id="next-btn" type="button" data-ja="次の問題 →" data-en="Next Question →">次の問題 →</button>
+    </div>
+  </div>
+
+  <!-- MATCH PAIRS AREA -->
+  <div id="match-area">
+    <div id="score-bar-match" style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:12px;">
+      <div class="score-chip">🎯 <span data-ja="マッチ数" data-en="Matched">マッチ数</span>: <span id="sc-matched">0</span> / <span id="sc-total">0</span></div>
+      <div class="score-chip">❌ <span data-ja="ミス" data-en="Misses">ミス</span>: <span id="sc-misses">0</span></div>
+    </div>
+    <div class="card">
+      <div class="match-columns">
+        <div>
+          <div class="match-col-title" data-ja="元素" data-en="Element">元素</div>
+          <div id="match-left"></div>
+        </div>
+        <div>
+          <div class="match-col-title" data-ja="役割" data-en="Role">役割</div>
+          <div id="match-right"></div>
+        </div>
+      </div>
+      <div id="match-result">
+        <div class="big-score" id="match-score-display"></div>
+        <div class="result-msg" id="match-result-msg"></div>
+        <button id="match-play-again" type="button" style="margin-top:14px;padding:10px 22px;background:var(--accent);color:#000;border:none;border-radius:8px;font-family:inherit;font-size:0.92rem;font-weight:700;cursor:pointer;" data-ja="もう一度" data-en="Play Again">もう一度</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULT PANEL (fast challenge) -->
+  <div id="result-panel">
+    <div id="result-rank"></div>
+    <div id="result-score-big"></div>
+    <div id="result-msg"></div>
+    <div id="result-achievements"></div>
+    <button id="play-again-btn" type="button" data-ja="もう一度" data-en="Play Again">もう一度</button>
+    <button id="back-to-menu-btn" type="button" data-ja="モード選択へ" data-en="Back to Modes">モード選択へ</button>
+  </div>
+
+  <!-- LEARNING SUMMARY -->
+  <div class="card" id="learning-panel">
+    <div class="card-title">📚 <span data-ja="今回学んだこと" data-en="What You Learned">今回学んだこと</span></div>
+    <div id="learning-list"></div>
+  </div>
+
+</div><!-- /main -->
+
+<script>
+'use strict';
+// ═══════════════════════════════════════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════════════════════════════════════
+const ELEMENTS = [
+  {
+    symbol:'H', num:1,
+    nameJA:'水素', nameEN:'Hydrogen',
+    abundance:['universe','atmosphere'],
+    technology:['fuel','biology'],
+    factsJA:['宇宙全体の約75%を占める最も豊富な元素', '燃料電池や水の構成要素'],
+    factsEN:['Most abundant element in the universe (~75%)', 'Used in fuel cells and makes up water'],
+    explainJA:'水素は宇宙で最も多い元素で、星の燃料になっています。',
+    explainEN:'Hydrogen is the most abundant element in the universe, fueling stars.'
+  },
+  {
+    symbol:'He', num:2,
+    nameJA:'ヘリウム', nameEN:'Helium',
+    abundance:['universe','atmosphere'],
+    technology:[],
+    factsJA:['宇宙で2番目に多い元素（約24%）', '風船・MRI冷却剤として使用'],
+    factsEN:['Second most abundant in the universe (~24%)', 'Used in balloons and MRI cooling'],
+    explainJA:'ヘリウムは宇宙で2番目に豊富で、星の核融合で生成されます。',
+    explainEN:'Helium is the second most abundant in the universe, formed in stellar fusion.'
+  },
+  {
+    symbol:'C', num:6,
+    nameJA:'炭素', nameEN:'Carbon',
+    abundance:['body','crust'],
+    technology:['semiconductor','structure','biology'],
+    factsJA:['生命の基盤。有機化合物すべての骨格', 'ダイヤモンド、グラファイトなど多様な形をとる'],
+    factsEN:['Foundation of all life. Backbone of organic molecules', 'Exists as diamond, graphite, graphene…'],
+    explainJA:'炭素は生命の基盤で、体の乾燥重量の約18%を占めます。',
+    explainEN:'Carbon is the backbone of life, making up ~18% of your body dry weight.'
+  },
+  {
+    symbol:'N', num:7,
+    nameJA:'窒素', nameEN:'Nitrogen',
+    abundance:['atmosphere','body'],
+    technology:['biology'],
+    factsJA:['大気の約78%を占める', 'DNA・タンパク質の構成要素'],
+    factsEN:['Makes up ~78% of Earth\'s atmosphere', 'Key component of DNA and proteins'],
+    explainJA:'窒素は大気の78%を占め、DNAとタンパク質に不可欠です。',
+    explainEN:'Nitrogen makes up 78% of air and is essential for DNA and proteins.'
+  },
+  {
+    symbol:'O', num:8,
+    nameJA:'酸素', nameEN:'Oxygen',
+    abundance:['atmosphere','crust','ocean','body'],
+    technology:['biology'],
+    factsJA:['地殻で最も多い元素（約46%）', '大気の21%、海水の89%（質量比）'],
+    factsEN:['Most abundant in Earth\'s crust (~46%)', '21% of air, 89% of ocean water by mass'],
+    explainJA:'酸素は地殻・大気・体に広く存在する、最重要元素の一つです。',
+    explainEN:'Oxygen is found in the crust, air, ocean, and body — one of the most vital elements.'
+  },
+  {
+    symbol:'Na', num:11,
+    nameJA:'ナトリウム', nameEN:'Sodium',
+    abundance:['ocean','crust','body'],
+    technology:['biology'],
+    factsJA:['海水の主要成分（塩化ナトリウム）', '神経信号の伝達に必須'],
+    factsEN:['Main component of seawater (sodium chloride)', 'Essential for nerve signal transmission'],
+    explainJA:'ナトリウムは海水に多く含まれ、体の神経伝達に必須です。',
+    explainEN:'Sodium is abundant in the ocean and essential for nerve signals in the body.'
+  },
+  {
+    symbol:'Mg', num:12,
+    nameJA:'マグネシウム', nameEN:'Magnesium',
+    abundance:['crust','body'],
+    technology:['structure','biology'],
+    factsJA:['地殻で7番目に多い元素', '骨や酵素反応に必要'],
+    factsEN:['7th most abundant in Earth\'s crust', 'Needed for bones and enzyme reactions'],
+    explainJA:'マグネシウムは地殻と人体に存在し、構造材料・酵素に使われます。',
+    explainEN:'Magnesium is in the crust and body, used in structural materials and enzymes.'
+  },
+  {
+    symbol:'Al', num:13,
+    nameJA:'アルミニウム', nameEN:'Aluminium',
+    abundance:['crust'],
+    technology:['structure'],
+    factsJA:['地殻で最も多い金属元素（約8%）', '軽量・高強度の構造材料'],
+    factsEN:['Most abundant metal in Earth\'s crust (~8%)', 'Lightweight and strong structural material'],
+    explainJA:'アルミニウムは地殻で最も多い金属で、軽量構造材として広く使われます。',
+    explainEN:'Aluminium is the most abundant metal in the crust, widely used for lightweight structures.'
+  },
+  {
+    symbol:'Si', num:14,
+    nameJA:'ケイ素', nameEN:'Silicon',
+    abundance:['crust'],
+    technology:['semiconductor','optics'],
+    factsJA:['地殻で2番目に多い元素（約28%）', '半導体・チップの中心材料'],
+    factsEN:['2nd most abundant in Earth\'s crust (~28%)', 'Core material for semiconductors and chips'],
+    explainJA:'ケイ素は地殻に豊富で、半導体チップの主原料です。',
+    explainEN:'Silicon is abundant in the crust and is the main raw material for semiconductor chips.'
+  },
+  {
+    symbol:'P', num:15,
+    nameJA:'リン', nameEN:'Phosphorus',
+    abundance:['body','crust'],
+    technology:['biology'],
+    factsJA:['骨・歯の主要成分', 'DNAの骨格（リン酸基）'],
+    factsEN:['Main component of bones and teeth', 'Backbone of DNA (phosphate groups)'],
+    explainJA:'リンは骨やDNAに不可欠な元素で、体内に豊富に存在します。',
+    explainEN:'Phosphorus is essential for bones and DNA, abundant in the body.'
+  },
+  {
+    symbol:'S', num:16,
+    nameJA:'硫黄', nameEN:'Sulfur',
+    abundance:['crust','body'],
+    technology:['biology','structure'],
+    factsJA:['火山活動で生成される黄色い固体', 'アミノ酸・タンパク質の構成要素'],
+    factsEN:['Yellow solid produced by volcanic activity', 'Component of amino acids and proteins'],
+    explainJA:'硫黄は火山地帯に多く、アミノ酸やタンパク質の重要成分です。',
+    explainEN:'Sulfur is common in volcanic regions and is a key component of amino acids and proteins.'
+  },
+  {
+    symbol:'Cl', num:17,
+    nameJA:'塩素', nameEN:'Chlorine',
+    abundance:['ocean','body'],
+    technology:['biology'],
+    factsJA:['海水の主要イオン（塩化物イオン）', '消毒・殺菌に使用'],
+    factsEN:['Major ion in seawater (chloride)', 'Used for disinfection and sterilization'],
+    explainJA:'塩素は海水に多く、消毒や体内の体液バランスに重要です。',
+    explainEN:'Chlorine is abundant in the ocean and important for disinfection and body fluid balance.'
+  },
+  {
+    symbol:'K', num:19,
+    nameJA:'カリウム', nameEN:'Potassium',
+    abundance:['body','crust'],
+    technology:['biology'],
+    factsJA:['心筋・神経の働きに不可欠', '肥料の重要成分'],
+    factsEN:['Essential for heart muscle and nerve function', 'Important component of fertilizers'],
+    explainJA:'カリウムは体内の神経・心筋に必須で、農業肥料にも使われます。',
+    explainEN:'Potassium is essential for nerves and heart muscle, also used in agricultural fertilizers.'
+  },
+  {
+    symbol:'Ca', num:20,
+    nameJA:'カルシウム', nameEN:'Calcium',
+    abundance:['crust','body'],
+    technology:['biology','structure'],
+    factsJA:['人体で最も多いミネラル（骨・歯）', '地殻では石灰石として豊富'],
+    factsEN:['Most abundant mineral in the body (bones, teeth)', 'Abundant in the crust as limestone'],
+    explainJA:'カルシウムは体の骨・歯の主成分で、地殻でも石灰石として豊富です。',
+    explainEN:'Calcium is the main component of bones and teeth, and abundant in the crust as limestone.'
+  },
+  {
+    symbol:'Fe', num:26,
+    nameJA:'鉄', nameEN:'Iron',
+    abundance:['crust','body'],
+    technology:['structure','biology'],
+    factsJA:['地球のコアのほとんどを占める', '血液中のヘモグロビンの中心元素'],
+    factsEN:['Makes up most of Earth\'s core', 'Central element of hemoglobin in blood'],
+    explainJA:'鉄は地球コアと血液ヘモグロビン、そして鉄鋼建材に不可欠です。',
+    explainEN:'Iron is essential in Earth\'s core, blood hemoglobin, and steel construction.'
+  },
+  {
+    symbol:'Cu', num:29,
+    nameJA:'銅', nameEN:'Copper',
+    abundance:['crust'],
+    technology:['structure','semiconductor'],
+    factsJA:['電気伝導性が高く配線に使用', '人類が最初に使った金属の一つ'],
+    factsEN:['High electrical conductivity, used in wiring', 'One of the first metals used by humans'],
+    explainJA:'銅は高い導電性から配線・電子部品に広く使われる金属です。',
+    explainEN:'Copper\'s high conductivity makes it widely used in wiring and electronic components.'
+  },
+  {
+    symbol:'Zn', num:30,
+    nameJA:'亜鉛', nameEN:'Zinc',
+    abundance:['crust','body'],
+    technology:['biology','structure'],
+    factsJA:['免疫機能・酵素反応に必須のミネラル', 'めっき（防錆）に広く使用'],
+    factsEN:['Essential mineral for immune function and enzymes', 'Widely used in galvanizing (rust prevention)'],
+    explainJA:'亜鉛は免疫・酵素に必須で、防錆めっきにも使われます。',
+    explainEN:'Zinc is essential for immunity and enzymes, and widely used in galvanizing.'
+  },
+  {
+    symbol:'Br', num:35,
+    nameJA:'臭素', nameEN:'Bromine',
+    abundance:['ocean'],
+    technology:[],
+    factsJA:['海水中に比較的多く含まれるハロゲン', '難燃材料・医薬品に利用'],
+    factsEN:['Halogen relatively abundant in seawater', 'Used in flame retardants and pharmaceuticals'],
+    explainJA:'臭素は海水に比較的多く、難燃材料や医薬品に使われます。',
+    explainEN:'Bromine is relatively abundant in seawater, used in flame retardants and drugs.'
+  },
+  {
+    symbol:'I', num:53,
+    nameJA:'ヨウ素', nameEN:'Iodine',
+    abundance:['ocean','body'],
+    technology:['biology'],
+    factsJA:['甲状腺ホルモンの生成に必須', '海藻に豊富に含まれる'],
+    factsEN:['Essential for thyroid hormone production', 'Abundant in seaweed'],
+    explainJA:'ヨウ素は甲状腺ホルモンに必須で、海洋・海藻に豊富です。',
+    explainEN:'Iodine is essential for thyroid hormones and is abundant in the ocean and seaweed.'
+  },
+  {
+    symbol:'Li', num:3,
+    nameJA:'リチウム', nameEN:'Lithium',
+    abundance:['crust'],
+    technology:['battery'],
+    factsJA:['リチウムイオン電池の核心材料', 'EV・スマートフォン・ノートPCに必須'],
+    factsEN:['Core material for lithium-ion batteries', 'Essential for EVs, smartphones, and laptops'],
+    explainJA:'リチウムはリチウムイオン電池の中心材料で、現代のEV社会を支えます。',
+    explainEN:'Lithium is the key material in lithium-ion batteries powering modern EVs and electronics.'
+  },
+  {
+    symbol:'Co', num:27,
+    nameJA:'コバルト', nameEN:'Cobalt',
+    abundance:['crust'],
+    technology:['battery','magnet'],
+    factsJA:['リチウムイオン電池の正極材料', '強力な永久磁石の成分'],
+    factsEN:['Cathode material in lithium-ion batteries', 'Component of strong permanent magnets'],
+    explainJA:'コバルトはEV電池の正極材料として急速に需要が高まっています。',
+    explainEN:'Cobalt is in high demand as a cathode material for EV batteries.'
+  },
+  {
+    symbol:'Ni', num:28,
+    nameJA:'ニッケル', nameEN:'Nickel',
+    abundance:['crust'],
+    technology:['battery','structure'],
+    factsJA:['EV用電池のエネルギー密度を高める', 'ステンレス鋼の主要合金元素'],
+    factsEN:['Improves energy density in EV batteries', 'Key alloying element in stainless steel'],
+    explainJA:'ニッケルはEV電池の高密度化とステンレス鋼に不可欠です。',
+    explainEN:'Nickel is essential for high-energy-density EV batteries and stainless steel.'
+  },
+  {
+    symbol:'Ga', num:31,
+    nameJA:'ガリウム', nameEN:'Gallium',
+    abundance:['crust'],
+    technology:['semiconductor','optics'],
+    factsJA:['LED・レーザーダイオードの材料（GaN）', '次世代パワー半導体として注目'],
+    factsEN:['Material for LEDs and laser diodes (GaN)', 'Noted for next-gen power semiconductors'],
+    explainJA:'ガリウムは窒化ガリウム（GaN）としてLEDや次世代半導体に使われます。',
+    explainEN:'Gallium as GaN is used in LEDs and next-generation power semiconductors.'
+  },
+  {
+    symbol:'Ge', num:32,
+    nameJA:'ゲルマニウム', nameEN:'Germanium',
+    abundance:['crust'],
+    technology:['semiconductor','optics'],
+    factsJA:['光ファイバーの材料として重要', '初期のトランジスタはゲルマニウム製'],
+    factsEN:['Important material for optical fibers', 'Early transistors were made of germanium'],
+    explainJA:'ゲルマニウムは光ファイバーと初期半導体に重要な元素です。',
+    explainEN:'Germanium was crucial for early semiconductors and is now key for optical fibers.'
+  },
+  {
+    symbol:'As', num:33,
+    nameJA:'ヒ素', nameEN:'Arsenic',
+    abundance:['crust'],
+    technology:['semiconductor'],
+    factsJA:['GaAs半導体として高周波通信デバイスに使用', '毒性があるため取り扱いに注意が必要'],
+    factsEN:['Used as GaAs semiconductor in high-frequency devices', 'Toxic, requires careful handling'],
+    explainJA:'ヒ素はGaAsとして高速通信デバイスに使われますが、毒性に注意が必要です。',
+    explainEN:'Arsenic as GaAs is used in high-speed communication devices but is toxic.'
+  },
+  {
+    symbol:'Se', num:34,
+    nameJA:'セレン', nameEN:'Selenium',
+    abundance:['crust'],
+    technology:['semiconductor','optics'],
+    factsJA:['太陽電池（CIS系）の材料', '光センサー・コピー機ドラムに使用'],
+    factsEN:['Material for solar cells (CIS type)', 'Used in photosensors and copier drums'],
+    explainJA:'セレンは薄膜太陽電池や光センサーに使われる半金属元素です。',
+    explainEN:'Selenium is used in thin-film solar cells and photosensors.'
+  },
+  {
+    symbol:'Nd', num:60,
+    nameJA:'ネオジム', nameEN:'Neodymium',
+    abundance:['crust'],
+    technology:['magnet'],
+    factsJA:['世界最強クラスのネオジム磁石（NdFeB）', 'EVモーター・風力発電機に必須'],
+    factsEN:['World\'s strongest magnets (NdFeB)', 'Essential for EV motors and wind turbines'],
+    explainJA:'ネオジムはNdFeB磁石として世界最強の磁力を持ち、EV・風力発電に不可欠です。',
+    explainEN:'Neodymium in NdFeB magnets produces the world\'s strongest magnetic fields, essential for EVs.'
+  },
+  {
+    symbol:'Pt', num:78,
+    nameJA:'白金', nameEN:'Platinum',
+    abundance:['crust'],
+    technology:['catalyst','fuel'],
+    factsJA:['自動車の触媒コンバーター（排ガス浄化）', '燃料電池の電極触媒として使用'],
+    factsEN:['Automotive catalytic converters (exhaust purification)', 'Electrode catalyst in fuel cells'],
+    explainJA:'白金は触媒コンバーターと燃料電池で排ガス浄化・クリーンエネルギーを支えます。',
+    explainEN:'Platinum enables exhaust purification in catalytic converters and clean energy in fuel cells.'
+  },
+  {
+    symbol:'Au', num:79,
+    nameJA:'金', nameEN:'Gold',
+    abundance:['crust'],
+    technology:['semiconductor'],
+    factsJA:['電子機器の接点・基板配線に使用（耐食性）', '宇宙から薄く存在する希少金属'],
+    factsEN:['Used in electronic contacts and circuits (corrosion-resistant)', 'Rare metal found in tiny amounts from space'],
+    explainJA:'金は腐食しないため精密電子部品の接点・配線に使われる希少金属です。',
+    explainEN:'Gold\'s corrosion resistance makes it ideal for precision electronic contacts and circuits.'
+  },
+  {
+    symbol:'Pb', num:82,
+    nameJA:'鉛', nameEN:'Lead',
+    abundance:['crust'],
+    technology:['battery','structure'],
+    factsJA:['鉛蓄電池（自動車バッテリー）の電極材料', '毒性があるため使用が規制されつつある'],
+    factsEN:['Electrode material in lead-acid batteries', 'Use being restricted due to toxicity'],
+    explainJA:'鉛は従来の車のバッテリーに使われてきましたが、毒性から規制が進んでいます。',
+    explainEN:'Lead was used in traditional car batteries but is being restricted due to its toxicity.'
+  },
+  {
+    symbol:'U', num:92,
+    nameJA:'ウラン', nameEN:'Uranium',
+    abundance:['crust'],
+    technology:['nuclear'],
+    factsJA:['核分裂反応の燃料として原子力発電に使用', '地殻に微量存在する放射性元素'],
+    factsEN:['Used as fuel in nuclear fission power generation', 'Trace radioactive element in the crust'],
+    explainJA:'ウランは核分裂の燃料として原子力発電を支える放射性元素です。',
+    explainEN:'Uranium is the radioactive fuel that powers nuclear fission energy generation.'
+  }
+];
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// LANGUAGE
+// ═══════════════════════════════════════════════════════════════════════════════
+let isJA = true;
+
+const T = {
+  abundanceLabel: { ja:'存在度クイズ', en:'Abundance Quiz' },
+  techLabel:      { ja:'テクノロジークイズ', en:'Technology Quiz' },
+  matchLabel:     { ja:'マッチペア', en:'Match Pairs' },
+  fastLabel:      { ja:'高速チャレンジ', en:'Fast Challenge' },
+  correctText:    { ja:'⭕ 正解！', en:'⭕ Correct!' },
+  wrongText:      { ja:'❌ 不正解', en:'❌ Wrong' },
+  nextBtn:        { ja:'次の問題 →', en:'Next Question →' },
+  playAgain:      { ja:'もう一度', en:'Play Again' },
+  backModes:      { ja:'モード選択へ', en:'Back to Modes' },
+  matchPlayAgain: { ja:'もう一度', en:'Play Again' },
+  matchComplete:  { ja:'全ペアマッチ完了！', en:'All pairs matched!' },
+  matchMissMsg:   { ja:'ミス', en:'misses' },
+  rankTitles: {
+    ja: ['化学の新入り','ラボアシスタント','元素探検家','ペリオディックマスター'],
+    en: ['Chemical Newcomer','Lab Assistant','Element Explorer','Periodic Master']
+  },
+  rankMsgs: {
+    ja:[
+      'まだまだこれから！一緒に元素の世界を探検しよう。',
+      'いい調子！もう少しで元素探検家だ。',
+      '素晴らしい！元素の知識が確実についてきている。',
+      '完璧！あなたは本物の元素マスターです！'
+    ],
+    en:[
+      'Just getting started! Keep exploring the world of elements.',
+      'Good work! Nearly an Element Explorer.',
+      'Excellent! Your element knowledge is really growing.',
+      'Perfect! You are a true Periodic Master!'
+    ]
+  },
+  achievements: {
+    battery:  { ja:'🔋 バッテリー見習い', en:'🔋 Battery Rookie' },
+    cosmic:   { ja:'🌌 宇宙の入口', en:'🌌 Cosmic Beginner' },
+    body:     { ja:'🧬 体の化学スタート', en:'🧬 Body Chemistry Starter' },
+    tech:     { ja:'💻 テクマテリアル見習い', en:'💻 Tech Materials Scout' },
+    streak:   { ja:'🔥 連続正解ボーナス', en:'🔥 Streak Bonus' }
+  },
+  abundanceQ: { ja:'この元素はどこに特に多く存在する？', en:'Where is this element especially abundant?' },
+  techQ:      { ja:'この元素は何に使われている？', en:'What is this element primarily used for?' },
+  abundanceTags: {
+    universe:   { ja:'🌌 宇宙', en:'🌌 Universe' },
+    atmosphere: { ja:'🌫️ 大気', en:'🌫️ Atmosphere' },
+    crust:      { ja:'🌍 地殻', en:'🌍 Crust' },
+    ocean:      { ja:'🌊 海洋', en:'🌊 Ocean' },
+    body:       { ja:'🧬 人体', en:'🧬 Human Body' }
+  },
+  techTags: {
+    battery:      { ja:'🔋 バッテリー', en:'🔋 Battery' },
+    semiconductor:{ ja:'💻 半導体', en:'💻 Semiconductor' },
+    magnet:       { ja:'🧲 磁石', en:'🧲 Magnet' },
+    catalyst:     { ja:'⚗️ 触媒', en:'⚗️ Catalyst' },
+    nuclear:      { ja:'☢️ 核燃料', en:'☢️ Nuclear Fuel' },
+    biology:      { ja:'🧬 生物・医療', en:'🧬 Biology/Medicine' },
+    structure:    { ja:'🏗️ 構造材料', en:'🏗️ Structure' },
+    optics:       { ja:'🔭 光学・通信', en:'🔭 Optics/Telecom' },
+    fuel:         { ja:'⚡ 燃料電池', en:'⚡ Fuel Cell' }
+  },
+  eotdLabel: { ja:'今日の元素', en:'Element of the Day' },
+  learnedLabel: { ja:'今回学んだこと', en:'What You Learned' }
+};
+
+function t(key, sub) {
+  const obj = sub ? T[key][sub] : T[key];
+  if (!obj) return key;
+  return isJA ? obj.ja : obj.en;
+}
+
+function applyLang() {
+  document.documentElement.lang = isJA ? 'ja' : 'en';
+  document.getElementById('langBtn').textContent = isJA ? 'EN' : 'JA';
+  document.querySelectorAll('[data-ja]').forEach(el => {
+    el.textContent = isJA ? el.dataset.ja : el.dataset.en;
+  });
+  document.querySelectorAll('[data-mode]').forEach(btn => {
+    const mode = btn.dataset.mode;
+    const nameEl = btn.querySelector('.mode-name');
+    const descEl = btn.querySelector('.mode-desc');
+    if (nameEl) nameEl.textContent = isJA ? nameEl.dataset.ja : nameEl.dataset.en;
+    if (descEl) descEl.textContent = isJA ? descEl.dataset.ja : descEl.dataset.en;
+  });
+  renderEOTD();
+  if (currentMode) {
+    document.getElementById('question-badge').textContent =
+      currentMode === 'abundance' ? t('abundanceLabel') :
+      currentMode === 'technology' ? t('techLabel') :
+      currentMode === 'fast' ? t('fastLabel') : '';
+  }
+}
+
+document.getElementById('langBtn').addEventListener('click', () => {
+  isJA = !isJA;
+  applyLang();
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// ELEMENT OF THE DAY
+// ═══════════════════════════════════════════════════════════════════════════════
+function renderEOTD() {
+  const idx = new Date().getDate() % ELEMENTS.length;
+  const el = ELEMENTS[idx];
+  document.getElementById('eotd-sym-text').textContent = el.symbol;
+  document.getElementById('eotd-num-text').textContent = el.num;
+  document.getElementById('eotd-name').textContent = isJA
+    ? `${el.nameJA}（${el.nameEN}）`
+    : `${el.nameEN} (${el.nameJA})`;
+  const facts = isJA ? el.factsJA : el.factsEN;
+  document.getElementById('eotd-fact').textContent = facts[0];
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// SCORE SYSTEM
+// ═══════════════════════════════════════════════════════════════════════════════
+let score = { correct: 0, wrong: 0, streak: 0, maxStreak: 0, answered: 0 };
+let learnedFacts = [];
+let achievementsEarned = new Set();
+
+function resetScore() {
+  score = { correct: 0, wrong: 0, streak: 0, maxStreak: 0, answered: 0 };
+  learnedFacts = [];
+  updateScoreUI();
+}
+
+function updateScoreUI() {
+  document.getElementById('sc-correct').textContent = score.correct;
+  document.getElementById('sc-wrong').textContent   = score.wrong;
+  document.getElementById('sc-streak').textContent  = score.streak;
+}
+
+function recordCorrect(el) {
+  score.correct++;
+  score.streak++;
+  score.answered++;
+  score.maxStreak = Math.max(score.maxStreak, score.streak);
+  updateScoreUI();
+  addLearnedFact(el);
+  checkAchievements(el, true);
+}
+
+function recordWrong(el) {
+  score.wrong++;
+  score.streak = 0;
+  score.answered++;
+  updateScoreUI();
+}
+
+function addLearnedFact(el) {
+  const fact = isJA ? el.explainJA : el.explainEN;
+  if (!learnedFacts.find(f => f.symbol === el.symbol)) {
+    learnedFacts.push({ symbol: el.symbol, fact });
+  }
+  if (learnedFacts.length >= 2) renderLearningPanel();
+}
+
+function renderLearningPanel() {
+  const panel = document.getElementById('learning-panel');
+  const list  = document.getElementById('learning-list');
+  panel.classList.add('visible');
+  list.innerHTML = learnedFacts.map(f =>
+    `<div class="learn-item"><span class="learn-icon">💡</span><span><strong>${f.symbol}</strong>: ${isJA ? ELEMENTS.find(e=>e.symbol===f.symbol).explainJA : ELEMENTS.find(e=>e.symbol===f.symbol).explainEN}</span></div>`
+  ).join('');
+}
+
+function checkAchievements(el, correct) {
+  if (!correct) return;
+  if (el.technology.includes('battery'))       achievementsEarned.add('battery');
+  if (el.abundance.includes('universe'))       achievementsEarned.add('cosmic');
+  if (el.abundance.includes('body'))           achievementsEarned.add('body');
+  if (el.technology.length > 0)               achievementsEarned.add('tech');
+  if (score.streak >= 3)                       achievementsEarned.add('streak');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// QUIZ GENERATORS
+// ═══════════════════════════════════════════════════════════════════════════════
+function shuffle(arr) { return [...arr].sort(() => Math.random() - 0.5); }
+function pick(arr, n)  { return shuffle(arr).slice(0, n); }
+function rand(arr)     { return arr[Math.floor(Math.random() * arr.length)]; }
+
+// Abundance question
+function makeAbundanceQ() {
+  const pool = ELEMENTS.filter(e => e.abundance.length > 0);
+  const correct = rand(pool);
+  const tag = rand(correct.abundance);
+  const wrong3 = pick(ELEMENTS.filter(e => e.symbol !== correct.symbol && !e.abundance.includes(tag)), 3);
+  if (wrong3.length < 3) return null;
+  const choices = shuffle([correct, ...wrong3]);
+  return {
+    type: 'abundance',
+    questionJA: `この元素はどこに特に多く存在するでしょう？ [${t('abundanceTags', tag)}]`,
+    questionEN: `Which element is especially abundant in: ${t('abundanceTags', tag)}?`,
+    choices: choices.map(e => ({ symbol: e.symbol, nameJA: e.nameJA, nameEN: e.nameEN })),
+    correctSymbol: correct.symbol,
+    tag,
+    elementObj: correct
+  };
+}
+
+// Technology question
+function makeTechQ() {
+  const pool = ELEMENTS.filter(e => e.technology.length > 0);
+  const correct = rand(pool);
+  const tag = rand(correct.technology);
+  const wrong3 = pick(ELEMENTS.filter(e => e.symbol !== correct.symbol && !e.technology.includes(tag)), 3);
+  if (wrong3.length < 3) return null;
+  const choices = shuffle([correct, ...wrong3]);
+  return {
+    type: 'technology',
+    questionJA: `次の用途に使われる元素はどれ？ [${t('techTags', tag)}]`,
+    questionEN: `Which element is essential for: ${t('techTags', tag)}?`,
+    choices: choices.map(e => ({ symbol: e.symbol, nameJA: e.nameJA, nameEN: e.nameEN })),
+    correctSymbol: correct.symbol,
+    tag,
+    elementObj: correct
+  };
+}
+
+function makeQ(mode) {
+  let q = null;
+  let attempts = 0;
+  while (!q && attempts < 20) {
+    if (mode === 'abundance') q = makeAbundanceQ();
+    else if (mode === 'technology') q = makeTechQ();
+    else q = (Math.random() < 0.5 ? makeAbundanceQ() : makeTechQ());
+    attempts++;
+  }
+  return q;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// RENDERING (MC Quiz)
+// ═══════════════════════════════════════════════════════════════════════════════
+let currentMode = null;
+let currentQ = null;
+let answered = false;
+let timerInterval = null;
+let timeLeft = 60;
+
+function showSection(mode) {
+  document.getElementById('quiz-area').classList.remove('visible');
+  document.getElementById('match-area').classList.remove('visible');
+  document.getElementById('result-panel').classList.remove('visible');
+  document.getElementById('learning-panel').classList.remove('visible');
+  document.getElementById('timer-bar-wrap').style.display = 'none';
+  document.getElementById('timer-chip').style.display = 'none';
+  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+
+  document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+  currentMode = mode;
+}
+
+function startMCMode(mode) {
+  showSection(mode);
+  resetScore();
+  document.getElementById('quiz-area').classList.add('visible');
+  document.getElementById('next-btn').style.display = 'none';
+  document.getElementById('feedback-box').style.display = 'none';
+
+  if (mode === 'fast') {
+    timeLeft = 60;
+    document.getElementById('timer-chip').style.display = 'flex';
+    document.getElementById('timer-bar-wrap').style.display = 'block';
+    document.getElementById('timer-bar').style.width = '100%';
+    document.getElementById('timer-bar').style.background = 'var(--warning)';
+    startTimer();
+  }
+  renderNextQ();
+}
+
+function startTimer() {
+  document.getElementById('sc-timer').textContent = timeLeft;
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    document.getElementById('sc-timer').textContent = timeLeft;
+    const pct = (timeLeft / 60) * 100;
+    document.getElementById('timer-bar').style.width = pct + '%';
+    if (timeLeft <= 15) document.getElementById('timer-bar').style.background = 'var(--danger)';
+    if (timeLeft <= 0) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+      showFastResult();
+    }
+  }, 1000);
+}
+
+function renderNextQ() {
+  currentQ = makeQ(currentMode);
+  if (!currentQ) return;
+  answered = false;
+
+  const badgeEl = document.getElementById('question-badge');
+  badgeEl.textContent = currentMode === 'abundance' ? t('abundanceLabel') :
+                        currentMode === 'technology' ? t('techLabel') : t('fastLabel');
+
+  document.getElementById('question-text').textContent =
+    isJA ? currentQ.questionJA : currentQ.questionEN;
+
+  const choicesEl = document.getElementById('choices');
+  const letters = ['A','B','C','D'];
+  choicesEl.innerHTML = currentQ.choices.map((c, i) => `
+    <button class="choice-btn" data-sym="${c.symbol}" type="button">
+      <span class="choice-letter">${letters[i]}</span>
+      <span>${c.symbol} — ${isJA ? c.nameJA : c.nameEN}</span>
+    </button>
+  `).join('');
+
+  choicesEl.querySelectorAll('.choice-btn').forEach(btn => {
+    btn.addEventListener('click', () => handleChoice(btn.dataset.sym));
+  });
+
+  document.getElementById('feedback-box').style.display = 'none';
+  document.getElementById('next-btn').style.display = 'none';
+}
+
+function handleChoice(sym) {
+  if (answered) return;
+  answered = true;
+
+  const isCorrect = sym === currentQ.correctSymbol;
+  const el = currentQ.elementObj;
+
+  document.querySelectorAll('.choice-btn').forEach(btn => {
+    btn.disabled = true;
+    if (btn.dataset.sym === currentQ.correctSymbol) btn.classList.add('correct');
+    else if (btn.dataset.sym === sym) btn.classList.add('wrong');
+  });
+
+  if (isCorrect) recordCorrect(el); else recordWrong(el);
+
+  const fb = document.getElementById('feedback-box');
+  fb.className = 'feedback-box ' + (isCorrect ? 'correct' : 'wrong');
+  fb.style.display = 'block';
+
+  document.getElementById('feedback-result').textContent =
+    isCorrect ? t('correctText') : t('wrongText');
+
+  document.getElementById('feedback-text').textContent =
+    isJA ? el.explainJA : el.explainEN;
+
+  const badgesEl = document.getElementById('feedback-badges');
+  let badges = '';
+  if (currentQ.type === 'abundance') {
+    badges = el.abundance.map(a => `<span class="badge-pill">${t('abundanceTags', a)}</span>`).join('');
+  } else {
+    badges = el.technology.map(a => `<span class="badge-pill">${t('techTags', a)}</span>`).join('');
+  }
+  badgesEl.innerHTML = badges;
+
+  const nextBtn = document.getElementById('next-btn');
+  nextBtn.textContent = isJA ? t('nextBtn').replace('→','') + '→' : t('nextBtn');
+
+  if (currentMode === 'fast') {
+    setTimeout(() => { renderNextQ(); }, 1200);
+  } else {
+    nextBtn.style.display = 'inline-block';
+  }
+}
+
+document.getElementById('next-btn').addEventListener('click', () => {
+  renderNextQ();
+});
+
+function showFastResult() {
+  document.getElementById('quiz-area').classList.remove('visible');
+  const total = score.correct + score.wrong;
+  const n = score.correct;
+
+  let rankIdx = 0;
+  if (n >= 12) rankIdx = 3;
+  else if (n >= 8) rankIdx = 2;
+  else if (n >= 4) rankIdx = 1;
+
+  const ranks = isJA ? T.rankTitles.ja : T.rankTitles.en;
+  const msgs  = isJA ? T.rankMsgs.ja  : T.rankMsgs.en;
+
+  document.getElementById('result-rank').textContent = ranks[rankIdx];
+  document.getElementById('result-score-big').textContent = `${n} / ${total}`;
+  document.getElementById('result-msg').textContent = msgs[rankIdx];
+
+  const ach = document.getElementById('result-achievements');
+  ach.innerHTML = [...achievementsEarned].map(k => {
+    const a = T.achievements[k];
+    return `<div class="achievement-chip">${isJA ? a.ja : a.en}</div>`;
+  }).join('');
+
+  document.getElementById('result-panel').classList.add('visible');
+  if (learnedFacts.length) renderLearningPanel();
+}
+
+document.getElementById('play-again-btn').addEventListener('click', () => startMCMode('fast'));
+document.getElementById('back-to-menu-btn').addEventListener('click', () => {
+  document.getElementById('result-panel').classList.remove('visible');
+  document.getElementById('learning-panel').classList.remove('visible');
+  document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+  currentMode = null;
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// MATCH PAIRS
+// ═══════════════════════════════════════════════════════════════════════════════
+const MATCH_DATA = [
+  { symbol:'Li', nameJA:'リチウム', nameEN:'Lithium', roleJA:'バッテリー', roleEN:'Battery' },
+  { symbol:'Si', nameJA:'ケイ素',   nameEN:'Silicon',  roleJA:'半導体チップ', roleEN:'Chip/Semiconductor' },
+  { symbol:'Nd', nameJA:'ネオジム', nameEN:'Neodymium',roleJA:'強力永久磁石', roleEN:'Strong Magnet' },
+  { symbol:'Pt', nameJA:'白金',     nameEN:'Platinum', roleJA:'触媒コンバーター', roleEN:'Catalytic Converter' },
+  { symbol:'U',  nameJA:'ウラン',   nameEN:'Uranium',  roleJA:'核燃料', roleEN:'Nuclear Fuel' },
+  { symbol:'Fe', nameJA:'鉄',       nameEN:'Iron',     roleJA:'鉄鋼・血液', roleEN:'Steel & Blood' },
+  { symbol:'Ga', nameJA:'ガリウム', nameEN:'Gallium',  roleJA:'LED・GaN半導体', roleEN:'LED & GaN' },
+  { symbol:'O',  nameJA:'酸素',     nameEN:'Oxygen',   roleJA:'地殻・大気・体', roleEN:'Crust & Air & Body' }
+];
+
+let matchSelected = null;
+let matchMatched  = new Set();
+let matchMisses   = 0;
+let matchTotal    = 0;
+
+function startMatch() {
+  showSection('match');
+  matchSelected = null;
+  matchMatched  = new Set();
+  matchMisses   = 0;
+  document.getElementById('match-area').classList.add('visible');
+  document.getElementById('match-result').style.display = 'none';
+  document.getElementById('sc-matched').textContent = '0';
+  document.getElementById('sc-misses').textContent  = '0';
+
+  const pool = pick(MATCH_DATA, 6);
+  matchTotal = pool.length;
+  document.getElementById('sc-total').textContent = matchTotal;
+
+  const leftItems  = shuffle(pool);
+  const rightItems = shuffle(pool);
+
+  document.getElementById('match-left').innerHTML = leftItems.map(p =>
+    `<div class="match-item" data-sym="${p.symbol}" data-side="left">${p.symbol} — ${isJA ? p.nameJA : p.nameEN}</div>`
+  ).join('');
+  document.getElementById('match-right').innerHTML = rightItems.map(p =>
+    `<div class="match-item" data-sym="${p.symbol}" data-side="right">${isJA ? p.roleJA : p.roleEN}</div>`
+  ).join('');
+
+  document.getElementById('match-left').querySelectorAll('.match-item').forEach(el => {
+    el.addEventListener('click', () => handleMatchClick(el));
+  });
+  document.getElementById('match-right').querySelectorAll('.match-item').forEach(el => {
+    el.addEventListener('click', () => handleMatchClick(el));
+  });
+}
+
+function handleMatchClick(el) {
+  if (el.classList.contains('matched') || el.classList.contains('disabled')) return;
+  const side = el.dataset.side;
+  const sym  = el.dataset.sym;
+
+  if (!matchSelected) {
+    el.classList.add('selected');
+    matchSelected = { el, sym, side };
+    return;
+  }
+
+  if (matchSelected.el === el) {
+    el.classList.remove('selected');
+    matchSelected = null;
+    return;
+  }
+
+  if (matchSelected.side === side) {
+    matchSelected.el.classList.remove('selected');
+    el.classList.add('selected');
+    matchSelected = { el, sym, side };
+    return;
+  }
+
+  const a = matchSelected, b = { el, sym, side };
+  matchSelected.el.classList.remove('selected');
+  matchSelected = null;
+
+  if (a.sym === b.sym) {
+    a.el.classList.add('matched');
+    b.el.classList.add('matched');
+    matchMatched.add(a.sym);
+    document.getElementById('sc-matched').textContent = matchMatched.size;
+    if (matchMatched.size === matchTotal) setTimeout(showMatchResult, 400);
+  } else {
+    matchMisses++;
+    document.getElementById('sc-misses').textContent = matchMisses;
+    [a.el, b.el].forEach(e => {
+      e.classList.add('wrong-flash');
+      setTimeout(() => e.classList.remove('wrong-flash'), 520);
+    });
+  }
+}
+
+function showMatchResult() {
+  const res = document.getElementById('match-result');
+  res.style.display = 'block';
+  const accuracy = Math.max(0, Math.round((matchTotal / (matchTotal + matchMisses)) * 100));
+  document.getElementById('match-score-display').textContent = `${accuracy}%`;
+  document.getElementById('match-result-msg').textContent = isJA
+    ? `全${matchTotal}ペアを${matchMisses}ミスでマッチ！`
+    : `All ${matchTotal} pairs matched with ${matchMisses} ${t('matchMissMsg')}!`;
+  document.getElementById('match-play-again').textContent = t('playAgain');
+}
+
+document.getElementById('match-play-again').addEventListener('click', startMatch);
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// MODE SELECTOR WIRING
+// ═══════════════════════════════════════════════════════════════════════════════
+document.querySelectorAll('.mode-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const mode = btn.dataset.mode;
+    if (mode === 'match') startMatch();
+    else startMCMode(mode);
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════════════════════
+renderEOTD();
+</script>
+</body>
+</html>
