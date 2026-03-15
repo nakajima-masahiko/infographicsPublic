@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>戦後日本のイチゴ品種図鑑 — 系統図と産地マップ</title>
+  <style>
+    :root {
+      --red: #e53e3e;
+      --pink: #fc8181;
+      --light-pink: #fff0f0;
+      --green: #276749;
+      --light-green: #f0fff4;
+      --bg: #fffbfc;
+      --text: #1a202c;
+      --sub: #718096;
+      --border: #fed7d7;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+    /* ===== HEADER ===== */
+    .page-header {
+      background: linear-gradient(135deg, #c53030 0%, #e53e3e 40%, #fc8181 100%);
+      color: #fff;
+      text-align: center;
+      padding: 48px 24px 40px;
+    }
+    .page-header h1 { font-size: 32px; font-weight: 900; margin-bottom: 10px; text-shadow: 0 2px 8px rgba(0,0,0,0.25); }
+    .page-header p  { font-size: 15px; opacity: .9; line-height: 1.6; }
+    .berry-icon { font-size: 48px; display: block; margin-bottom: 12px; }
+
+    /* ===== LAYOUT ===== */
+    .container { max-width: 1100px; margin: 0 auto; padding: 40px 20px 80px; }
+    section { margin-bottom: 56px; }
+    h2.sec-title {
+      font-size: 22px; font-weight: 800; color: var(--red);
+      border-left: 5px solid var(--red); padding-left: 14px;
+      margin-bottom: 24px;
+    }
+
+    /* ===== GENEALOGY TREE ===== */
+    .tree-wrap {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px 24px;
+      overflow-x: auto;
+    }
+    .tree-svg-container { min-width: 900px; }
+
+    /* ===== MAP SECTION ===== */
+    .map-layout {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 32px;
+      align-items: start;
+    }
+    @media (max-width: 800px) { .map-layout { grid-template-columns: 1fr; } }
+    .map-wrap {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+    }
+    .legend-wrap {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+    }
+    .legend-wrap h3 { font-size: 16px; font-weight: 700; margin-bottom: 16px; color: var(--text); }
+    .legend-item {
+      display: flex; align-items: flex-start; gap: 12px;
+      margin-bottom: 16px; padding-bottom: 16px;
+      border-bottom: 1px solid #f7e0e0;
+    }
+    .legend-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+    .legend-dot {
+      width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0;
+      margin-top: 2px; border: 2px solid rgba(0,0,0,0.15);
+    }
+    .legend-name { font-size: 15px; font-weight: 700; color: var(--text); }
+    .legend-pref { font-size: 12px; color: var(--sub); margin-top: 2px; }
+    .legend-year { font-size: 11px; color: #fff; background: var(--red); padding: 1px 6px; border-radius: 4px; margin-top: 4px; display: inline-block; }
+
+    /* ===== VARIETY CARDS ===== */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 20px;
+    }
+    .v-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+      border-top: 4px solid var(--red);
+    }
+    .v-card-name { font-size: 18px; font-weight: 800; margin-bottom: 4px; }
+    .v-card-yomi { font-size: 13px; color: var(--sub); margin-bottom: 12px; }
+    .v-card-tag {
+      display: inline-block; font-size: 11px; padding: 2px 8px;
+      border-radius: 4px; margin-right: 4px; margin-bottom: 4px;
+      background: var(--light-pink); color: var(--red); border: 1px solid var(--border);
+    }
+    .v-card-desc { font-size: 13px; color: var(--sub); line-height: 1.7; margin-top: 10px; }
+
+    /* ===== TIMELINE ===== */
+    .timeline { position: relative; padding-left: 40px; }
+    .timeline::before {
+      content: ''; position: absolute; left: 14px; top: 0; bottom: 0;
+      width: 3px; background: linear-gradient(to bottom, var(--red), var(--pink));
+      border-radius: 2px;
+    }
+    .tl-item { position: relative; margin-bottom: 28px; }
+    .tl-dot {
+      position: absolute; left: -34px; top: 4px;
+      width: 16px; height: 16px; border-radius: 50%;
+      background: var(--red); border: 3px solid #fff;
+      box-shadow: 0 0 0 2px var(--red);
+    }
+    .tl-year { font-size: 12px; font-weight: 700; color: var(--red); margin-bottom: 2px; }
+    .tl-title { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+    .tl-body { font-size: 13px; color: var(--sub); line-height: 1.6; }
+
+    /* footer */
+    footer { text-align: center; padding: 24px; font-size: 13px; color: var(--sub); border-top: 1px solid var(--border); }
+    a.back { display: inline-block; margin-bottom: 32px; color: var(--red); text-decoration: none; font-weight: 600; font-size: 14px; }
+    a.back:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+<div class="page-header">
+  <span class="berry-icon">🍓</span>
+  <h1>戦後日本のイチゴ品種図鑑</h1>
+  <p>1945年以降に開発・普及した主要品種の系統図と全国産地マップ</p>
+</div>
+
+<div class="container">
+  <a href="../index.html" class="back">← インフォグラフィック一覧に戻る</a>
+
+  <!-- ===== SECTION 1: GENEALOGY ===== -->
+  <section id="genealogy">
+    <h2 class="sec-title">🌿 品種系統図（1945年〜現在）</h2>
+    <div class="tree-wrap">
+      <div class="tree-svg-container">
+        <svg id="genealogy-svg" viewBox="0 0 1050 620" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;">
+          <defs>
+            <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L8,3 z" fill="#c53030"/>
+            </marker>
+          </defs>
+
+          <!-- Era backgrounds -->
+          <rect x="0" y="0" width="1050" height="80" fill="#fff5f5" rx="8"/>
+          <text x="525" y="22" text-anchor="middle" font-size="11" fill="#c53030" font-weight="700">── 品種の系譜（矢印は交配・育種関係） ──</text>
+
+          <!-- Era labels -->
+          <rect x="10" y="30" width="95" height="24" rx="4" fill="#fed7d7"/>
+          <text x="57" y="46" text-anchor="middle" font-size="11" fill="#c53030" font-weight="700">1940-60年代</text>
+
+          <rect x="200" y="30" width="95" height="24" rx="4" fill="#fbd38d" opacity=".8"/>
+          <text x="247" y="46" text-anchor="middle" font-size="11" fill="#7b341e" font-weight="700">1970-80年代</text>
+
+          <rect x="420" y="30" width="95" height="24" rx="4" fill="#9ae6b4" opacity=".8"/>
+          <text x="467" y="46" text-anchor="middle" font-size="11" fill="#22543d" font-weight="700">1990年代</text>
+
+          <rect x="640" y="30" width="95" height="24" rx="4" fill="#90cdf4" opacity=".8"/>
+          <text x="687" y="46" text-anchor="middle" font-size="11" fill="#1a365d" font-weight="700">2000年代</text>
+
+          <rect x="850" y="30" width="95" height="24" rx="4" fill="#d6bcfa" opacity=".8"/>
+          <text x="897" y="46" text-anchor="middle" font-size="11" fill="#44337a" font-weight="700">2010年代〜</text>
+
+          <!-- ===== NODES ===== -->
+          <!-- Helper: node = rect+text, color by era -->
+
+          <!-- 1940-60s -->
+          <g id="node-fukuba">
+            <rect x="10" y="100" width="100" height="44" rx="8" fill="#c53030" stroke="#fff" stroke-width="2"/>
+            <text x="60" y="118" text-anchor="middle" font-size="13" fill="#fff" font-weight="700">福羽</text>
+            <text x="60" y="134" text-anchor="middle" font-size="10" fill="#ffd0d0">1900年代〜</text>
+          </g>
+          <g id="node-donner">
+            <rect x="10" y="175" width="100" height="44" rx="8" fill="#c53030" stroke="#fff" stroke-width="2"/>
+            <text x="60" y="193" text-anchor="middle" font-size="13" fill="#fff" font-weight="700">ドナー</text>
+            <text x="60" y="209" text-anchor="middle" font-size="10" fill="#ffd0d0">米国導入</text>
+          </g>
+          <g id="node-hohkoutarou">
+            <rect x="10" y="250" width="100" height="44" rx="8" fill="#e53e3e" stroke="#fff" stroke-width="2"/>
+            <text x="60" y="268" text-anchor="middle" font-size="13" fill="#fff" font-weight="700">宝交早生</text>
+            <text x="60" y="284" text-anchor="middle" font-size="10" fill="#ffd0d0">1960年</text>
+          </g>
+
+          <!-- 1970-80s -->
+          <g id="node-nyoho">
+            <rect x="200" y="100" width="100" height="44" rx="8" fill="#dd6b20" stroke="#fff" stroke-width="2"/>
+            <text x="250" y="118" text-anchor="middle" font-size="13" fill="#fff" font-weight="700">女峰</text>
+            <text x="250" y="134" text-anchor="middle" font-size="10" fill="#ffe0c0">1985年</text>
+          </g>
+          <g id="node-toyonoka">
+            <rect x="200" y="175" width="100" height="44" rx="8" fill="#dd6b20" stroke="#fff" stroke-width="2"/>
+            <text x="250" y="193" text-anchor="middle" font-size="13" fill="#fff" font-weight="700">とよのか</text>
+            <text x="250" y="209" text-anchor="middle" font-size="10" fill="#ffe0c0">1979年</text>
+          </g>
+          <g id="node-aiberry">
+            <rect x="200" y="250" width="100" height="44" rx="8" fill="#dd6b20" stroke="#fff" stroke-width="2"/>
+            <text x="250" y="268" text-anchor="middle" font-size="13" fill="#fff" font-weight="700">アイベリー</text>
+            <text x="250" y="284" text-anchor="middle" font-size="10" fill="#ffe0c0">1983年</text>
+          </g>
+
+          <!-- 1990s -->
+          <g id="node-sachinoka">
+            <rect x="420" y="100" width="110" height="44" rx="8" fill="#2f855a" stroke="#fff" stroke-width="2"/>
+            <text x="475" y="118" text-anchor="middle" font-size="13" fill="#fff" font-weight="700">さちのか</text>
+            <text x="475" y="134" text-anchor="middle" font-size="10" fill="#c6f6d5">1996年</text>
+          </g>
+          <g id="node-akihime">
+            <rect x="420" y="175" width="110" height="44" rx="8" fill="#2f855a" stroke="#fff" stroke-width="2"/>
+            <text x="475" y="193" text-anchor="middle" font-size="13" fill="#fff" font-weight="700">章姫</text>
+            <text x="475" y="209" text-anchor="middle" font-size="10" fill="#c6f6d5">1992年</text>
+          </g>
+          <g id="node-tochiotome">
+            <rect x="420" y="250" width="110" height="44" rx="8" fill="#2f855a" stroke="#fff" stroke-width="2"/>
+            <text x="475" y="268" text-anchor="middle" font-size="13" fill="#fff" font-weight="700">とちおとめ</text>
+            <text x="475" y="284" text-anchor="middle" font-size="10" fill="#c6f6d5">1996年</text>
+          </g>
+          <g id="node-kaorino">
+            <rect x="420" y="325" width="110" height="44" rx="8" fill="#2f855a" stroke="#fff" stroke-width="2"/>
+            <text x="475" y="343" text-anchor="middle" font-size="13" fill="#fff" font-weight="700">かおりの</text>
+            <text x="475" y="359" text-anchor="middle" font-size="10" fill="#c6f6d5">1996年</text>
+          </g>
+
+          <!-- 2000s -->
+          <g id="node-amao">
+            <rect x="640" y="85" width="110" height="44" rx="8" fill="#2b6cb0" stroke="#fff" stroke-width="2"/>
+            <text x="695" y="103" text-anchor="middle" font-size="13" fill="#fff" font-weight="700">あまおう</text>
+            <text x="695" y="119" text-anchor="middle" font-size="10" fill="#bee3f8">2001年</text>
+          </g>
+          <g id="node-benihoppe">
+            <rect x="640" y="160" width="110" height="44" rx="8" fill="#2b6cb0" stroke="#fff" stroke-width="2"/>
+            <text x="695" y="178" text-anchor="middle" font-size="13" fill="#fff" font-weight="700">紅ほっぺ</text>
+            <text x="695" y="194" text-anchor="middle" font-size="10" fill="#bee3f8">2002年</text>
+          </g>
+          <g id="node-skyberry">
+            <rect x="640" y="235" width="110" height="44" rx="8" fill="#2b6cb0" stroke="#fff" stroke-width="2"/>
+            <text x="695" y="253" text-anchor="middle" font-size="13" fill="#fff" font-weight="700">スカイベリー</text>
+            <text x="695" y="269" text-anchor="middle" font-size="10" fill="#bee3f8">2012年</text>
+          </g>
+          <g id="node-hinoshizuku">
+            <rect x="640" y="310" width="110" height="44" rx="8" fill="#2b6cb0" stroke="#fff" stroke-width="2"/>
+            <text x="695" y="328" text-anchor="middle" font-size="13" fill="#fff" font-weight="700">ひのしずく</text>
+            <text x="695" y="344" text-anchor="middle" font-size="10" fill="#bee3f8">2003年</text>
+          </g>
+
+          <!-- 2010s- -->
+          <g id="node-yotsuboshi">
+            <rect x="860" y="85" width="110" height="44" rx="8" fill="#6b46c1" stroke="#fff" stroke-width="2"/>
+            <text x="915" y="103" text-anchor="middle" font-size="13" fill="#fff" font-weight="700">よつぼし</text>
+            <text x="915" y="119" text-anchor="middle" font-size="10" fill="#e9d8fd">2015年</text>
+          </g>
+          <g id="node-minorichan">
+            <rect x="860" y="160" width="110" height="44" rx="8" fill="#6b46c1" stroke="#fff" stroke-width="2"/>
+            <text x="915" y="178" text-anchor="middle" font-size="13" fill="#fff" font-weight="700">みのりちゃん</text>
+            <text x="915" y="194" text-anchor="middle" font-size="10" fill="#e9d8fd">2014年</text>
+          </g>
+          <g id="node-ichinose">
+            <rect x="860" y="235" width="110" height="44" rx="8" fill="#6b46c1" stroke="#fff" stroke-width="2"/>
+            <text x="915" y="253" text-anchor="middle" font-size="13" fill="#fff" font-weight="700">いちごさん</text>
+            <text x="915" y="269" text-anchor="middle" font-size="10" fill="#e9d8fd">2019年</text>
+          </g>
+          <g id="node-pechika">
+            <rect x="860" y="310" width="110" height="44" rx="8" fill="#6b46c1" stroke="#fff" stroke-width="2"/>
+            <text x="915" y="328" text-anchor="middle" font-size="13" fill="#fff" font-weight="700">ペチカ</text>
+            <text x="915" y="344" text-anchor="middle" font-size="10" fill="#e9d8fd">2019年</text>
+          </g>
+
+          <!-- White variety notes -->
+          <g id="node-hatsukoi">
+            <rect x="860" y="385" width="110" height="44" rx="8" fill="#e2e8f0" stroke="#fc8181" stroke-width="2" stroke-dasharray="5,3"/>
+            <text x="915" y="403" text-anchor="middle" font-size="13" fill="#c53030" font-weight="700">初恋の香り</text>
+            <text x="915" y="419" text-anchor="middle" font-size="10" fill="#718096">白いちご</text>
+          </g>
+          <g id="node-awayuki">
+            <rect x="860" y="455" width="110" height="44" rx="8" fill="#e2e8f0" stroke="#fc8181" stroke-width="2" stroke-dasharray="5,3"/>
+            <text x="915" y="473" text-anchor="middle" font-size="13" fill="#c53030" font-weight="700">淡雪</text>
+            <text x="915" y="489" text-anchor="middle" font-size="10" fill="#718096">白いちご</text>
+          </g>
+
+          <!-- ===== EDGES (arrows) ===== -->
+          <!-- hohkoutarou → nyoho (partial) -->
+          <line x1="110" y1="272" x2="198" y2="122" stroke="#c53030" stroke-width="1.5" marker-end="url(#arrow)" opacity=".5"/>
+          <!-- hohkoutarou → toyonoka -->
+          <line x1="110" y1="272" x2="198" y2="197" stroke="#c53030" stroke-width="1.5" marker-end="url(#arrow)" opacity=".5"/>
+          <!-- donner → hohkoutarou -->
+          <line x1="110" y1="197" x2="15" y2="252" stroke="#c53030" stroke-width="1.5" marker-end="url(#arrow)" opacity=".4"/>
+          <!-- fukuba → nyoho -->
+          <line x1="110" y1="122" x2="198" y2="122" stroke="#c53030" stroke-width="1.5" marker-end="url(#arrow)" opacity=".4"/>
+          <!-- toyonoka → sachinoka -->
+          <line x1="300" y1="197" x2="418" y2="122" stroke="#dd6b20" stroke-width="1.5" marker-end="url(#arrow)" opacity=".5"/>
+          <!-- toyonoka → tochiotome -->
+          <line x1="300" y1="197" x2="418" y2="272" stroke="#dd6b20" stroke-width="1.5" marker-end="url(#arrow)" opacity=".5"/>
+          <!-- nyoho → tochiotome -->
+          <line x1="300" y1="122" x2="418" y2="272" stroke="#dd6b20" stroke-width="1.5" marker-end="url(#arrow)" opacity=".4"/>
+          <!-- aiberry → akihime -->
+          <line x1="300" y1="272" x2="418" y2="197" stroke="#dd6b20" stroke-width="1.5" marker-end="url(#arrow)" opacity=".4"/>
+          <!-- tochiotome → skyberry -->
+          <line x1="530" y1="272" x2="638" y2="257" stroke="#2f855a" stroke-width="1.5" marker-end="url(#arrow)" opacity=".5"/>
+          <!-- sachinoka → amao -->
+          <line x1="530" y1="122" x2="638" y2="107" stroke="#2f855a" stroke-width="1.5" marker-end="url(#arrow)" opacity=".5"/>
+          <!-- sachinoka → benihoppe -->
+          <line x1="530" y1="122" x2="638" y2="182" stroke="#2f855a" stroke-width="1.5" marker-end="url(#arrow)" opacity=".4"/>
+          <!-- akihime → amao -->
+          <line x1="530" y1="197" x2="638" y2="107" stroke="#2f855a" stroke-width="1.5" marker-end="url(#arrow)" opacity=".4"/>
+          <!-- akihime → benihoppe -->
+          <line x1="530" y1="197" x2="638" y2="182" stroke="#2f855a" stroke-width="1.5" marker-end="url(#arrow)" opacity=".5"/>
+          <!-- sachinoka → hinoshizuku -->
+          <line x1="530" y1="122" x2="638" y2="332" stroke="#2f855a" stroke-width="1.5" marker-end="url(#arrow)" opacity=".3"/>
+          <!-- amao → yotsuboshi -->
+          <line x1="750" y1="107" x2="858" y2="107" stroke="#2b6cb0" stroke-width="1.5" marker-end="url(#arrow)" opacity=".5"/>
+          <!-- benihoppe → minorichan -->
+          <line x1="750" y1="182" x2="858" y2="182" stroke="#2b6cb0" stroke-width="1.5" marker-end="url(#arrow)" opacity=".5"/>
+          <!-- skyberry → ichinose -->
+          <line x1="750" y1="257" x2="858" y2="257" stroke="#2b6cb0" stroke-width="1.5" marker-end="url(#arrow)" opacity=".5"/>
+          <!-- hinoshizuku → pechika -->
+          <line x1="750" y1="332" x2="858" y2="332" stroke="#2b6cb0" stroke-width="1.5" marker-end="url(#arrow)" opacity=".5"/>
+
+          <!-- White varieties note -->
+          <text x="865" y="378" font-size="10" fill="#c53030">── 白いちご系統</text>
+
+          <!-- bottom legend -->
+          <rect x="10" y="545" width="14" height="14" rx="2" fill="#c53030"/>
+          <text x="28" y="557" font-size="11" fill="#555">戦前〜戦後初期</text>
+          <rect x="130" y="545" width="14" height="14" rx="2" fill="#dd6b20"/>
+          <text x="148" y="557" font-size="11" fill="#555">1970-80年代</text>
+          <rect x="240" y="545" width="14" height="14" rx="2" fill="#2f855a"/>
+          <text x="258" y="557" font-size="11" fill="#555">1990年代</text>
+          <rect x="330" y="545" width="14" height="14" rx="2" fill="#2b6cb0"/>
+          <text x="348" y="557" font-size="11" fill="#555">2000年代</text>
+          <rect x="420" y="545" width="14" height="14" rx="2" fill="#6b46c1"/>
+          <text x="438" y="557" font-size="11" fill="#555">2010年代〜</text>
+          <rect x="520" y="545" width="14" height="14" rx="2" fill="#e2e8f0" stroke="#fc8181" stroke-width="1.5"/>
+          <text x="538" y="557" font-size="11" fill="#555">白いちご</text>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SECTION 2: MAP ===== -->
+  <section id="map">
+    <h2 class="sec-title">🗾 主要産地マップ</h2>
+    <div class="map-layout">
+      <div class="map-wrap">
+        <svg id="japan-map" viewBox="0 0 560 680" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;background:#e8f4fd;border-radius:10px;">
+
+          <!-- Ocean background -->
+          <rect width="560" height="680" fill="#dbeafe" rx="10"/>
+          <text x="40" y="650" font-size="11" fill="#93c5fd">日本海</text>
+          <text x="460" y="400" font-size="11" fill="#93c5fd">太平洋</text>
+
+          <!-- ===== JAPAN SIMPLIFIED SVG PATHS ===== -->
+          <!-- Hokkaido -->
+          <path id="hokkaido" d="M340,30 L380,25 L420,35 L450,55 L460,80 L440,100 L410,110 L390,100 L370,95 L350,80 L330,65 Z" fill="#d4edda" stroke="#888" stroke-width="1"/>
+          <!-- Aomori -->
+          <path d="M295,130 L320,120 L340,130 L345,150 L330,165 L305,160 L290,148 Z" fill="#d4edda" stroke="#888" stroke-width="1"/>
+          <!-- Iwate -->
+          <path d="M305,160 L330,165 L340,185 L335,215 L315,225 L295,215 L290,190 Z" fill="#d4edda" stroke="#888" stroke-width="1"/>
+          <!-- Akita -->
+          <path d="M270,135 L295,130 L290,148 L290,190 L275,200 L260,185 L255,160 Z" fill="#d4edda" stroke="#888" stroke-width="1"/>
+          <!-- Yamagata -->
+          <path d="M260,185 L275,200 L270,225 L250,235 L235,220 L240,200 Z" fill="#d4edda" stroke="#888" stroke-width="1"/>
+          <!-- Miyagi -->
+          <path d="M295,215 L315,225 L318,248 L300,258 L282,248 L282,228 Z" fill="#d4edda" stroke="#888" stroke-width="1"/>
+          <!-- Fukushima -->
+          <path d="M270,248 L300,258 L305,280 L285,292 L260,285 L255,265 Z" fill="#d4edda" stroke="#888" stroke-width="1"/>
+          <!-- Niigata -->
+          <path d="M230,200 L255,200 L258,225 L248,255 L228,260 L215,245 L220,220 Z" fill="#d4edda" stroke="#888" stroke-width="1"/>
+          <!-- Ibaraki -->
+          <path d="M310,285 L335,278 L345,298 L340,320 L320,328 L305,315 L305,295 Z" fill="#d4edda" stroke="#888" stroke-width="1"/>
+          <!-- Tochigi -->
+          <path d="M285,265 L310,260 L315,285 L305,295 L283,290 L278,272 Z" fill="#d4edda" stroke="#888" stroke-width="1"/>
+          <!-- Gunma -->
+          <path d="M258,268 L282,265 L282,285 L265,295 L248,285 L248,270 Z" fill="#d4edda" stroke="#888" stroke-width="1"/>
+          <!-- Saitama -->
+          <path d="M275,295 L300,290 L305,310 L290,322 L272,315 Z" fill="#d4edda" stroke="#888" stroke-width="1"/>
+          <!-- Chiba -->
+          <path d="M310,310 L335,305 L348,325 L342,345 L320,350 L308,335 Z" fill="#d4edda" stroke="#888" stroke-width="1"/>
+          <!-- Tokyo -->
+          <path d="M285,305 L308,305 L308,318 L292,320 Z" fill="#d4edda" stroke="#888" stroke-width="1"/>
+          <!-- Kanagawa -->
+          <path d="M278,318 L305,318 L308,335 L290,342 L272,335 Z" fill="#d4edda" stroke="#888" stroke-width="1"/>
+          <!-- Yamanashi -->
+          <path d="M258,305 L278,300 L280,318 L265,328 L250,318 Z" fill="#d4edda" stroke="#888" stroke-width="1"/>
+          <!-- Nagano -->
+          <path d="M228,270 L252,268 L255,295 L250,318 L230,325 L212,308 L210,285 Z" fill="#d4edda" stroke="#888" stroke-width="1"/>
+          <!-- Shizuoka -->
+          <path d="M252,335 L278,325 L285,345 L280,368 L258,372 L245,358 L245,342 Z" fill="#d4edda" stroke="#888" stroke-width="1"/>
+          <!-- Aichi -->
+          <path d="M218,330 L248,325 L250,345 L240,362 L220,362 L208,348 Z" fill="#d4edda" stroke="#888" stroke-width="1"/>
+          <!-- Mie -->
+          <path d="M210,358 L232,355 L238,378 L228,398 L210,400 L200,382 Z" fill="#d4edda" stroke="#888" stroke-width="1"/>
+          <!-- Gifu -->
+          <path d="M198,288 L225,280 L228,305 L218,325 L200,320 L192,305 Z" fill="#d4edda" stroke="#888" stroke-width="1"/>
+          <!-- Fukui -->
+          <path d="M175,268 L198,268 L198,290 L182,298 L168,285 Z" fill="#d4edda" stroke="#888" stroke-width="1"/>
+          <!-- Shiga -->
+          <path d="M190,322 L215,318 L218,338 L202,345 L188,335 Z" fill="#d4edda" stroke="#888" stroke-width="1"/>
+          <!-- Kyoto -->
+          <path d="M175,305 L195,300 L198,320 L185,330 L170,322 L168,308 Z" fill="#d4edda" stroke="#888" stroke-width="1"/>
+          <!-- Osaka -->
+          <path d="M172,330 L188,328 L192,342 L180,350 L168,342 Z" fill="#d4edda" stroke="#888" stroke-width="1"/>
+          <!-- Hyogo -->
+          <path d="M148,308 L172,305 L175,328 L160,340 L142,332 L140,315 Z" fill="#d4edda" stroke="#888" stroke-width="1"/>
+          <!-- Nara -->
+          <path d="M182,340 L200,338 L202,358 L188,365 L175,355 L175,342 Z" fill="#d4edda" stroke="#888" stroke-width="1"/>
+          <!-- Wakayama -->
+          <path d="M175,355 L195,358 L198,378 L182,385 L165,375 L165,362 Z" fill="#d4edda" stroke="#888" stroke-width="1"/>
+          <!-- Tottori -->
+          <path d="M130,290 L158,285 L162,305 L145,312 L128,305 Z" fill="#d4edda" stroke="#888" stroke-width="1"/>
+          <!-- Shimane -->
+          <path d="M100,288 L130,285 L132,305 L115,315 L98,305 Z" fill="#d4edda" stroke="#888" stroke-width="1"/>
+          <!-- Okayama -->
+          <path d="M130,305 L155,305 L158,328 L138,335 L122,328 L120,312 Z" fill="#d4edda" stroke="#888" stroke-width="1"/>
+          <!-- Hiroshima -->
+          <path d="M100,305 L125,305 L125,328 L108,335 L95,325 L95,312 Z" fill="#d4edda" stroke="#888" stroke-width="1"/>
+          <!-- Yamaguchi -->
+          <path d="M72,318 L100,315 L100,338 L85,345 L68,338 Z" fill="#d4edda" stroke="#888" stroke-width="1"/>
+          <!-- Ehime -->
+          <path d="M115,360 L140,355 L145,375 L130,385 L112,378 Z" fill="#d4edda" stroke="#888" stroke-width="1"/>
+          <!-- Kochi -->
+          <path d="M120,380 L155,375 L158,398 L138,408 L118,400 Z" fill="#d4edda" stroke="#888" stroke-width="1"/>
+          <!-- Tokushima -->
+          <path d="M158,355 L180,352 L182,372 L165,378 L155,368 Z" fill="#d4edda" stroke="#888" stroke-width="1"/>
+          <!-- Kagawa -->
+          <path d="M148,335 L168,332 L170,348 L152,352 L140,342 Z" fill="#d4edda" stroke="#888" stroke-width="1"/>
+          <!-- Fukuoka -->
+          <path d="M55,368 L85,360 L90,382 L72,392 L52,384 Z" fill="#d4edda" stroke="#888" stroke-width="1"/>
+          <!-- Saga -->
+          <path d="M42,380 L62,375 L68,395 L52,402 L38,394 Z" fill="#d4edda" stroke="#888" stroke-width="1"/>
+          <!-- Nagasaki -->
+          <path d="M20,382 L45,378 L48,400 L32,410 L18,400 Z" fill="#d4edda" stroke="#888" stroke-width="1"/>
+          <!-- Kumamoto -->
+          <path d="M55,392 L82,385 L88,410 L70,422 L50,415 Z" fill="#d4edda" stroke="#888" stroke-width="1"/>
+          <!-- Oita -->
+          <path d="M85,368 L112,362 L118,385 L100,395 L82,388 Z" fill="#d4edda" stroke="#888" stroke-width="1"/>
+          <!-- Miyazaki -->
+          <path d="M90,405 L118,398 L122,428 L105,440 L85,432 Z" fill="#d4edda" stroke="#888" stroke-width="1"/>
+          <!-- Kagoshima -->
+          <path d="M68,428 L100,422 L105,448 L85,460 L62,452 Z" fill="#d4edda" stroke="#888" stroke-width="1"/>
+          <!-- Okinawa (simplified) -->
+          <ellipse cx="180" cy="620" rx="40" ry="15" fill="#d4edda" stroke="#888" stroke-width="1"/>
+          <text x="180" y="624" text-anchor="middle" font-size="9" fill="#555">沖縄</text>
+
+          <!-- ===== STRAWBERRY MARKERS ===== -->
+
+          <!-- Tochigi → とちおとめ, スカイベリー -->
+          <circle cx="303" cy="277" r="16" fill="#e53e3e" opacity=".85" stroke="#fff" stroke-width="2"/>
+          <text x="303" y="272" text-anchor="middle" font-size="9" fill="#fff" font-weight="700">栃木</text>
+          <text x="303" y="283" text-anchor="middle" font-size="8" fill="#ffe0e0">とちおとめ</text>
+
+          <!-- Fukuoka → あまおう -->
+          <circle cx="70" cy="378" r="16" fill="#2b6cb0" opacity=".85" stroke="#fff" stroke-width="2"/>
+          <text x="70" y="373" text-anchor="middle" font-size="9" fill="#fff" font-weight="700">福岡</text>
+          <text x="70" y="384" text-anchor="middle" font-size="8" fill="#bee3f8">あまおう</text>
+
+          <!-- Shizuoka → 章姫, 紅ほっぺ -->
+          <circle cx="262" cy="352" r="16" fill="#dd6b20" opacity=".85" stroke="#fff" stroke-width="2"/>
+          <text x="262" y="347" text-anchor="middle" font-size="9" fill="#fff" font-weight="700">静岡</text>
+          <text x="262" y="358" text-anchor="middle" font-size="8" fill="#ffe0c0">章姫</text>
+
+          <!-- Kumamoto → いちごさん, ひのしずく -->
+          <circle cx="70" cy="405" r="15" fill="#6b46c1" opacity=".85" stroke="#fff" stroke-width="2"/>
+          <text x="70" y="400" text-anchor="middle" font-size="9" fill="#fff" font-weight="700">熊本</text>
+          <text x="70" y="411" text-anchor="middle" font-size="8" fill="#e9d8fd">いちごさん</text>
+
+          <!-- Nagano → さちのか系 -->
+          <circle cx="230" cy="298" r="14" fill="#2f855a" opacity=".85" stroke="#fff" stroke-width="2"/>
+          <text x="230" y="293" text-anchor="middle" font-size="9" fill="#fff" font-weight="700">長野</text>
+          <text x="230" y="304" text-anchor="middle" font-size="8" fill="#c6f6d5">さちのか</text>
+
+          <!-- Saga → 白いちご・さがほのか -->
+          <circle cx="50" cy="391" r="13" fill="#fc8181" opacity=".85" stroke="#fff" stroke-width="2"/>
+          <text x="50" y="386" text-anchor="middle" font-size="9" fill="#fff" font-weight="700">佐賀</text>
+          <text x="50" y="397" text-anchor="middle" font-size="8" fill="#fff8f8">さがほのか</text>
+
+          <!-- Aichi → ゆめのか -->
+          <circle cx="228" cy="348" r="13" fill="#d69e2e" opacity=".85" stroke="#fff" stroke-width="2"/>
+          <text x="228" y="343" text-anchor="middle" font-size="9" fill="#fff" font-weight="700">愛知</text>
+          <text x="228" y="354" text-anchor="middle" font-size="8" fill="#fef3c7">ゆめのか</text>
+
+          <!-- Nara → 古都華 -->
+          <circle cx="190" cy="349" r="13" fill="#c53030" opacity=".85" stroke="#fff" stroke-width="2"/>
+          <text x="190" y="344" text-anchor="middle" font-size="9" fill="#fff" font-weight="700">奈良</text>
+          <text x="190" y="355" text-anchor="middle" font-size="8" fill="#fff0f0">古都華</text>
+
+          <!-- Ibaraki -->
+          <circle cx="325" cy="298" r="13" fill="#2f855a" opacity=".75" stroke="#fff" stroke-width="2"/>
+          <text x="325" y="293" text-anchor="middle" font-size="9" fill="#fff" font-weight="700">茨城</text>
+          <text x="325" y="304" text-anchor="middle" font-size="8" fill="#c6f6d5">いばらキッス</text>
+
+          <!-- Hokkaido -->
+          <circle cx="400" cy="72" r="14" fill="#6b46c1" opacity=".75" stroke="#fff" stroke-width="2"/>
+          <text x="400" y="67" text-anchor="middle" font-size="9" fill="#fff" font-weight="700">北海道</text>
+          <text x="400" y="78" text-anchor="middle" font-size="8" fill="#e9d8fd">けんたろう</text>
+
+          <!-- Title -->
+          <text x="280" y="16" text-anchor="middle" font-size="13" fill="#1a365d" font-weight="800">イチゴ主要産地マップ</text>
+        </svg>
+      </div>
+
+      <!-- Legend -->
+      <div class="legend-wrap">
+        <h3>産地別 主要品種</h3>
+
+        <div class="legend-item">
+          <div class="legend-dot" style="background:#e53e3e;"></div>
+          <div>
+            <div class="legend-name">栃木県</div>
+            <div class="legend-pref">とちおとめ・スカイベリー</div>
+            <span class="legend-year">日本1位の生産量</span>
+          </div>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:#2b6cb0;"></div>
+          <div>
+            <div class="legend-name">福岡県</div>
+            <div class="legend-pref">あまおう</div>
+            <span class="legend-year">ブランドいちご No.1</span>
+          </div>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:#dd6b20;"></div>
+          <div>
+            <div class="legend-name">静岡県</div>
+            <div class="legend-pref">章姫・紅ほっぺ</div>
+            <span class="legend-year">大粒品種の産地</span>
+          </div>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:#6b46c1;"></div>
+          <div>
+            <div class="legend-name">熊本県</div>
+            <div class="legend-pref">いちごさん・ひのしずく</div>
+            <span class="legend-year">九州最大産地</span>
+          </div>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:#2f855a;"></div>
+          <div>
+            <div class="legend-name">長野県</div>
+            <div class="legend-pref">さちのか・シナノスイート</div>
+            <span class="legend-year">高原栽培</span>
+          </div>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:#fc8181;"></div>
+          <div>
+            <div class="legend-name">佐賀県</div>
+            <div class="legend-pref">さがほのか・いちごさん</div>
+            <span class="legend-year">九州ブランド</span>
+          </div>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:#d69e2e;"></div>
+          <div>
+            <div class="legend-name">愛知県</div>
+            <div class="legend-pref">ゆめのか・章姫</div>
+            <span class="legend-year">中部圏の主力</span>
+          </div>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:#c53030;"></div>
+          <div>
+            <div class="legend-name">奈良県</div>
+            <div class="legend-pref">古都華</div>
+            <span class="legend-year">2014年デビュー</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SECTION 3: VARIETY CARDS ===== -->
+  <section id="varieties">
+    <h2 class="sec-title">🍓 主要品種プロフィール</h2>
+    <div class="cards-grid">
+
+      <div class="v-card">
+        <div class="v-card-name">とちおとめ</div>
+        <div class="v-card-yomi">Tochiotome</div>
+        <span class="v-card-tag">栃木県育成</span><span class="v-card-tag">1996年</span><span class="v-card-tag">酸味少なめ</span>
+        <p class="v-card-desc">栃木県が育成した国内最大生産量を誇る品種。果実は鮮紅色で光沢があり、甘みと適度な酸味のバランスが優れる。長年にわたり日本のイチゴ生産の主役。</p>
+      </div>
+
+      <div class="v-card">
+        <div class="v-card-name">あまおう</div>
+        <div class="v-card-yomi">Amaou</div>
+        <span class="v-card-tag">福岡県育成</span><span class="v-card-tag">2001年</span><span class="v-card-tag">大粒・高糖度</span>
+        <p class="v-card-desc">「赤い・丸い・大きい・うまい」の頭文字から命名。糖度が高く果汁が豊富。福岡県の登録商標で、ブランドいちごとして最高峰の評価。</p>
+      </div>
+
+      <div class="v-card">
+        <div class="v-card-name">章姫</div>
+        <div class="v-card-yomi">Akihime</div>
+        <span class="v-card-tag">静岡県育成</span><span class="v-card-tag">1992年</span><span class="v-card-tag">長円錐形</span>
+        <p class="v-card-desc">静岡県の育種家・萩原章弘氏が育成。細長い独特の果形と甘みが特徴。多くの品種の交配親となった重要品種で「あまおう」の系譜にもつながる。</p>
+      </div>
+
+      <div class="v-card">
+        <div class="v-card-name">紅ほっぺ</div>
+        <div class="v-card-yomi">Beni Hoppe</div>
+        <span class="v-card-tag">静岡県育成</span><span class="v-card-tag">2002年</span><span class="v-card-tag">大粒・濃い甘さ</span>
+        <p class="v-card-desc">「章姫」と「さちのか」の交配種。果肉まで赤く、甘みが非常に強い。静岡県を代表するブランドいちごで、贈答品として人気が高い。</p>
+      </div>
+
+      <div class="v-card">
+        <div class="v-card-name">スカイベリー</div>
+        <div class="v-card-yomi">Skyberry</div>
+        <span class="v-card-tag">栃木県育成</span><span class="v-card-tag">2012年</span><span class="v-card-tag">超大粒</span>
+        <p class="v-card-desc">栃木県が「とちおとめ」に続く新ブランドとして開発。1粒25g以上の大粒を出荷基準とし、上品な甘さとほのかな酸味が特徴。高級ギフト向け。</p>
+      </div>
+
+      <div class="v-card">
+        <div class="v-card-name">さちのか</div>
+        <div class="v-card-yomi">Sachinoka</div>
+        <span class="v-card-tag">農研機構育成</span><span class="v-card-tag">1996年</span><span class="v-card-tag">硬さ・輸送性</span>
+        <p class="v-card-desc">農業研究機構（旧農水省）が育成。果肉が硬く輸送性に優れ、西日本での生産に適する。多くの優良品種を生んだ「母品種」として歴史的に重要。</p>
+      </div>
+
+      <div class="v-card">
+        <div class="v-card-name">いちごさん</div>
+        <div class="v-card-yomi">Ichigo-san</div>
+        <span class="v-card-tag">佐賀県育成</span><span class="v-card-tag">2019年</span><span class="v-card-tag">大粒・高糖度</span>
+        <p class="v-card-desc">佐賀県が「さがほのか」に続く新ブランドとして育成。糖度が高く大粒で、「いちごさん」の愛称が話題に。九州産ブランドいちごの新星。</p>
+      </div>
+
+      <div class="v-card">
+        <div class="v-card-name">古都華</div>
+        <div class="v-card-yomi">Kotoka</div>
+        <span class="v-card-tag">奈良県育成</span><span class="v-card-tag">2014年</span><span class="v-card-tag">芳香・濃い甘さ</span>
+        <p class="v-card-desc">奈良県が「飛鳥ルビー」に続いて登録。深紅の果実と豊かな香り、高い糖度が特徴。奈良ブランドとして関西圏で高い評価を受ける。</p>
+      </div>
+
+      <div class="v-card" style="border-top-color:#fc8181;">
+        <div class="v-card-name">淡雪</div>
+        <div class="v-card-yomi">Awayuki</div>
+        <span class="v-card-tag">鹿児島県育成</span><span class="v-card-tag">白いちご</span><span class="v-card-tag">芳醇な甘さ</span>
+        <p class="v-card-desc">白いちごの先駆け品種。外皮が白く、果肉もピンク〜白色。アントシアニンをほとんど含まないため白くなる。甘みが強く酸味は少ない希少品種。</p>
+      </div>
+
+      <div class="v-card" style="border-top-color:#fc8181;">
+        <div class="v-card-name">初恋の香り</div>
+        <div class="v-card-yomi">Hatsukoi no Kaori</div>
+        <span class="v-card-tag">栃木県育成</span><span class="v-card-tag">白いちご</span><span class="v-card-tag">桃の香り</span>
+        <p class="v-card-desc">栃木県農業試験場が育成した白いちご品種。桃やパイナップルに似た甘い香りが特徴。赤いちごより甘みが強く、糖度12〜15度に達することも。</p>
+      </div>
+
+      <div class="v-card">
+        <div class="v-card-name">よつぼし</div>
+        <div class="v-card-yomi">Yotsuboshi</div>
+        <span class="v-card-tag">農研機構育成</span><span class="v-card-tag">2015年</span><span class="v-card-tag">夏秋採り</span>
+        <p class="v-card-desc">農研機構が育成した夏秋採りを可能にした品種。一季なりのシーズン外れの需要を満たす。収量が多く、産業用・業務用にも適する。</p>
+      </div>
+
+      <div class="v-card">
+        <div class="v-card-name">宝交早生</div>
+        <div class="v-card-yomi">Hoko Wase</div>
+        <span class="v-card-tag">兵庫県育成</span><span class="v-card-tag">1960年</span><span class="v-card-tag">戦後の基幹品種</span>
+        <p class="v-card-desc">戦後の日本のイチゴ産業を支えた歴史的品種。耐病性・耐寒性に優れ全国に普及。現在の多くの優良品種のルーツとなった品種であり、品種育成の礎。</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===== SECTION 4: TIMELINE ===== -->
+  <section id="timeline">
+    <h2 class="sec-title">📅 戦後イチゴ品種育成の歴史</h2>
+    <div style="background:#fff;border:1px solid var(--border);border-radius:16px;padding:32px 32px 32px 50px;">
+      <div class="timeline">
+        <div class="tl-item">
+          <div class="tl-dot"></div>
+          <div class="tl-year">1945年〜1960年代</div>
+          <div class="tl-title">復興期：基幹品種の整備</div>
+          <div class="tl-body">戦後の食料難を背景に、国内各地でイチゴ栽培が本格化。米国から「ドナー」などの品種が導入され、1960年に兵庫県が<strong>宝交早生</strong>を登録。全国の農家に普及し、日本のイチゴ産業の礎を作る。</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot"></div>
+          <div class="tl-year">1970〜1985年</div>
+          <div class="tl-title">成長期：地域ブランド品種の誕生</div>
+          <div class="tl-body">1979年に福岡県が<strong>とよのか</strong>を登録。大粒で甘みが強く高い人気を誇り、一時期は国内シェア1位を獲得。1985年には栃木県が<strong>女峰</strong>を登録し、関東での主力品種となる。</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot"></div>
+          <div class="tl-year">1990年代</div>
+          <div class="tl-title">転換期：現在の主力品種が登場</div>
+          <div class="tl-body">1992年に<strong>章姫</strong>（静岡）、1996年に<strong>とちおとめ</strong>（栃木）・<strong>さちのか</strong>（農研機構）が相次いで登録。とちおとめは以後20年以上にわたり生産量1位を維持。品種の多様化が加速する。</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot"></div>
+          <div class="tl-year">2001〜2010年</div>
+          <div class="tl-title">ブランド競争時代：あまおう登場</div>
+          <div class="tl-body">2001年に福岡県が<strong>あまおう</strong>を登録し、高級ブランドいちごの先駆けとなる。2002年に<strong>紅ほっぺ</strong>（静岡）も登場。各県が独自ブランド品種の育成に力を入れる「ブランドいちご競争時代」が到来。</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot"></div>
+          <div class="tl-year">2012〜2020年</div>
+          <div class="tl-title">差別化時代：超大粒・白いちごの台頭</div>
+          <div class="tl-body">2012年に<strong>スカイベリー</strong>（栃木）が登録、2014年に<strong>古都華</strong>（奈良）が登場。白いちご（<strong>淡雪</strong>、<strong>初恋の香り</strong>）が注目を集める。2019年には<strong>いちごさん</strong>（佐賀）がデビュー。品種の個性化・高付加価値化が進む。</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot"></div>
+          <div class="tl-year">2020年代〜</div>
+          <div class="tl-title">革新期：育成技術の進化と輸出戦略</div>
+          <div class="tl-body">ゲノム解析・ゲノム編集技術の導入により育種の効率化が進む。日本のイチゴは海外でも高評価を受け、輸出向けブランドの開発も加速。四季成りや夏秋採り品種の開発により、年間供給体制の整備が進む。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  <p>🍓 戦後日本のイチゴ品種図鑑 — 教育用インフォグラフィック</p>
+  <p style="margin-top:6px;">品種情報は農林水産省・各県農業試験場の公開データをもとに作成 | © 2026</p>
+</footer>
+
+</body>
+</html>
