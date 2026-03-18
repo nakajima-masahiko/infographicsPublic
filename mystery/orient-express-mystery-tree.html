@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>オリエント急行殺人事件 — 推理ツリー</title>
+  <style>
+    :root {
+      --bg: #0d0a14;
+      --surface: #1a1528;
+      --surface2: #231d38;
+      --border: #3d3460;
+      --gold: #c9a227;
+      --gold-light: #f0c84a;
+      --red: #c0392b;
+      --red-light: #e74c3c;
+      --blue: #2980b9;
+      --blue-light: #3498db;
+      --green: #27ae60;
+      --green-light: #2ecc71;
+      --purple: #8e44ad;
+      --purple-light: #9b59b6;
+      --text: #e8e0f0;
+      --text-dim: #9d95b0;
+      --connector: #4a4070;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Noto Serif JP", "Yu Mincho", "Hiragino Mincho ProN", Georgia, serif;
+      min-height: 100vh;
+      padding: 0 0 60px;
+    }
+
+    /* ===== HEADER ===== */
+    .page-header {
+      background: linear-gradient(180deg, #100c1e 0%, #0d0a14 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 40px 20px 32px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .page-header::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: radial-gradient(ellipse at 50% 0%, rgba(201,162,39,0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .train-deco {
+      font-size: 40px;
+      margin-bottom: 12px;
+      filter: drop-shadow(0 0 16px rgba(201,162,39,0.5));
+    }
+    .page-header h1 {
+      font-size: clamp(22px, 4vw, 36px);
+      color: var(--gold-light);
+      letter-spacing: 0.12em;
+      text-shadow: 0 0 30px rgba(201,162,39,0.4);
+      margin-bottom: 8px;
+    }
+    .page-header .subtitle {
+      font-size: 14px;
+      color: var(--text-dim);
+      letter-spacing: 0.06em;
+    }
+    .badge-row {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+    .badge {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 4px 14px;
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+
+    /* ===== LAYOUT ===== */
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 16px;
+    }
+
+    /* ===== SECTION TITLES ===== */
+    .section-label {
+      text-align: center;
+      margin: 40px 0 20px;
+      position: relative;
+    }
+    .section-label::before, .section-label::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      width: 30%;
+      height: 1px;
+      background: linear-gradient(to var(--dir, right), transparent, var(--border));
+    }
+    .section-label::before { left: 0; --dir: right; }
+    .section-label::after  { right: 0; --dir: left;  }
+    .section-label span {
+      display: inline-block;
+      background: var(--bg);
+      padding: 0 16px;
+      font-size: 13px;
+      color: var(--gold);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    /* ===== TREE WRAPPER ===== */
+    .tree-wrapper {
+      overflow-x: auto;
+      padding: 20px 0 10px;
+    }
+
+    /* ===== TREE ===== */
+    .tree {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+      min-width: 900px;
+    }
+
+    /* NODE */
+    .node {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .node-box {
+      border-radius: 12px;
+      padding: 14px 20px;
+      text-align: center;
+      position: relative;
+      cursor: default;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .node-box:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    }
+    .node-icon { font-size: 24px; display: block; margin-bottom: 6px; }
+    .node-title {
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1.4;
+      margin-bottom: 4px;
+    }
+    .node-desc {
+      font-size: 12px;
+      color: rgba(255,255,255,0.65);
+      line-height: 1.5;
+    }
+
+    /* Connector lines */
+    .connector-down {
+      width: 2px;
+      background: var(--connector);
+      margin: 0 auto;
+    }
+    .connector-h {
+      height: 2px;
+      background: var(--connector);
+      position: absolute;
+      top: 0;
+    }
+    .branch-row {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      width: 100%;
+      position: relative;
+    }
+    .branch-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1;
+    }
+
+    /* ===== NODE THEMES ===== */
+    .node-start .node-box {
+      background: linear-gradient(135deg, #2c1810 0%, #4a1c14 100%);
+      border: 2px solid var(--red);
+      min-width: 280px;
+      box-shadow: 0 0 30px rgba(192,57,43,0.3);
+    }
+    .node-start .node-title { color: #ff9999; }
+
+    .node-victim .node-box {
+      background: linear-gradient(135deg, #1a1020 0%, #2d1e40 100%);
+      border: 2px solid var(--purple);
+      min-width: 220px;
+      box-shadow: 0 0 20px rgba(142,68,173,0.25);
+    }
+    .node-victim .node-title { color: #c39bd3; }
+
+    .node-evidence .node-box {
+      background: linear-gradient(135deg, #0e1820 0%, #162535 100%);
+      border: 2px solid var(--blue);
+      min-width: 180px;
+      box-shadow: 0 0 20px rgba(41,128,185,0.2);
+    }
+    .node-evidence .node-title { color: #85c1e9; }
+
+    .node-suspect .node-box {
+      background: linear-gradient(135deg, #0e1a10 0%, #162918 100%);
+      border: 2px solid var(--green);
+      min-width: 160px;
+      box-shadow: 0 0 20px rgba(39,174,96,0.2);
+    }
+    .node-suspect .node-title { color: #82e0aa; }
+
+    .node-clue .node-box {
+      background: linear-gradient(135deg, #1a1700 0%, #2a2400 100%);
+      border: 2px solid #7a6a00;
+      min-width: 160px;
+    }
+    .node-clue .node-title { color: var(--gold-light); }
+
+    .node-deduction .node-box {
+      background: linear-gradient(135deg, #0d1220 0%, #162040 100%);
+      border: 2px solid #1a5276;
+      min-width: 200px;
+    }
+    .node-deduction .node-title { color: #aed6f1; }
+
+    .node-answer .node-box {
+      background: linear-gradient(135deg, #1c1200 0%, #3a2600 100%);
+      border: 2px solid var(--gold);
+      min-width: 300px;
+      box-shadow: 0 0 40px rgba(201,162,39,0.35);
+    }
+    .node-answer .node-title { color: var(--gold-light); font-size: 18px; }
+
+    /* ===== FULL-WIDTH PANELS ===== */
+    .panel-row {
+      display: grid;
+      gap: 16px;
+      margin-top: 8px;
+    }
+    .panel-row.cols-3 { grid-template-columns: repeat(3, 1fr); }
+    .panel-row.cols-4 { grid-template-columns: repeat(4, 1fr); }
+    .panel-row.cols-2 { grid-template-columns: repeat(2, 1fr); }
+
+    .panel {
+      border-radius: 12px;
+      padding: 16px 18px;
+      border: 1px solid;
+    }
+    .panel .p-icon { font-size: 22px; margin-bottom: 8px; }
+    .panel .p-title {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .panel .p-body {
+      font-size: 12px;
+      line-height: 1.7;
+      color: rgba(255,255,255,0.65);
+    }
+    .panel ul { padding-left: 14px; }
+    .panel li { margin-bottom: 3px; }
+
+    .panel.red   { background: rgba(192,57,43,0.08);  border-color: rgba(192,57,43,0.4);  }
+    .panel.red   .p-title { color: #e57373; }
+    .panel.blue  { background: rgba(41,128,185,0.08); border-color: rgba(41,128,185,0.4); }
+    .panel.blue  .p-title { color: #64b5f6; }
+    .panel.green { background: rgba(39,174,96,0.08);  border-color: rgba(39,174,96,0.4);  }
+    .panel.green .p-title { color: #81c784; }
+    .panel.gold  { background: rgba(201,162,39,0.08); border-color: rgba(201,162,39,0.4); }
+    .panel.gold  .p-title { color: var(--gold-light); }
+    .panel.purple{ background: rgba(142,68,173,0.08); border-color: rgba(142,68,173,0.4); }
+    .panel.purple .p-title { color: #ce93d8; }
+    .panel.grey  { background: rgba(100,100,120,0.08); border-color: rgba(100,100,120,0.4); }
+    .panel.grey  .p-title { color: #b0bec5; }
+
+    /* ===== SUSPECTS TABLE ===== */
+    .suspects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+      gap: 12px;
+      margin-top: 8px;
+    }
+    .suspect-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      transition: border-color 0.2s;
+    }
+    .suspect-card:hover { border-color: var(--green); }
+    .suspect-card .s-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: #82e0aa;
+      margin-bottom: 4px;
+    }
+    .suspect-card .s-role {
+      font-size: 11px;
+      color: var(--gold);
+      margin-bottom: 6px;
+      letter-spacing: 0.05em;
+    }
+    .suspect-card .s-conn {
+      font-size: 11px;
+      color: var(--text-dim);
+      line-height: 1.5;
+    }
+    .suspect-card .s-motive {
+      margin-top: 6px;
+      font-size: 11px;
+      background: rgba(39,174,96,0.1);
+      border: 1px solid rgba(39,174,96,0.3);
+      border-radius: 6px;
+      padding: 4px 8px;
+      color: #a9dfbf;
+    }
+
+    /* ===== FLOW DIAGRAM ===== */
+    .flow-diagram {
+      position: relative;
+      padding: 20px 0;
+    }
+    .flow-steps {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+    }
+    .flow-step {
+      display: flex;
+      align-items: stretch;
+      gap: 16px;
+      width: 100%;
+      max-width: 780px;
+    }
+    .flow-step-left {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 36px;
+      flex-shrink: 0;
+    }
+    .flow-step-num {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 700;
+      flex-shrink: 0;
+    }
+    .flow-step-line {
+      flex: 1;
+      width: 2px;
+      background: var(--connector);
+      margin: 4px auto;
+    }
+    .flow-step-content {
+      flex: 1;
+      padding: 12px 16px;
+      border-radius: 10px;
+      margin-bottom: 16px;
+    }
+    .flow-step-content .fs-title {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .flow-step-content .fs-body {
+      font-size: 12px;
+      color: rgba(255,255,255,0.65);
+      line-height: 1.7;
+    }
+    .step-red    .flow-step-num { background: rgba(192,57,43,0.8); color: #fff; }
+    .step-red    .flow-step-content { background: rgba(192,57,43,0.08); border: 1px solid rgba(192,57,43,0.35); }
+    .step-red    .fs-title { color: #e57373; }
+    .step-purple .flow-step-num { background: rgba(142,68,173,0.8); color: #fff; }
+    .step-purple .flow-step-content { background: rgba(142,68,173,0.08); border: 1px solid rgba(142,68,173,0.35); }
+    .step-purple .fs-title { color: #ce93d8; }
+    .step-blue   .flow-step-num { background: rgba(41,128,185,0.8); color: #fff; }
+    .step-blue   .flow-step-content { background: rgba(41,128,185,0.08); border: 1px solid rgba(41,128,185,0.35); }
+    .step-blue   .fs-title { color: #64b5f6; }
+    .step-green  .flow-step-num { background: rgba(39,174,96,0.8); color: #fff; }
+    .step-green  .flow-step-content { background: rgba(39,174,96,0.08); border: 1px solid rgba(39,174,96,0.35); }
+    .step-green  .fs-title { color: #81c784; }
+    .step-gold   .flow-step-num { background: rgba(201,162,39,0.8); color: #000; }
+    .step-gold   .flow-step-content { background: rgba(201,162,39,0.08); border: 1px solid rgba(201,162,39,0.45); }
+    .step-gold   .fs-title { color: var(--gold-light); }
+    .step-orange .flow-step-num { background: rgba(211,84,0,0.8); color: #fff; }
+    .step-orange .flow-step-content { background: rgba(211,84,0,0.08); border: 1px solid rgba(211,84,0,0.35); }
+    .step-orange .fs-title { color: #f0a500; }
+
+    /* ===== VERDICT ===== */
+    .verdict-box {
+      background: linear-gradient(135deg, #1c1200 0%, #3a2a00 100%);
+      border: 2px solid var(--gold);
+      border-radius: 20px;
+      padding: 32px 40px;
+      text-align: center;
+      max-width: 700px;
+      margin: 0 auto;
+      box-shadow: 0 0 60px rgba(201,162,39,0.25);
+    }
+    .verdict-box .v-icon { font-size: 48px; margin-bottom: 12px; }
+    .verdict-box .v-title {
+      font-size: 24px;
+      color: var(--gold-light);
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      margin-bottom: 16px;
+      text-shadow: 0 0 20px rgba(201,162,39,0.5);
+    }
+    .verdict-box .v-body {
+      font-size: 14px;
+      color: rgba(255,255,255,0.75);
+      line-height: 1.8;
+    }
+    .verdict-box .v-quote {
+      margin-top: 20px;
+      padding: 14px 20px;
+      background: rgba(201,162,39,0.08);
+      border-left: 3px solid var(--gold);
+      border-radius: 4px;
+      font-size: 13px;
+      font-style: italic;
+      color: var(--gold-light);
+      text-align: left;
+      line-height: 1.7;
+    }
+
+    /* ===== TWO-HYPOTHESIS ===== */
+    .hypothesis-row {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 0;
+      align-items: start;
+      margin: 8px 0;
+    }
+    .hypothesis-box {
+      border-radius: 12px;
+      padding: 18px 20px;
+      border: 1px solid;
+    }
+    .hypothesis-box .h-title {
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      letter-spacing: 0.05em;
+    }
+    .hypothesis-box .h-body {
+      font-size: 12px;
+      color: rgba(255,255,255,0.62);
+      line-height: 1.6;
+    }
+    .hypothesis-box.wrong {
+      background: rgba(192,57,43,0.06);
+      border-color: rgba(192,57,43,0.3);
+    }
+    .hypothesis-box.wrong .h-title { color: #e57373; }
+    .hypothesis-box.correct {
+      background: rgba(39,174,96,0.06);
+      border-color: rgba(39,174,96,0.3);
+    }
+    .hypothesis-box.correct .h-title { color: #81c784; }
+    .hypothesis-vs {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 20px;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--gold);
+    }
+
+    /* ===== ARMSTRONG TREE ===== */
+    .armstrong-box {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      max-width: 640px;
+      margin: 0 auto;
+    }
+    .armstrong-box .a-center {
+      background: rgba(192,57,43,0.15);
+      border: 2px solid rgba(192,57,43,0.6);
+      border-radius: 10px;
+      padding: 10px 16px;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+    .armstrong-box .a-center-title { font-size: 15px; color: #ff9999; font-weight: 700; }
+    .armstrong-box .a-center-sub { font-size: 11px; color: var(--text-dim); }
+    .armstrong-members {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+    .armstrong-member {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 10px;
+      text-align: center;
+      font-size: 11px;
+    }
+    .armstrong-member .am-name { color: var(--gold); font-weight: 700; margin-bottom: 2px; }
+    .armstrong-member .am-rel  { color: var(--text-dim); }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 680px) {
+      .panel-row.cols-3 { grid-template-columns: 1fr; }
+      .panel-row.cols-4 { grid-template-columns: 1fr 1fr; }
+      .panel-row.cols-2 { grid-template-columns: 1fr; }
+      .hypothesis-row   { grid-template-columns: 1fr; }
+      .hypothesis-vs    { padding: 10px 0; }
+      .armstrong-members { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    /* ===== LEGEND ===== */
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+      margin: 20px 0;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+    .legend-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== HEADER ===== -->
+  <div class="page-header">
+    <div class="train-deco">🚂</div>
+    <h1>オリエント急行殺人事件</h1>
+    <p class="subtitle">Murder on the Orient Express — アガサ・クリスティ著（1934年） — 推理解明ツリー</p>
+    <div class="badge-row">
+      <span class="badge">🕵️ エルキュール・ポアロ</span>
+      <span class="badge">🚂 オリエント急行</span>
+      <span class="badge">❄️ 雪のユーゴスラビア</span>
+      <span class="badge">🔪 密室殺人</span>
+      <span class="badge">👥 12人の容疑者</span>
+    </div>
+  </div>
+
+  <div class="container">
+
+    <!-- ===== LEGEND ===== -->
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#e74c3c"></div>事件発生</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#9b59b6"></div>被害者調査</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#3498db"></div>物的証拠</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#27ae60"></div>容疑者</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#c9a227"></div>推理・結論</div>
+    </div>
+
+    <!-- ===== STEP 1: 事件発生 ===== -->
+    <div class="section-label"><span>STEP 1 — 事件発生</span></div>
+
+    <div class="panel-row cols-3">
+      <div class="panel red">
+        <div class="p-icon">🌨️</div>
+        <div class="p-title">状況設定</div>
+        <div class="p-body">
+          冬のユーゴスラビア。激しい吹雪により、イスタンブール発カレー行きの「オリエント急行」が雪の中に立ち往生。外部との連絡が絶たれる。
+        </div>
+      </div>
+      <div class="panel red">
+        <div class="p-icon">💀</div>
+        <div class="p-title">死体の発見</div>
+        <div class="p-body">
+          朝、アメリカ人実業家サミュエル・エドワード・ラチェット氏（60代）がコンパートメントで遺体となって発見される。<br>
+          刺し傷：<strong style="color:#ff9999">12箇所</strong>（深浅不均一）
+        </div>
+      </div>
+      <div class="panel red">
+        <div class="p-icon">🕰️</div>
+        <div class="p-title">死亡推定時刻</div>
+        <div class="p-body">
+          深夜0時〜2時の間と推定。ただし手掛かりの一つである時計は故意に<strong style="color:#ff9999">1時15分</strong>で止められており、真実を隠蔽している。
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== STEP 2: 被害者の正体 ===== -->
+    <div class="section-label"><span>STEP 2 — 被害者の正体を暴く</span></div>
+
+    <div class="armstrong-box">
+      <div class="a-center">
+        <div class="a-center-title">ラチェット = カッセッティ</div>
+        <div class="a-center-sub">本名：ジョン・カッセッティ — 凶悪な誘拐犯・殺人犯</div>
+      </div>
+      <div class="armstrong-members">
+        <div class="armstrong-member">
+          <div class="am-name">デイジー・アームストロング</div>
+          <div class="am-rel">誘拐・殺害された幼女（3歳）</div>
+        </div>
+        <div class="armstrong-member">
+          <div class="am-name">ソニア・アームストロング</div>
+          <div class="am-rel">デイジーの母／悲嘆で死産・死亡</div>
+        </div>
+        <div class="armstrong-member">
+          <div class="am-name">コーネル・アームストロング</div>
+          <div class="am-rel">デイジーの父／精神的打撃で自殺</div>
+        </div>
+        <div class="armstrong-member">
+          <div class="am-name">スザンヌ</div>
+          <div class="am-rel">フランス人メイド／嫌疑をかけられ自殺</div>
+        </div>
+        <div class="armstrong-member">
+          <div class="am-name">カッセッティ</div>
+          <div class="am-rel">誘拐犯／証拠不十分で無罪放免</div>
+        </div>
+        <div class="armstrong-member">
+          <div class="am-name">計12人</div>
+          <div class="am-rel">遺族・関係者が復讐団を結成</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== STEP 3: 物的証拠 ===== -->
+    <div class="section-label"><span>STEP 3 — 物的証拠の分析</span></div>
+
+    <div class="panel-row cols-4">
+      <div class="panel blue">
+        <div class="p-icon">🔪</div>
+        <div class="p-title">12箇所の刺し傷</div>
+        <div class="p-body">
+          深さと方向が不均一。右利き・左利き両方の痕跡。これは<em>一人</em>の犯行では説明できない。
+        </div>
+      </div>
+      <div class="panel blue">
+        <div class="p-icon">🎀</div>
+        <div class="p-title">Hのハンカチ</div>
+        <div class="p-body">
+          被害者のコンパートメントで発見。イニシャル「H」。後にエクターミナ・アンドレノヴィッチ（アームストロング家の乳母）のものと判明。
+        </div>
+      </div>
+      <div class="panel blue">
+        <div class="p-icon">🧹</div>
+        <div class="p-title">パイプクリーナー</div>
+        <div class="p-body">
+          現場に落ちていたパイプクリーナー。マッカーリー大佐（元軍人）が所持していたものと一致。
+        </div>
+      </div>
+      <div class="panel blue">
+        <div class="p-icon">📜</div>
+        <div class="p-title">燃やされた手紙</div>
+        <div class="p-body">
+          暖炉で燃やされたメモの断片。「アームストロング事件」の文字が読み取れる。過去の事件との関連を示す決定的な証拠。
+        </div>
+      </div>
+      <div class="panel blue">
+        <div class="p-icon">👘</div>
+        <div class="p-title">赤いキモノ</div>
+        <div class="p-body">
+          被害者の部屋に持ち込まれていた赤いキモノ。ドラゴミロフ公爵夫人のメイド（ヒルデガルド・シュミット）のものだったが偽装に使用。
+        </div>
+      </div>
+      <div class="panel blue">
+        <div class="p-icon">🕐</div>
+        <div class="p-title">止まった時計</div>
+        <div class="p-body">
+          1時15分で止められた時計。犯人たちが意図的にアリバイ工作のために操作したもの。実際の死亡時刻を隠蔽するための偽装。
+        </div>
+      </div>
+      <div class="panel blue">
+        <div class="p-icon">👩‍⚕️</div>
+        <div class="p-title">隣室からの声</div>
+        <div class="p-body">
+          深夜、隣のコンパートメントから女性の声と物音。アリバイ工作の一環として仕組まれた演出。
+        </div>
+      </div>
+      <div class="panel blue">
+        <div class="p-icon">🚪</div>
+        <div class="p-title">密室の状況</div>
+        <div class="p-body">
+          コンパートメントはドアが施錠されていた。ただし隣室との連絡扉は鍵が壊れており、通行が可能な状態だった。
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== STEP 4: 容疑者全員 ===== -->
+    <div class="section-label"><span>STEP 4 — 12人の容疑者 × アームストロング家との関係</span></div>
+
+    <div class="suspects-grid">
+      <div class="suspect-card">
+        <div class="s-name">エクターミナ・アンドレノヴィッチ</div>
+        <div class="s-role">ロシア貴族の老婦人（公爵夫人）</div>
+        <div class="s-conn">デイジー・アームストロングの教母。ハンカチが証拠。</div>
+        <div class="s-motive">🔗 教母として深い愛着</div>
+      </div>
+      <div class="suspect-card">
+        <div class="s-name">ヒルデガルド・シュミット</div>
+        <div class="s-role">ドイツ人メイド</div>
+        <div class="s-conn">アームストロング家のコック。赤いキモノを所持。</div>
+        <div class="s-motive">🔗 アームストロング家の使用人</div>
+      </div>
+      <div class="suspect-card">
+        <div class="s-name">ハクター・マッカーリー大佐</div>
+        <div class="s-role">英国人退役軍人</div>
+        <div class="s-conn">コーネル・アームストロングの親友・戦友。パイプクリーナーが証拠。</div>
+        <div class="s-motive">🔗 親友の仇討ち</div>
+      </div>
+      <div class="suspect-card">
+        <div class="s-name">メアリ・デベナム</div>
+        <div class="s-role">英国人家庭教師</div>
+        <div class="s-conn">アームストロング家の家庭教師だった。</div>
+        <div class="s-motive">🔗 アームストロング家の使用人</div>
+      </div>
+      <div class="suspect-card">
+        <div class="s-name">アンドレニー伯爵夫人（ヘレナ）</div>
+        <div class="s-role">ハンガリー貴族</div>
+        <div class="s-conn">ソニア・アームストロングの妹。旧姓ゴールデンバーグ。</div>
+        <div class="s-motive">🔗 姉の死への復讐</div>
+      </div>
+      <div class="suspect-card">
+        <div class="s-name">ルドルフ・アンドレニー伯爵</div>
+        <div class="s-role">ハンガリー貴族</div>
+        <div class="s-conn">アンドレニー伯爵夫人の夫。妻を守るため偽のアリバイを提供。</div>
+        <div class="s-motive">🔗 妻への愛と義理</div>
+      </div>
+      <div class="suspect-card">
+        <div class="s-name">グレタ・オルソン</div>
+        <div class="s-role">スウェーデン人宣教師</div>
+        <div class="s-conn">デイジーの乳母（エクターミナ）の友人。</div>
+        <div class="s-motive">🔗 乳母への友情・正義感</div>
+      </div>
+      <div class="suspect-card">
+        <div class="s-name">ピエール・ミシェル</div>
+        <div class="s-role">フランス人車掌</div>
+        <div class="s-conn">無実の嫌疑をかけられ自殺したフランス人メイド（スザンヌ）の父。</div>
+        <div class="s-motive">🔗 娘の無念を晴らす</div>
+      </div>
+      <div class="suspect-card">
+        <div class="s-name">マストマン大佐夫人（キャロライン）</div>
+        <div class="s-role">米国人老婦人</div>
+        <div class="s-conn">アームストロング家の乳母（エクターミナ）本人。偽名を使用。</div>
+        <div class="s-motive">🔗 育てたデイジーへの愛</div>
+      </div>
+      <div class="suspect-card">
+        <div class="s-name">ハバード夫人（リンダ・アーデン）</div>
+        <div class="s-role">米国人裕福な旅行者</div>
+        <div class="s-conn">アームストロング夫人（ソニア）の母。著名な女優。首謀者。</div>
+        <div class="s-motive">🔗 娘と孫を殺された祖母</div>
+      </div>
+      <div class="suspect-card">
+        <div class="s-name">アントニオ・フォスカレリ</div>
+        <div class="s-role">イタリア人自動車セールスマン</div>
+        <div class="s-conn">アームストロング家の運転手だった。</div>
+        <div class="s-motive">🔗 アームストロング家への忠義</div>
+      </div>
+      <div class="suspect-card">
+        <div class="s-name">シリル・バットルソン</div>
+        <div class="s-role">英国人執事</div>
+        <div class="s-conn">アームストロング家の執事。マストマン大佐夫人のメイド役を担当。</div>
+        <div class="s-motive">🔗 アームストロング家への忠義</div>
+      </div>
+    </div>
+
+    <!-- ===== STEP 5: 2つの仮説 ===== -->
+    <div class="section-label"><span>STEP 5 — ポアロの2仮説</span></div>
+
+    <div class="hypothesis-row">
+      <div class="hypothesis-box wrong">
+        <div class="h-title">❌ 仮説A：外部犯行説</div>
+        <div class="h-body">
+          列車が停車中に外部から侵入した第三者が犯行を行い、その後脱出した。殺傷力の強い外部犯が単独で行った。<br><br>
+          <strong style="color:#e57373">→ 否定される理由：</strong><br>
+          • 12箇所の刺し傷は一人では不自然<br>
+          • 深さ・方向の不均一性<br>
+          • 外部からの侵入の痕跡がない<br>
+          • 雪の中に足跡なし
+        </div>
+      </div>
+      <div class="hypothesis-vs">VS</div>
+      <div class="hypothesis-box correct">
+        <div class="h-title">✅ 仮説B：集団犯行説（正解）</div>
+        <div class="h-body">
+          乗客12名全員がカッセッティへの復讐のために集結し、各々が1回ずつ刺した集団犯行。<br><br>
+          <strong style="color:#81c784">→ 証拠が示すこと：</strong><br>
+          • 12箇所の傷＝12人で一致<br>
+          • 全員がアームストロング事件と関係<br>
+          • ハバード夫人＝リンダ・アーデン（首謀者）<br>
+          • 周到なアリバイ工作・偽装
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== STEP 6: 推理の流れ ===== -->
+    <div class="section-label"><span>STEP 6 — ポアロの推理プロセス</span></div>
+
+    <div class="flow-diagram">
+      <div class="flow-steps">
+
+        <div class="flow-step step-red">
+          <div class="flow-step-left">
+            <div class="flow-step-num">1</div>
+            <div class="flow-step-line"></div>
+          </div>
+          <div class="flow-step-content">
+            <div class="fs-title">死体の観察</div>
+            <div class="fs-body">
+              12箇所の刺し傷に注目。深さと方向が異なり、右利き・左利き両方の痕跡がある。一人の犯行としては極めて不自然。また、血が乾いた状態と新鮮な状態が混在しており、複数回にわたって刺されたことを示唆。
+            </div>
+          </div>
+        </div>
+
+        <div class="flow-step step-purple">
+          <div class="flow-step-left">
+            <div class="flow-step-num">2</div>
+            <div class="flow-step-line"></div>
+          </div>
+          <div class="flow-step-content">
+            <div class="fs-title">被害者の正体特定</div>
+            <div class="fs-body">
+              燃やされた手紙の断片から「アームストロング」の文字を発見。ポアロはアームストロング誘拐事件（幼女デイジーが身代金目的で誘拐・殺害された事件）を記憶しており、ラチェット＝カッセッティと看破。証拠不十分で無罪になった人物が逃げ回っていた。
+            </div>
+          </div>
+        </div>
+
+        <div class="flow-step step-blue">
+          <div class="flow-step-left">
+            <div class="flow-step-num">3</div>
+            <div class="flow-step-line"></div>
+          </div>
+          <div class="flow-step-content">
+            <div class="fs-title">乗客全員の尋問</div>
+            <div class="fs-body">
+              ポアロは12人の乗客全員に個別尋問を実施。各人のアリバイ・証言・矛盾を記録。それぞれが「何かを隠している」ことに気づく。ハバード夫人の過剰に詳細な証言、デベナムとマッカーリーの事前の緊張した会話なども観察。
+            </div>
+          </div>
+        </div>
+
+        <div class="flow-step step-green">
+          <div class="flow-step-left">
+            <div class="flow-step-num">4</div>
+            <div class="flow-step-line"></div>
+          </div>
+          <div class="flow-step-content">
+            <div class="fs-title">アームストロング家との関係を解明</div>
+            <div class="fs-body">
+              尋問・証拠分析から、乗客12名全員とアームストロング家との関係が次々と明らかに。ハバード夫人がリンダ・アーデン（ソニア・アームストロングの母、著名な女優）であること、マストマン夫人が本物の乳母エクターミナ本人であることも判明。
+            </div>
+          </div>
+        </div>
+
+        <div class="flow-step step-orange">
+          <div class="flow-step-left">
+            <div class="flow-step-num">5</div>
+            <div class="flow-step-line"></div>
+          </div>
+          <div class="flow-step-content">
+            <div class="fs-title">アリバイ工作の解体</div>
+            <div class="fs-body">
+              止められた時計は偽装。車掌のミシェルも共犯者であり、証言が信頼できない。赤いキモノや廊下での「女性の目撃情報」も全て仕組まれたもの。12人が連携してポアロを混乱させる煙幕を張っていた。
+            </div>
+          </div>
+        </div>
+
+        <div class="flow-step step-gold">
+          <div class="flow-step-left">
+            <div class="flow-step-num">6</div>
+            <div class="flow-step-line"></div>
+          </div>
+          <div class="flow-step-content">
+            <div class="fs-title">12人全員が共犯という結論</div>
+            <div class="fs-body">
+              乗客の数（12人）と刺し傷の数（12箇所）が一致。デイジーの死に関わる12人が、それぞれ1回ずつラチェットを刺したのだ。誰もが「犯人」であり、誰もが「動機を持つ被害者の関係者」。これは正義の遂行なのか、それとも犯罪なのか。
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ===== STEP 7: ポアロの決断 ===== -->
+    <div class="section-label"><span>STEP 7 — ポアロの最終決断</span></div>
+
+    <div class="panel-row cols-2">
+      <div class="panel gold">
+        <div class="p-icon">⚖️</div>
+        <div class="p-title">真実の二択</div>
+        <div class="p-body">
+          ポアロは2つの解決策をユーゴスラビア警察に提示できる。<br><br>
+          <strong>案①</strong>：真実を告げる → 12人全員が逮捕・起訴される<br><br>
+          <strong>案②</strong>：外部犯行説を採用する → 12人全員が無罪放免<br><br>
+          道徳的に正しいのはどちらか？ 法の正義か、人道的正義か。
+        </div>
+      </div>
+      <div class="panel green">
+        <div class="p-icon">🤝</div>
+        <div class="p-title">ポアロの選択</div>
+        <div class="p-body">
+          ポアロは<strong style="color:#81c784">「外部犯行説」をユーゴスラビア警察に報告することを選択</strong>する。<br><br>
+          理由：<br>
+          • 12人それぞれに正当な動機がある<br>
+          • 法が見逃した正義を12人が実行した<br>
+          • 冷徹な法の論理より人間の道義を優先<br>
+          • ポアロ自身の内なる良心の葛藤と決断
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== VERDICT ===== -->
+    <div class="section-label"><span>最終結論</span></div>
+
+    <div class="verdict-box">
+      <div class="v-icon">🚂</div>
+      <div class="v-title">全員有罪、全員無罪</div>
+      <div class="v-body">
+        スタンブール発カレー行きオリエント急行の乗客12名は、アームストロング誘拐殺人事件の被害者・遺族・関係者であった。法の網をくぐり抜けた凶悪犯カッセッティに対し、それぞれが1回ずつ刺すことで「全員が犯人」となり、誰一人として「唯一の犯人」にならないように仕組まれた完全犯罪——それは同時に、愛する者たちへの深い哀悼と、法律が果たせなかった正義の代行でもあった。
+      </div>
+      <div class="v-quote">
+        「真実はいつもひとつ。だが正義とは何か——それは必ずしもひとつではない。」<br>
+        — エルキュール・ポアロ（アガサ・クリスティ著『オリエント急行殺人事件』より）
+      </div>
+    </div>
+
+    <!-- ===== SUMMARY TABLE ===== -->
+    <div class="section-label"><span>推理ツリー 全体構造まとめ</span></div>
+
+    <div class="panel-row cols-3">
+      <div class="panel purple">
+        <div class="p-icon">🎭</div>
+        <div class="p-title">背景（アームストロング事件）</div>
+        <div class="p-body">
+          <ul>
+            <li>デイジー誘拐・殺害（3歳）</li>
+            <li>母ソニア：死産・死亡</li>
+            <li>父コーネル：自殺</li>
+            <li>メイド・スザンヌ：嫌疑で自殺</li>
+            <li>カッセッティ：証拠不十分で無罪</li>
+          </ul>
+        </div>
+      </div>
+      <div class="panel blue">
+        <div class="p-icon">🔍</div>
+        <div class="p-title">証拠一覧</div>
+        <div class="p-body">
+          <ul>
+            <li>12箇所の不規則な刺し傷</li>
+            <li>Hのイニシャルのハンカチ</li>
+            <li>パイプクリーナー</li>
+            <li>燃やされたメモの断片</li>
+            <li>赤いキモノ</li>
+            <li>故意に止められた時計</li>
+          </ul>
+        </div>
+      </div>
+      <div class="panel gold">
+        <div class="p-icon">💡</div>
+        <div class="p-title">ポアロの推理の核心</div>
+        <div class="p-body">
+          <ul>
+            <li>傷の数＝乗客数＝12</li>
+            <li>全員がアームストロング家と関係</li>
+            <li>アリバイは全て偽装</li>
+            <li>ハバード夫人＝首謀者リンダ・アーデン</li>
+            <li>外部犯行説を採用して幕引き</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== FOOTER ===== -->
+  <div style="text-align:center; margin-top:48px; color:var(--text-dim); font-size:13px; padding:0 16px;">
+    <p>アガサ・クリスティ著『オリエント急行殺人事件』（1934年） — 推理解明インフォグラフィック</p>
+    <p style="margin-top:6px;">Murder on the Orient Express — Agatha Christie — Mystery Reasoning Tree</p>
+  </div>
+
+</body>
+</html>
