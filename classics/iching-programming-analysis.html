@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>易経プログラム言語仕様解釈 — 64卦のコード理論分析</title>
+<style>
+  :root {
+    --bg-primary: #0a0a0f;
+    --bg-secondary: #12121a;
+    --bg-card: #1a1a2a;
+    --bg-card-hover: #1f1f32;
+    --border-color: #2a2a3a;
+    --gold: #d4a017;
+    --gold-light: #f0c040;
+    --gold-dim: #8a6510;
+    --text-primary: #e8e0d0;
+    --text-secondary: #a09080;
+    --text-dim: #6a6070;
+    --code-bg: #0d0d18;
+    --shadow: 0 4px 24px rgba(0,0,0,0.5);
+    --shadow-card: 0 2px 12px rgba(0,0,0,0.4);
+    --cat-type: #6366f1;
+    --cat-control: #f59e0b;
+    --cat-data: #10b981;
+    --cat-async: #3b82f6;
+    --cat-pattern: #8b5cf6;
+    --cat-error: #ef4444;
+    --cat-memory: #14b8a6;
+    --cat-arch: #f97316;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', 'Yu Gothic', sans-serif;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* === HEADER === */
+  header {
+    background: linear-gradient(135deg, #0a0a0f 0%, #12100a 50%, #0a0a0f 100%);
+    border-bottom: 1px solid var(--gold-dim);
+    padding: 3rem 2rem 2rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  header::before {
+    content: '☯';
+    position: absolute;
+    font-size: 300px;
+    opacity: 0.03;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--gold);
+    pointer-events: none;
+  }
+
+  .header-kua {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .header-kua span {
+    font-size: 1.4rem;
+    color: var(--gold-dim);
+    opacity: 0.6;
+    animation: fadeGold 4s ease-in-out infinite;
+  }
+
+  .header-kua span:nth-child(odd) { animation-delay: 0.5s; }
+  .header-kua span:nth-child(3n) { animation-delay: 1s; }
+
+  @keyframes fadeGold {
+    0%, 100% { opacity: 0.4; color: var(--gold-dim); }
+    50% { opacity: 0.8; color: var(--gold-light); }
+  }
+
+  h1 {
+    font-size: clamp(1.4rem, 3vw, 2.2rem);
+    color: var(--gold-light);
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-shadow: 0 0 30px rgba(212,160,23,0.4);
+    margin-bottom: 0.5rem;
+  }
+
+  .header-sub {
+    font-size: clamp(0.75rem, 1.5vw, 0.9rem);
+    color: var(--text-secondary);
+    letter-spacing: 0.08em;
+    margin-bottom: 1rem;
+  }
+
+  .header-desc {
+    max-width: 700px;
+    margin: 0 auto;
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    line-height: 1.8;
+    border-top: 1px solid var(--gold-dim);
+    padding-top: 1rem;
+    opacity: 0.8;
+  }
+
+  /* === CONTROLS === */
+  .controls-wrapper {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(10,10,15,0.97);
+    border-bottom: 1px solid var(--border-color);
+    backdrop-filter: blur(12px);
+    padding: 0.75rem 1.5rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+  }
+
+  .controls-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .search-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .search-box {
+    flex: 1;
+    max-width: 380px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 0.5rem 0.9rem;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s;
+    font-family: inherit;
+  }
+
+  .search-box:focus {
+    border-color: var(--gold-dim);
+    box-shadow: 0 0 0 2px rgba(212,160,23,0.15);
+  }
+
+  .search-box::placeholder { color: var(--text-dim); }
+
+  .count-label {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    white-space: nowrap;
+  }
+
+  .count-label span { color: var(--gold); font-weight: 600; }
+
+  .filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    align-items: center;
+  }
+
+  .filter-label {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    margin-right: 0.2rem;
+    white-space: nowrap;
+  }
+
+  .filter-btn {
+    border: none;
+    border-radius: 20px;
+    padding: 0.3rem 0.75rem;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    opacity: 0.65;
+    background: var(--bg-card);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+  }
+
+  .filter-btn:hover { opacity: 0.85; }
+
+  .filter-btn.active {
+    opacity: 1;
+    color: #fff;
+    border-color: transparent;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  }
+
+  .filter-btn[data-cat="all"].active {
+    background: linear-gradient(135deg, var(--gold-dim), var(--gold));
+    color: #0a0a0f;
+  }
+
+  .filter-btn[data-cat="型システム"].active { background: var(--cat-type); }
+  .filter-btn[data-cat="制御フロー"].active { background: var(--cat-control); }
+  .filter-btn[data-cat="データ構造"].active { background: var(--cat-data); }
+  .filter-btn[data-cat="並行・非同期"].active { background: var(--cat-async); }
+  .filter-btn[data-cat="デザインパターン"].active { background: var(--cat-pattern); }
+  .filter-btn[data-cat="エラー処理"].active { background: var(--cat-error); }
+  .filter-btn[data-cat="メモリ管理"].active { background: var(--cat-memory); }
+  .filter-btn[data-cat="アーキテクチャ"].active { background: var(--cat-arch); }
+
+  /* === GRID === */
+  .grid-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 1.5rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+    gap: 1.25rem;
+  }
+
+  /* === CARD === */
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow);
+    border-color: var(--gold-dim);
+  }
+
+  .card.hidden { display: none; }
+
+  .card-top {
+    padding: 1rem 1rem 0.75rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .hex-glyph {
+    font-size: 58px;
+    line-height: 1;
+    color: var(--gold);
+    text-shadow: 0 0 20px rgba(212,160,23,0.5);
+    flex-shrink: 0;
+    font-family: 'Segoe UI', 'Apple Color Emoji', serif;
+    min-width: 64px;
+    text-align: center;
+    filter: drop-shadow(0 0 8px rgba(212,160,23,0.3));
+  }
+
+  .hex-meta {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .hex-number {
+    display: inline-block;
+    background: rgba(212,160,23,0.15);
+    color: var(--gold);
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    border: 1px solid rgba(212,160,23,0.3);
+    margin-bottom: 0.3rem;
+    letter-spacing: 0.05em;
+  }
+
+  .hex-names {
+    display: flex;
+    align-items: baseline;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.2rem;
+  }
+
+  .hex-chinese {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--gold-light);
+    letter-spacing: 0.05em;
+  }
+
+  .hex-pinyin {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    font-style: italic;
+  }
+
+  .hex-english {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    line-height: 1.3;
+  }
+
+  .card-body {
+    padding: 0.75rem 1rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .cat-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    color: #fff;
+    width: fit-content;
+  }
+
+  .cat-badge::before { content: '◆'; font-size: 0.55rem; }
+
+  .prog-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    font-family: 'Courier New', 'Consolas', monospace;
+    letter-spacing: -0.01em;
+  }
+
+  .prog-desc {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    flex: 1;
+  }
+
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-left: 3px solid var(--gold-dim);
+    border-radius: 6px;
+    padding: 0.55rem 0.75rem;
+    font-family: 'Courier New', 'Consolas', 'SF Mono', monospace;
+    font-size: 0.73rem;
+    color: #7dd3a8;
+    line-height: 1.5;
+    overflow-x: auto;
+    white-space: pre;
+    margin-top: auto;
+  }
+
+  .code-block .comment { color: #5a7a6a; }
+  .code-block .keyword { color: #c792ea; }
+  .code-block .string { color: #c3e88d; }
+  .code-block .number { color: #f78c6c; }
+
+  /* === NO RESULTS === */
+  .no-results {
+    display: none;
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--text-dim);
+    grid-column: 1 / -1;
+  }
+
+  .no-results.visible { display: block; }
+  .no-results .nr-icon { font-size: 3rem; margin-bottom: 1rem; opacity: 0.4; }
+  .no-results p { font-size: 0.9rem; }
+
+  /* === FOOTER === */
+  footer {
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--gold-dim);
+    padding: 2.5rem 2rem;
+    text-align: center;
+    margin-top: 2rem;
+  }
+
+  .footer-inner {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .footer-title {
+    color: var(--gold);
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    letter-spacing: 0.05em;
+  }
+
+  .footer-text {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    line-height: 1.9;
+    margin-bottom: 1rem;
+  }
+
+  .footer-stats {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+    margin-top: 1.5rem;
+  }
+
+  .stat-item {
+    text-align: center;
+  }
+
+  .stat-num {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--gold);
+    display: block;
+  }
+
+  .stat-label {
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    margin-top: 0.1rem;
+  }
+
+  .footer-sep {
+    color: var(--gold-dim);
+    font-size: 1.2rem;
+    margin: 1.5rem 0;
+    opacity: 0.5;
+  }
+
+  /* === RESPONSIVE === */
+  @media (max-width: 768px) {
+    .grid-container {
+      grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+      padding: 1rem;
+      gap: 1rem;
+    }
+
+    .controls-wrapper { padding: 0.6rem 1rem; }
+
+    header { padding: 2rem 1rem 1.5rem; }
+
+    .filter-row { gap: 0.3rem; }
+    .filter-btn { padding: 0.25rem 0.55rem; font-size: 0.7rem; }
+  }
+
+  @media (max-width: 480px) {
+    .grid-container {
+      grid-template-columns: 1fr;
+    }
+
+    h1 { font-size: 1.2rem; }
+    .hex-glyph { font-size: 48px; min-width: 54px; }
+  }
+
+  /* === SCROLL ANIMATION === */
+  .card {
+    animation: cardIn 0.3s ease both;
+  }
+
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Stagger via nth-child up to 20 */
+  .card:nth-child(1) { animation-delay: 0.02s; }
+  .card:nth-child(2) { animation-delay: 0.04s; }
+  .card:nth-child(3) { animation-delay: 0.06s; }
+  .card:nth-child(4) { animation-delay: 0.08s; }
+  .card:nth-child(5) { animation-delay: 0.10s; }
+  .card:nth-child(6) { animation-delay: 0.12s; }
+  .card:nth-child(7) { animation-delay: 0.14s; }
+  .card:nth-child(8) { animation-delay: 0.16s; }
+  .card:nth-child(9) { animation-delay: 0.18s; }
+  .card:nth-child(10) { animation-delay: 0.20s; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-kua" aria-hidden="true">
+    <span>䷀</span><span>䷁</span><span>䷂</span><span>䷃</span><span>䷄</span>
+    <span>䷅</span><span>䷆</span><span>䷇</span><span>䷈</span><span>䷉</span>
+    <span>䷊</span><span>䷋</span><span>䷌</span><span>䷍</span><span>䷎</span>
+    <span>䷏</span><span>䷐</span><span>䷑</span><span>䷒</span><span>䷓</span>
+  </div>
+  <h1>易経プログラム言語仕様解釈</h1>
+  <p class="header-sub">64卦のコード理論分析 ― The I Ching as Programming Specification</p>
+  <p class="header-desc">
+    周易（易経）の64卦を現代のプログラミング理論・言語仕様として再解釈する試み。
+    古代中国の宇宙論的思想体系と、現代ソフトウェア工学の概念体系に潜む構造的同型性を探求する。
+    各卦は型システム・制御フロー・データ構造・並行処理・設計パターン・エラー処理・メモリ管理・アーキテクチャのいずれかに対応する。
+  </p>
+</header>
+
+<div class="controls-wrapper">
+  <div class="controls-inner">
+    <div class="search-row">
+      <input
+        type="search"
+        class="search-box"
+        id="searchBox"
+        placeholder="卦名・カテゴリ・キーワードで検索..."
+        aria-label="Search hexagrams"
+      />
+      <span class="count-label">表示中: <span id="countDisplay">64</span> / 64 卦</span>
+    </div>
+    <div class="filter-row">
+      <span class="filter-label">カテゴリ:</span>
+      <button class="filter-btn active" data-cat="all">すべて</button>
+      <button class="filter-btn" data-cat="型システム">型システム</button>
+      <button class="filter-btn" data-cat="制御フロー">制御フロー</button>
+      <button class="filter-btn" data-cat="データ構造">データ構造</button>
+      <button class="filter-btn" data-cat="並行・非同期">並行・非同期</button>
+      <button class="filter-btn" data-cat="デザインパターン">デザインパターン</button>
+      <button class="filter-btn" data-cat="エラー処理">エラー処理</button>
+      <button class="filter-btn" data-cat="メモリ管理">メモリ管理</button>
+      <button class="filter-btn" data-cat="アーキテクチャ">アーキテクチャ</button>
+    </div>
+  </div>
+</div>
+
+<main>
+  <div class="grid-container" id="cardGrid">
+    <!-- Cards injected by JS -->
+    <div class="no-results" id="noResults">
+      <div class="nr-icon">卦</div>
+      <p>条件に一致する卦が見つかりませんでした。</p>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-title">方法論について</div>
+    <p class="footer-text">
+      易経の64卦は、陰陽の二元論を六層に積み重ねた64の記号体系である。
+      各卦は独自の「徳」と「象」を持ち、変化の位相を示す。これをプログラミング理論に投影すると、
+      型の階層（乾坤）、制御構造（需・履）、エラー状態（坎・解）、データ流（師・比）など、
+      驚くべき対応関係が現れる。本解釈は厳密な哲学的研究ではなく、
+      古典と現代技術の創造的対話として位置付けられる。
+    </p>
+    <p class="footer-text">
+      King Wen序（文王序）に従い64卦を配置。上経30卦（乾〜離）と下経34卦（咸〜未済）の
+      伝統的区分を踏まえつつ、プログラムのライフサイクル――設計・実装・デプロイ・障害・回復――と
+      の対応を意識した解釈を行った。
+    </p>
+    <div class="footer-sep">☯</div>
+    <div class="footer-stats">
+      <div class="stat-item">
+        <span class="stat-num">64</span>
+        <span class="stat-label">卦 (Hexagrams)</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-num">8</span>
+        <span class="stat-label">プログラミングカテゴリ</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-num">384</span>
+        <span class="stat-label">爻 (Lines)</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-num">∞</span>
+        <span class="stat-label">解釈の可能性</span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+const CAT_COLORS = {
+  '型システム':       '#6366f1',
+  '制御フロー':       '#f59e0b',
+  'データ構造':       '#10b981',
+  '並行・非同期':     '#3b82f6',
+  'デザインパターン': '#8b5cf6',
+  'エラー処理':       '#ef4444',
+  'メモリ管理':       '#14b8a6',
+  'アーキテクチャ':   '#f97316',
+};
+
+const HEXAGRAMS = [
+  {
+    num: 1, glyph: '䷀', chinese: '乾', pinyin: 'Qián', english: 'Creative Heaven',
+    cat: '型システム',
+    title: 'abstract class Universe',
+    desc: '純粋な陽の力。完全な抽象クラスであり、全メソッドがabstractで宣言され具象実装を持たない。型の頂点に立つ基底クラスとして、すべての型の源泉となる。インターフェースの究極形であり、実装なき契約の完全な体現。',
+    code: 'interface Pure {\n  execute(): void;\n  // すべての型の源泉\n}'
+  },
+  {
+    num: 2, glyph: '䷁', chinese: '坤', pinyin: 'Kūn', english: 'Receptive Earth',
+    cat: '型システム',
+    title: 'null | void | undefined',
+    desc: '純粋な陰の力。空の実装。NullObjectパターンの完全体であり、全メソッドはno-opとして機能する。受容的で副作用なく、何も持たないが何でも受け入れる空の型。',
+    code: 'type Void = null & undefined;\n// 何も持たないが受容する型'
+  },
+  {
+    num: 3, glyph: '䷂', chinese: '屯', pinyin: 'Zhūn', english: 'Difficulty at Beginning',
+    cat: '制御フロー',
+    title: 'constructor()',
+    desc: '初期化の困難。コンストラクタで発生する複雑な依存解決。依存性注入コンテナの初期化フェーズでは、循環依存や非同期初期化が入り乱れ混乱が生じる。始まりの混乱から秩序へと至る道。',
+    code: 'new Promise((resolve) => {\n  // 複雑な初期化フェーズ\n  await initDependencies();\n});'
+  },
+  {
+    num: 4, glyph: '䷃', chinese: '蒙', pinyin: 'Méng', english: 'Youthful Folly',
+    cat: 'デザインパターン',
+    title: 'Logger | DebugMode',
+    desc: '学習アルゴリズム。未熟なモデルの訓練フェーズにおいて、デバッグモードで全ログを出力する状態。エラーから学ぶ機械学習の初期フェーズであり、無知から知へと向かう成長プロセス。',
+    code: 'console.debug(\'learning...\');\n// エラーから学ぶ初期フェーズ'
+  },
+  {
+    num: 5, glyph: '䷄', chinese: '需', pinyin: 'Xū', english: 'Waiting',
+    cat: '並行・非同期',
+    title: 'async/await | Promise.pending()',
+    desc: '非同期待機。イベントループ内でのPromise解決待ち。雲が空に漂うように、結果が来るまで待機するasync関数。焦らずに待つことが最善の戦略であるケースを表す。',
+    code: 'const result = await Promise.resolve();\n// 待つことが正しい非同期処理'
+  },
+  {
+    num: 6, glyph: '䷅', chinese: '訟', pinyin: 'Sòng', english: 'Conflict',
+    cat: 'エラー処理',
+    title: 'ConflictError | RaceCondition',
+    desc: '競合状態。複数スレッドが同一リソースにアクセスするレースコンディション。争いは中途で止めるべきであり、適切な競合解決プロトコルが必要。訴訟のように、仲裁者（排他制御）が必要。',
+    code: 'throw new ConflictException(\n  \'resource locked by another thread\'\n);'
+  },
+  {
+    num: 7, glyph: '䷆', chinese: '師', pinyin: 'Shī', english: 'The Army',
+    cat: 'データ構造',
+    title: 'Array.prototype | BatchProcessor',
+    desc: '配列処理。大量データの一斉操作。統率のとれた軍隊のように、バッチ処理パイプラインが整然とデータを変換していく。map・filter・reduceの連鎖による統制されたデータ処理。',
+    code: 'items\n  .map(fn)\n  .filter(pred)\n  .reduce(acc, 0);'
+  },
+  {
+    num: 8, glyph: '䷇', chinese: '比', pinyin: 'Bǐ', english: 'Holding Together',
+    cat: 'データ構造',
+    title: 'LinkedList | Graph.edge',
+    desc: '連結リスト。ノード間の結合。グラフのエッジ定義。親しみによって結びつく連結構造は、力の相互依存によって全体を形成する。隣接リストとしてのグラフ表現。',
+    code: 'node.next = adjacentNode;\n// 結びつきが力を生む連結構造'
+  },
+  {
+    num: 9, glyph: '䷈', chinese: '小畜', pinyin: 'Xiǎo Chù', english: 'Small Accumulating',
+    cat: 'データ構造',
+    title: 'Stack | Buffer',
+    desc: '小さなデータを積み上げていくスタック構造。少しずつ蓄積するLIFO（後入れ先出し）構造。バッファリングによって一時的にデータを保持し、適切なタイミングで処理する。',
+    code: 'stack.push(item); // 少しずつ蓄積\nconst top = stack.pop();'
+  },
+  {
+    num: 10, glyph: '䷉', chinese: '履', pinyin: 'Lǚ', english: 'Treading Carefully',
+    cat: '制御フロー',
+    title: 'step-by-step execution | Stepper',
+    desc: 'ステップ実行。デバッガのステップイン操作。虎の尾を踏むような慎重なコード実行。一歩一歩確認しながら進む手続き的実行は、危険なコードパスを安全に通過するための技術。',
+    code: 'debugger; // step into\n// 虎の尾を踏む慎重な実行'
+  },
+  {
+    num: 11, glyph: '䷊', chinese: '泰', pinyin: 'Tài', english: 'Peace',
+    cat: 'アーキテクチャ',
+    title: 'LoadBalancer | HAProxy',
+    desc: '天地が調和した完璧な負荷分散状態。ロードバランサーが各サーバーへ均等にリクエストを振り分け、上下が通じ合う理想的なシステム状態を実現。すべてのノードが協調する平和なアーキテクチャ。',
+    code: 'lb.distribute(requests, servers);\n// 天地調和の負荷分散'
+  },
+  {
+    num: 12, glyph: '䷋', chinese: '否', pinyin: 'Pǐ', english: 'Standstill',
+    cat: 'エラー処理',
+    title: 'Deadlock | BlockedState',
+    desc: 'デッドロック。互いに相手のリソースを待ち続ける膠着状態。天地が不通となり、システムが完全停止する。スレッドAがBを待ち、スレッドBがAを待つ相互依存の罠。',
+    code: '// Thread A waits for Lock B\n// Thread B waits for Lock A\n// → Deadlock'
+  },
+  {
+    num: 13, glyph: '䷌', chinese: '同人', pinyin: 'Tóng Rén', english: 'Fellowship',
+    cat: 'デザインパターン',
+    title: 'interface | implements',
+    desc: 'インターフェース実装。同じ契約を共有する複数クラス。プロトコルへの準拠によって、異なる実装が同じ型として扱われる。同じ型シグネチャを持つ者の集いによる多態性の実現。',
+    code: 'class A implements IProtocol {\n  execute(): void { /*...*/ }\n}'
+  },
+  {
+    num: 14, glyph: '䷍', chinese: '大有', pinyin: 'Dà Yǒu', english: 'Great Possession',
+    cat: 'データ構造',
+    title: 'Database | DataWarehouse',
+    desc: '大規模データの所有と管理。クエリ最適化によって豊かなデータ資産を統治する。データウェアハウスは天下の財を一身に受ける大有の象であり、適切なインデックス設計が富を活かす鍵。',
+    code: 'SELECT * FROM universe\nWHERE truth = 1\nORDER BY wisdom DESC;'
+  },
+  {
+    num: 15, glyph: '䷎', chinese: '謙', pinyin: 'Qiān', english: 'Modesty',
+    cat: 'デザインパターン',
+    title: 'Encapsulation | private',
+    desc: 'カプセル化。内部実装を隠蔽するprivateアクセス修飾子。謙虚に内部を隠し外部に最小限のインターフェースだけを公開する設計原則。情報隠蔽は謙の徳に通じる。',
+    code: 'class Module {\n  private _data: T; // 謙虚に隠蔽\n  get data() { return this._data; }\n}'
+  },
+  {
+    num: 16, glyph: '䷏', chinese: '豫', pinyin: 'Yù', english: 'Enthusiasm',
+    cat: '並行・非同期',
+    title: 'EventEmitter | Callback',
+    desc: 'イベント駆動アーキテクチャ。熱狂的なイベント発火とコールバック処理の連鎖。喜びのイベントが次々と発火し、リスナーを目覚めさせる。Node.jsのEventEmitterがその典型例。',
+    code: 'emitter.on(\'data\', handler);\nemitter.emit(\'data\', payload);\n// 喜びのイベント発火'
+  },
+  {
+    num: 17, glyph: '䷐', chinese: '隨', pinyin: 'Suí', english: 'Following',
+    cat: 'デザインパターン',
+    title: 'Observer | Subscriber',
+    desc: 'オブザーバーパターン。状態変化を追跡するサブスクライバー。主（Subject）の変化に従い、観察者（Observer）が自動的に通知を受ける。ReactiveX（Rx）はこの卦の具現。',
+    code: 'subject.subscribe(observer);\n// 主を追うObserverの連鎖'
+  },
+  {
+    num: 18, glyph: '䷑', chinese: '蠱', pinyin: 'Gǔ', english: 'Work on Decay',
+    cat: 'アーキテクチャ',
+    title: 'Refactoring | TechnicalDebt',
+    desc: 'リファクタリング。腐敗したコードの修正と技術的負債の返済。先人が作った混乱を整理し直す作業。レガシーコードに立ち向かい、腐敗を修復して再生する根本的な再構築。',
+    code: '// TODO: refactor this legacy code\n// 技術的負債: 推定工数 40h\ncleanup(corruptedState);'
+  },
+  {
+    num: 19, glyph: '䷒', chinese: '臨', pinyin: 'Lín', english: 'Approach',
+    cat: '制御フロー',
+    title: 'function call | invocation',
+    desc: '関数呼び出し。スタックフレームへの接近。力が近づく瞬間、コールスタックに新しいフレームが積まれる。メソッドの起動とコンテキストの切り替えは、大いなる者が近づく象に等しい。',
+    code: 'method.call(context, ...args);\n// スタックフレームへの接近'
+  },
+  {
+    num: 20, glyph: '䷓', chinese: '觀', pinyin: 'Guān', english: 'Contemplation',
+    cat: 'アーキテクチャ',
+    title: 'Monitoring | Observability',
+    desc: 'システム状態の観察。ログ収集・メトリクス・トレーシングによる可観測性の実現。高みから全体を観察する洞察は、障害検知とパフォーマンス最適化の基盤となる。',
+    code: 'logger.observe(system.metrics);\ntracer.span(\'operation\').end();'
+  },
+  {
+    num: 21, glyph: '䷔', chinese: '噬嗑', pinyin: 'Shì Kè', english: 'Biting Through',
+    cat: '制御フロー',
+    title: 'Parser | Tokenizer',
+    desc: 'パーサーとトークナイザー。テキストを噛み砕いて意味単位に分解する構文解析。障害を噛み砕いて通路を開くように、ソースコードをASTへと変換する。コンパイラの心臓部。',
+    code: 'const tokens = lexer.tokenize(source);\nconst ast = parser.parse(tokens);'
+  },
+  {
+    num: 22, glyph: '䷕', chinese: '賁', pinyin: 'Bì', english: 'Grace',
+    cat: 'デザインパターン',
+    title: 'Decorator | CSS | Styling',
+    desc: 'デコレータパターン。機能に美しさを付加する装飾。実質（コア機能）に文彩（付加機能）を重ねることで、元の実装を変えずに振る舞いを拡張する。JavaScriptデコレータの哲学。',
+    code: '@memoize\n@validate\nclass Styled {\n  // 実質を美しく飾る\n}'
+  },
+  {
+    num: 23, glyph: '䷖', chinese: '剥', pinyin: 'Bō', english: 'Splitting Apart',
+    cat: 'メモリ管理',
+    title: 'GarbageCollector | Destructor',
+    desc: 'ガベージコレクション。不要オブジェクトの解放とデストラクタの実行。剥がれ落ちるように消える不要なメモリ。参照カウントがゼロになった瞬間、オブジェクトは静かに回収される。',
+    code: '~Object() {\n  free(this.memory); // メモリ解放\n  // GCに剥がされる'
+  },
+  {
+    num: 24, glyph: '䷗', chinese: '復', pinyin: 'Fù', english: 'Return',
+    cat: '制御フロー',
+    title: 'recursion | return | loop',
+    desc: '再帰とリターン。関数の戻り値とループの回帰。一陽来復のように、基底ケースに達した再帰関数が結果を返しながら呼び出し元へと戻っていく。元に戻ることの本質的な意味。',
+    code: 'function fn(n) {\n  return n === 0 ? val : fn(n - 1);\n}'
+  },
+  {
+    num: 25, glyph: '䷘', chinese: '無妄', pinyin: 'Wú Wàng', english: 'Innocence',
+    cat: '型システム',
+    title: 'pure function | immutable',
+    desc: '純粋関数と不変性。副作用なし。同じ入力には必ず同じ出力。無心で自然な純粋関数は、期待通りに動き偽りがない。関数型プログラミングの基本原理であり、テスタビリティの源泉。',
+    code: 'const pure = (x: T): U =>\n  transform(x); // 副作用ゼロ'
+  },
+  {
+    num: 26, glyph: '䷙', chinese: '大畜', pinyin: 'Dà Chù', english: 'Great Taming',
+    cat: 'メモリ管理',
+    title: 'Cache | MemoryPool',
+    desc: '大規模なメモリプール管理とキャッシュ。大きな力（データ）を蓄え制御するキャッシュシステム。TTL付きLRUキャッシュは蓄積と解放のバランスを保ち、システムのパフォーマンスを支える。',
+    code: 'cache.set(key, value, ttl);\nconst v = cache.get(key) ?? fetchFresh();'
+  },
+  {
+    num: 27, glyph: '䷚', chinese: '頤', pinyin: 'Yí', english: 'Nourishment',
+    cat: 'アーキテクチャ',
+    title: 'I/O Stream | Pipeline',
+    desc: '入出力ストリームとデータパイプライン。口から入り養いとなる入出力の流れ。ストリームはデータを育てながら変換し、最終的な出力へと導く。Unix哲学のパイプとフィルター。',
+    code: 'stream\n  .pipe(transform)\n  .pipe(compress)\n  .pipe(output);'
+  },
+  {
+    num: 28, glyph: '䷛', chinese: '大過', pinyin: 'Dà Guò', english: 'Preponderance of Great',
+    cat: 'エラー処理',
+    title: 'StackOverflow | BufferOverflow',
+    desc: 'スタックオーバーフローとバッファオーバーフロー。梁が折れるほどの過負荷状態。無限再帰やバッファ超過によって、システムが限界を超える致命的なエラー。非常手段が必要な局面。',
+    code: '// RangeError: Maximum call stack\n// size exceeded\n// → 梁が折れた'
+  },
+  {
+    num: 29, glyph: '䷜', chinese: '坎', pinyin: 'Kǎn', english: 'The Abysmal',
+    cat: 'エラー処理',
+    title: 'infinite loop | deep recursion',
+    desc: '無限ループと深い再帰の危険。奈落のような処理の落とし穴。重なる険しさが繰り返す危機を生む。while(true)の深淵に落ちたプログラムは脱出条件なしに永遠に実行され続ける。',
+    code: 'while (true) {\n  // 脱出不能な無限ループ\n  // ← ここに誠実さで通る'
+  },
+  {
+    num: 30, glyph: '䷝', chinese: '離', pinyin: 'Lí', english: 'The Clinging',
+    cat: 'デザインパターン',
+    title: 'Binding | Coupling | Dependency',
+    desc: '依存結合とオブジェクト間の強い結びつき。双方向バインディング。離れられない依存関係の連鎖は、火が燃料に付着するように、コンポーネントを密結合させる。疎結合への改善が求められる。',
+    code: '@Inject() private dep: Dependency;\n// 強結合 → DIで解消すべき'
+  },
+  {
+    num: 31, glyph: '䷞', chinese: '咸', pinyin: 'Xián', english: 'Influence',
+    cat: '並行・非同期',
+    title: 'EventPropagation | Signal',
+    desc: 'イベント伝播とシグナル。リアクティブプログラミングにおける感応し合うデータフロー。山の上の沢のように、高いところから低いところへと自然に感応が伝わる。Signalベースの状態管理。',
+    code: 'signal.emit(data);\n// 感応し合うリアクティブフロー'
+  },
+  {
+    num: 32, glyph: '䷟', chinese: '恒', pinyin: 'Héng', english: 'Duration',
+    cat: 'アーキテクチャ',
+    title: 'Daemon | PersistentService',
+    desc: '恒久的に動き続けるデーモンプロセスと永続的なサービス。変動しない定常状態こそが健全なシステムの証。常駐プログラムは雷と風が相い与えるように、互いに支え合い永続する。',
+    code: 'service.start();\n// runs forever until SIGTERM\nprocess.on(\'SIGTERM\', gracefulShutdown);'
+  },
+  {
+    num: 33, glyph: '䷠', chinese: '遯', pinyin: 'Dùn', english: 'Retreat',
+    cat: '制御フロー',
+    title: 'rollback | undo | transaction.abort',
+    desc: 'ロールバックとトランザクションの中断。退くことで損害を最小化するアンドゥ操作。状況が不利なときは撤退が最善策。データベーストランザクションの中断と状態の巻き戻し。',
+    code: 'try {\n  await transaction.commit();\n} catch {\n  await transaction.rollback();\n}'
+  },
+  {
+    num: 34, glyph: '䷡', chinese: '大壮', pinyin: 'Dà Zhuàng', english: 'Great Power',
+    cat: '並行・非同期',
+    title: 'Multithreading | Parallelism',
+    desc: 'マルチスレッドと並列処理による強大な計算力。大いなる力を持つ並列実行は、雷が天に鳴り響くように処理を一斉に展開する。Promise.all()による並列処理の制御。',
+    code: 'const results = await Promise.all([\n  taskA(), taskB(), taskC()\n]);'
+  },
+  {
+    num: 35, glyph: '䷢', chinese: '晉', pinyin: 'Jìn', english: 'Progress',
+    cat: 'アーキテクチャ',
+    title: 'CI/CD | DeployPipeline',
+    desc: 'CI/CDパイプラインと継続的インテグレーション・継続的デリバリー。太陽が昇るような進歩のパイプライン。ビルド・テスト・デプロイの各段階を自動化し、ソフトウェアの品質を継続的に向上させる。',
+    code: 'pipeline.run([\n  \'build\', \'test\', \'staging\', \'deploy\'\n]);'
+  },
+  {
+    num: 36, glyph: '䷣', chinese: '明夷', pinyin: 'Míng Yí', english: 'Darkening of Light',
+    cat: 'アーキテクチャ',
+    title: 'Obfuscation | Minification',
+    desc: '難読化とコードの隠蔽、ミニファイ処理。光が傷つく闇の中で、知恵は内なる暗闇に隠れる。変数名の短縮・制御フローの複雑化・文字列の暗号化によってソースコードの可読性を意図的に低下させる。',
+    code: 'const a=0x1,b=0x2,_0x3f=\n  function(_){return _^0x41};'
+  },
+  {
+    num: 37, glyph: '䷤', chinese: '家人', pinyin: 'Jiā Rén', english: 'The Family',
+    cat: 'アーキテクチャ',
+    title: 'Module | Namespace | Package',
+    desc: 'モジュールと名前空間。関連する機能の家族的まとまり。凝集度の高いモジュールは家族のように互いに支え合い、外部への依存を最小化する。単一責任原則に基づく設計の理想形。',
+    code: 'namespace Family {\n  export class Member {}\n  export interface Role {}\n}'
+  },
+  {
+    num: 38, glyph: '䷥', chinese: '睽', pinyin: 'Kuí', english: 'Opposition',
+    cat: '制御フロー',
+    title: 'if/else | branch | fork',
+    desc: '分岐処理と条件による対立的な処理経路。対立する二つの道への分岐は睽の本質。if/elseによるフォークは、火と沢が背を向け合うように、互いに異なる方向へ処理を導く。',
+    code: 'if (conditionA) {\n  pathA(); // 火の道\n} else {\n  pathB(); // 沢の道\n}'
+  },
+  {
+    num: 39, glyph: '䷦', chinese: '蹇', pinyin: 'Jiǎn', english: 'Obstruction',
+    cat: 'エラー処理',
+    title: 'Bottleneck | Deadlock | Throttle',
+    desc: 'ボトルネックとシステムの詰まり、スロットリング。前進を妨げる障害との対峙。険しい山と水に挟まれた状況では、退いて力を蓄え直すことが正解。レートリミットで過負荷を防ぐ。',
+    code: 'await limiter.throttle(request);\n// 障害には迂回路が正解'
+  },
+  {
+    num: 40, glyph: '䷧', chinese: '解', pinyin: 'Xiè', english: 'Deliverance',
+    cat: 'エラー処理',
+    title: 'try/catch | ExceptionHandler',
+    desc: '例外処理とエラーからの解放。try-catchブロックによって困難から解放される。雷雨の後に緊張が緩むように、エラーをキャッチして回復処理を行う。graceful degradationの実践。',
+    code: 'try {\n  await risky();\n} catch (e) {\n  await recover(e); // 解放\n}'
+  },
+  {
+    num: 41, glyph: '䷨', chinese: '損', pinyin: 'Sǔn', english: 'Decrease',
+    cat: 'メモリ管理',
+    title: 'Optimization | Pruning | Compression',
+    desc: 'コードの最適化とプルーニング、不要部分の削減。減らすことで得る最適化の逆説。決定木の枝刈り、データ圧縮、不要な依存関係の除去によって、システム全体が軽量化され性能が向上する。',
+    code: 'tree.prune(unnecessary);\nbundle.compress({ minify: true });\n// 減じて益を得る'
+  },
+  {
+    num: 42, glyph: '䷩', chinese: '益', pinyin: 'Yì', english: 'Increase',
+    cat: 'アーキテクチャ',
+    title: 'Scaling | HorizontalScale',
+    desc: '水平スケールアウトとリソースの増強。増やすことで全体が利益を得るスケーリング。風と雷が互いを助け合うように、ノードを追加することでシステム全体の処理能力が増大する。',
+    code: 'cluster.scale(+3); // 水平スケール\n// 上を損じて下を益す'
+  },
+  {
+    num: 43, glyph: '䷪', chinese: '夬', pinyin: 'Guài', english: 'Breakthrough',
+    cat: '制御フロー',
+    title: 'assert | break | validate',
+    desc: 'アサーションとブレークポイント、バリデーション突破。決断的に真実を宣言する。五つの陽爻が一つの陰爻を突き破るように、アサーションは不変条件を強制し、違反があれば即座に停止する。',
+    code: 'assert(condition, \'invariant violated\');\nif (!valid) break; // 決断的突破'
+  },
+  {
+    num: 44, glyph: '䷫', chinese: '姤', pinyin: 'Gòu', english: 'Coming to Meet',
+    cat: 'デザインパターン',
+    title: 'Hook | Callback | Middleware',
+    desc: 'フックとコールバック、ミドルウェア。予期せぬ出会いを処理するフック機構。Express.jsのミドルウェアチェーンは、リクエストが到着するたびに登録された処理を順に実行する。',
+    code: 'app.use(authMiddleware);\napp.use(logMiddleware);\n// 出会いを処理するフック'
+  },
+  {
+    num: 45, glyph: '䷬', chinese: '萃', pinyin: 'Cuì', english: 'Gathering Together',
+    cat: 'データ構造',
+    title: 'Aggregation | Collection | Set',
+    desc: '集約とコレクション、セット型データ構造。同種のものが集まる集約の象。沢の水が大地に集まるように、共通の性質を持つ要素が一箇所に集結する。和集合・積集合による集合演算。',
+    code: 'const unified = Set.union(setA, setB);\nconst common = Set.intersect(a, b);'
+  },
+  {
+    num: 46, glyph: '䷭', chinese: '升', pinyin: 'Shēng', english: 'Pushing Upward',
+    cat: 'デザインパターン',
+    title: 'Promotion | Upcasting | Inheritance',
+    desc: 'アップキャストと継承による型の昇格。地中の木が地上へと成長するように、派生クラスが基底クラスとして扱われる型昇格。着実に上昇する継承の階層構造と多態性の実現。',
+    code: 'const base: Base = derived; // 昇格\n// 着実な上昇による継承'
+  },
+  {
+    num: 47, glyph: '䷮', chinese: '困', pinyin: 'Kùn', english: 'Oppression',
+    cat: 'エラー処理',
+    title: 'ResourceExhaustion | OOM',
+    desc: 'リソース枯渇とOut Of Memory。CPU・メモリ・ディスクが尽きた困窮状態。沢の水が涸れた困の卦は、システムリソースが完全に消耗しJVMがOutOfMemoryErrorを投げる瞬間を象徴する。',
+    code: '// java.lang.OutOfMemoryError\n// GC overhead limit exceeded\n// 資源が尽きた困窮'
+  },
+  {
+    num: 48, glyph: '䷯', chinese: '井', pinyin: 'Jǐng', english: 'The Well',
+    cat: 'アーキテクチャ',
+    title: 'API | ServiceEndpoint | REST',
+    desc: 'APIエンドポイントとサービスの共有リソース。変わらず水を供給するAPIの井戸は、どんなクライアントが来ても同じリソースを提供する。RESTfulエンドポイントは永続的な水源として機能する。',
+    code: 'GET /api/v1/resource\n// 変わらず水を供給するAPI'
+  },
+  {
+    num: 49, glyph: '䷰', chinese: '革', pinyin: 'Gé', english: 'Revolution',
+    cat: 'アーキテクチャ',
+    title: 'BreakingChange | Migration | v2.0',
+    desc: '破壊的変更とメジャーバージョンアップ、マイグレーション。革命的な変化は時が至って初めて信じられる。APIの後方互換性を壊すブレーキングチェンジは慎重に実施すべき革命的行為。',
+    code: '// BREAKING CHANGE: v2.0\n// API incompatible with v1.x\n// migrate: v1.auth() → v2.authenticate()'
+  },
+  {
+    num: 50, glyph: '䷱', chinese: '鼎', pinyin: 'Dǐng', english: 'The Cauldron',
+    cat: 'アーキテクチャ',
+    title: 'Container | Runtime | VM',
+    desc: 'コンテナとランタイム環境、仮想マシン。材料を煮る鼎のようなコンテナは、アプリケーションとその依存関係を一つの独立した環境にパッケージングする。Dockerはまさに現代の鼎。',
+    code: 'docker run --rm \\\n  -p 8080:8080 \\\n  app:latest'
+  },
+  {
+    num: 51, glyph: '䷲', chinese: '震', pinyin: 'Zhèn', english: 'The Arousing',
+    cat: '並行・非同期',
+    title: 'Interrupt | Trigger | Event',
+    desc: '割り込みとイベントトリガー、システム割り込み信号。雷のように突然発火する割り込みは、実行中のプロセスを一瞬止め、ハンドラへと制御を移す。SIGINTやSIGTERMによるプロセス制御。',
+    code: 'process.on(\'SIGINT\', handler);\n// 雷の如く突然発火する割り込み'
+  },
+  {
+    num: 52, glyph: '䷳', chinese: '艮', pinyin: 'Gèn', english: 'Keeping Still',
+    cat: '並行・非同期',
+    title: 'Mutex | Lock | Semaphore',
+    desc: 'ミューテックスとロック、セマフォ。山のように動かないロック機構。クリティカルセクションへの排他的アクセスを保証し、複数スレッドの同時アクセスによるデータ競合を防ぐ。静止が安全を生む。',
+    code: 'mutex.lock();\ntry { criticalSection(); }\nfinally { mutex.unlock(); }'
+  },
+  {
+    num: 53, glyph: '䷴', chinese: '漸', pinyin: 'Jiàn', english: 'Development',
+    cat: 'デザインパターン',
+    title: 'IncrementalUpdate | Migration',
+    desc: 'インクリメンタル更新と段階的マイグレーション。徐々に進む漸進的な開発プロセス。雁が序列に従い飛ぶように、バージョンアップは段階的に行われるべきで、急激な変化は危険を招く。',
+    code: '// v1.0 → v1.1 → v1.2 → v2.0\nmigrate.step(current, next);'
+  },
+  {
+    num: 54, glyph: '䷵', chinese: '歸妹', pinyin: 'Guī Mèi', english: 'Marrying Maiden',
+    cat: 'エラー処理',
+    title: 'SideEffect | Mutation',
+    desc: '副作用と状態の変異。純粋でない処理の象徴。本来の位にない副作用は、関数の外部状態を密かに変更し、バグの温床となる。副作用を隔離・管理することが堅牢なプログラム設計の要。',
+    code: 'let x = 0;\nconst fn = () => x++; // 副作用!\n// → 純粋関数に改善すべき'
+  },
+  {
+    num: 55, glyph: '䷶', chinese: '豊', pinyin: 'Fēng', english: 'Abundance',
+    cat: 'アーキテクチャ',
+    title: 'PeakLoad | HighTraffic',
+    desc: 'ピーク負荷と高トラフィック状態、最大処理能力。最盛期の豊かなトラフィックは一時的なものであり、永続しない。大規模負荷テストとオートスケーリングによって豊かな瞬間を乗り越える。',
+    code: 'loadTest.run({\n  rps: 100_000,\n  duration: \'60s\'\n});'
+  },
+  {
+    num: 56, glyph: '䷷', chinese: '旅', pinyin: 'Lǚ', english: 'The Wanderer',
+    cat: 'アーキテクチャ',
+    title: 'Stateless | RESTful | Microservice',
+    desc: '旅人のように状態を持たないステートレス設計。RESTfulアーキテクチャとマイクロサービス。各リクエストは独立しており、サーバーはセッション状態を保持しない。水平スケールの前提条件。',
+    code: '// No session state maintained\nGET /resource HTTP/1.1\n// Each request is self-contained'
+  },
+  {
+    num: 57, glyph: '䷸', chinese: '巽', pinyin: 'Xùn', english: 'The Gentle',
+    cat: '制御フロー',
+    title: 'SoftConstraint | Hint | Suggestion',
+    desc: 'ソフト制約とコンパイラのヒント、最適化提案。風のように穏やかに浸透する指示。強制ではなく提案として機能するアノテーションやリント警告は、柔らかく繰り返し示すことで効果を発揮する。',
+    code: '// @hint: consider inlining\n// eslint-disable-next-line\n// pragma optimize(O3)'
+  },
+  {
+    num: 58, glyph: '䷹', chinese: '兌', pinyin: 'Duì', english: 'The Joyous',
+    cat: 'アーキテクチャ',
+    title: 'UserInterface | REPL | Interactive',
+    desc: 'ユーザーインターフェースとREPLシェル、インタラクティブ入力。喜びをもたらすユーザーとの対話。沢が潤すように、良いUIはユーザーを喜ばせる。対話的なフィードバックループの本質。',
+    code: 'readline.question(\'> \', (input) => {\n  process(input); // 喜びの対話\n});'
+  },
+  {
+    num: 59, glyph: '䷺', chinese: '渙', pinyin: 'Huàn', english: 'Dispersion',
+    cat: '並行・非同期',
+    title: 'Broadcast | PubSub | Scatter',
+    desc: 'ブロードキャストとPub/Subパターン、データの散布。集まりを解いて広がる渙の象は、一つのメッセージが多数のサブスクライバーへと散布される分散メッセージングの本質を表す。',
+    code: 'pubsub.broadcast(channel, message);\n// 一から多への散布'
+  },
+  {
+    num: 60, glyph: '䷻', chinese: '節', pinyin: 'Jié', english: 'Limitation',
+    cat: 'アーキテクチャ',
+    title: 'RateLimit | Throttle | Quota',
+    desc: 'レートリミットとスロットリング、APIクォータ。節度をもって制限することが系の安定を保つ。痛苦な節（過度な制限）はいけないが、甘い節（無制限）は系を崩壊させる。適切な制限が秩序を生む。',
+    code: 'rateLimit({\n  max: 100,\n  windowMs: 60_000\n}); // 節度ある制限'
+  },
+  {
+    num: 61, glyph: '䷼', chinese: '中孚', pinyin: 'Zhōng Fú', english: 'Inner Truth',
+    cat: '型システム',
+    title: 'TypeSafety | Validation | Assertion',
+    desc: '型安全性と実行時バリデーション、内部の真実の検証。中に誠信があれば外に通じる。コンパイル時の型チェックとランタイムバリデーションの二重防御が、内なる真実としてシステムの正確性を保証する。',
+    code: 'const schema = z.object({\n  id: z.number(),\n  name: z.string()\n});\nschema.parse(data); // 内なる誠'
+  },
+  {
+    num: 62, glyph: '䷽', chinese: '小過', pinyin: 'Xiǎo Guò', english: 'Small Exceeding',
+    cat: 'エラー処理',
+    title: 'Warning | MinorException | EdgeCase',
+    desc: '警告と軽微な例外、エッジケース処理。小さな過ちとしての軽微な例外は致命的ではないが放置すると重大なバグへと発展する可能性がある。console.warnで記録し適切に対処することが重要。',
+    code: 'console.warn(\'minor edge case\');\n// 小さな過ちを見逃さない'
+  },
+  {
+    num: 63, glyph: '䷾', chinese: '既済', pinyin: 'Jì Jì', english: 'After Completion',
+    cat: '制御フロー',
+    title: 'commit | finalize | close',
+    desc: 'コミット確定とトランザクション完了、ファイルクローズ。完成したように見えるが、次の変化の始まりでもある。全てが正しい位にある完了状態は、新たな不均衡の種を内包する。継続的な保守が必要。',
+    code: 'transaction.commit();\nconnection.close();\n// 完成 → 次の変化の始まり'
+  },
+  {
+    num: 64, glyph: '䷿', chinese: '未済', pinyin: 'Wèi Jì', english: 'Before Completion',
+    cat: '並行・非同期',
+    title: 'pending | in-progress | Promise.pending',
+    desc: '処理中と未完了状態、実行中のPromise。未完成だからこそ可能性を秘める終局。最後の卦が「未完」であることは、ソフトウェアに完成はなく常に進化し続けるという本質的真理を示す。',
+    code: 'const result = await longRunningTask();\n// 未完成 = 無限の可能性'
+  }
+];
+
+function getCatColor(cat) {
+  return CAT_COLORS[cat] || '#888';
+}
+
+function buildCodeHtml(code) {
+  // Simple syntax highlighting
+  let escaped = code
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+
+  // Comments
+  escaped = escaped.replace(/(\/\/[^\n]*)/g, '<span class="comment">$1</span>');
+  // Keywords
+  const kws = ['const','let','var','function','class','interface','type','namespace',
+    'export','import','extends','implements','private','public','return','await',
+    'async','new','try','catch','finally','throw','if','else','while','for',
+    'GET','docker','run','pragma'];
+  kws.forEach(kw => {
+    const re = new RegExp('\\b(' + kw + ')\\b(?![^<]*>)', 'g');
+    escaped = escaped.replace(re, '<span class="keyword">$1</span>');
+  });
+  // Strings
+  escaped = escaped.replace(/('(?:[^'\\]|\\.)*')/g, '<span class="string">$1</span>');
+  // Numbers
+  escaped = escaped.replace(/\b(\d[\d_]*(?:\.\d+)?(?:n)?)\b/g, '<span class="number">$1</span>');
+
+  return escaped;
+}
+
+function createCard(h) {
+  const color = getCatColor(h.cat);
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.dataset.cat = h.cat;
+  card.dataset.search = [
+    h.num, h.glyph, h.chinese, h.pinyin, h.english,
+    h.cat, h.title, h.desc, h.code
+  ].join(' ').toLowerCase();
+
+  card.innerHTML = `
+    <div class="card-top">
+      <div class="hex-glyph" title="U+${(0x4DBF + h.num).toString(16).toUpperCase()}">${h.glyph}</div>
+      <div class="hex-meta">
+        <div class="hex-number">第 ${h.num} 卦</div>
+        <div class="hex-names">
+          <span class="hex-chinese">${h.chinese}</span>
+          <span class="hex-pinyin">${h.pinyin}</span>
+        </div>
+        <div class="hex-english">${h.english}</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="cat-badge" style="background:${color};">${h.cat}</div>
+      <div class="prog-title">${h.title}</div>
+      <div class="prog-desc">${h.desc}</div>
+      <div class="code-block">${buildCodeHtml(h.code)}</div>
+    </div>
+  `;
+  return card;
+}
+
+// Build cards
+const grid = document.getElementById('cardGrid');
+const noResults = document.getElementById('noResults');
+const cards = [];
+
+HEXAGRAMS.forEach(h => {
+  const card = createCard(h);
+  grid.insertBefore(card, noResults);
+  cards.push(card);
+});
+
+// Filter & search logic
+let currentCat = 'all';
+let currentSearch = '';
+
+function updateDisplay() {
+  let visible = 0;
+  const q = currentSearch.trim().toLowerCase();
+
+  cards.forEach(card => {
+    const catMatch = currentCat === 'all' || card.dataset.cat === currentCat;
+    const searchMatch = !q || card.dataset.search.includes(q);
+    if (catMatch && searchMatch) {
+      card.classList.remove('hidden');
+      visible++;
+    } else {
+      card.classList.add('hidden');
+    }
+  });
+
+  document.getElementById('countDisplay').textContent = visible;
+
+  if (visible === 0) {
+    noResults.classList.add('visible');
+  } else {
+    noResults.classList.remove('visible');
+  }
+}
+
+// Filter buttons
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentCat = btn.dataset.cat;
+    updateDisplay();
+  });
+});
+
+// Search
+document.getElementById('searchBox').addEventListener('input', e => {
+  currentSearch = e.target.value;
+  updateDisplay();
+});
+</script>
+</body>
+</html>
