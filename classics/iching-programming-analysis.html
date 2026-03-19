@@ -662,6 +662,10 @@
     min-width: 88px;
     text-align: center;
     padding-right: 0.25rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
   }
 
   .divination-info {
@@ -775,6 +779,66 @@
     .divination-btn { padding: 0.25rem 0.65rem; font-size: 0.7rem; }
     .divination-panel-wrap { padding: 0 1rem; }
   }
+
+  /* === HEXAGRAM LINES MINI DISPLAY ===
+     .hex-lines 配列の並び順: index 0 = 初爻（下）, index 5 = 上爻（上）
+     flex-direction: column-reverse により、index 0 が視覚的に最下段に表示される */
+  .hex-glyph-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+    flex-shrink: 0;
+  }
+
+  .hex-lines {
+    display: flex;
+    flex-direction: column-reverse; /* index 0（初爻）が下になるよう反転 */
+    gap: 2px;
+    width: 22px;
+  }
+
+  .hex-line {
+    height: 3px;
+    border-radius: 1px;
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  /* 陽爻: 実線 */
+  .hex-line.yang {
+    background: rgba(212,160,23,0.42);
+  }
+
+  /* 陰爻: 中央が切れた二本線 */
+  .hex-line.yin::before,
+  .hex-line.yin::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    height: 100%;
+    width: 44%;
+    background: rgba(212,160,23,0.42);
+    border-radius: 1px;
+  }
+  .hex-line.yin::before { left: 0; }
+  .hex-line.yin::after  { right: 0; }
+
+  /* 占いパネル: やや大きめ */
+  .hex-lines.panel-lines {
+    width: 36px;
+    gap: 3px;
+  }
+  .hex-lines.panel-lines .hex-line {
+    height: 4px;
+  }
+
+  @media (max-width: 480px) {
+    .hex-lines { width: 18px; }
+    .hex-lines .hex-line { height: 2px; }
+    .hex-lines.panel-lines { width: 28px; gap: 2px; }
+    .hex-lines.panel-lines .hex-line { height: 3px; }
+  }
 </style>
 </head>
 <body>
@@ -833,7 +897,10 @@
   <div id="divinationPanel" class="divination-panel" hidden>
     <button class="divination-close" id="divinationClose" aria-label="閉じる" type="button">✕</button>
     <div class="divination-header-label" id="divinationLabel">今日の開発卦</div>
-    <div class="divination-glyph" id="divinationGlyph" aria-hidden="true">䷀</div>
+    <div class="divination-glyph" id="divinationGlyph" aria-hidden="true">
+      <span id="divinationGlyphChar">䷀</span>
+      <div id="divinationLines" class="hex-lines panel-lines" style="display:none"></div>
+    </div>
     <div class="divination-info">
       <div class="divination-num" id="divinationNum">第 1 卦</div>
       <div class="divination-names">
@@ -1434,6 +1501,40 @@ function buildRelatedNav(h) {
   return `<div class="related-nav">${rows.join('')}</div>`;
 }
 
+// === 六爻ミニ表示データ ===
+// 各卦の爻構成。lines フィールドが HEXAGRAMS エントリに直接あればそちらを優先。
+// 配列の並び順: index 0 = 初爻（最下爻）, index 5 = 上爻（最上爻）
+// 1 = 陽爻（実線）, 0 = 陰爻（破線）
+const HEX_LINES = {
+   1:[1,1,1,1,1,1],  2:[0,0,0,0,0,0],  3:[1,0,0,0,1,0],  4:[0,1,0,0,0,1],
+   5:[1,1,1,0,1,0],  6:[0,1,0,1,1,1],  7:[0,1,0,0,0,0],  8:[0,0,0,0,1,0],
+   9:[1,1,1,0,1,1], 10:[1,1,0,1,1,1], 11:[1,1,1,0,0,0], 12:[0,0,0,1,1,1],
+  13:[1,0,1,1,1,1], 14:[1,1,1,1,0,1], 15:[0,0,1,0,0,0], 16:[0,0,0,1,0,0],
+  17:[1,0,0,1,1,0], 18:[0,1,1,0,0,1], 19:[1,1,0,0,0,0], 20:[0,0,0,0,1,1],
+  21:[1,0,0,1,0,1], 22:[1,0,1,0,0,1], 23:[0,0,0,0,0,1], 24:[1,0,0,0,0,0],
+  25:[1,0,0,1,1,1], 26:[1,1,1,0,0,1], 27:[1,0,0,0,0,1], 28:[0,1,1,1,1,0],
+  29:[0,1,0,0,1,0], 30:[1,0,1,1,0,1], 31:[0,0,1,1,1,0], 32:[0,1,1,1,0,0],
+  33:[0,0,1,1,1,1], 34:[1,1,1,1,0,0], 35:[0,0,0,1,0,1], 36:[1,0,1,0,0,0],
+  37:[1,0,1,0,1,1], 38:[1,1,0,1,0,1], 39:[0,0,1,0,1,0], 40:[0,1,0,1,0,0],
+  41:[1,1,0,0,0,1], 42:[1,0,0,0,1,1], 43:[1,1,1,1,1,0], 44:[0,1,1,1,1,1],
+  45:[0,0,0,1,1,0], 46:[0,1,1,0,0,0], 47:[0,1,0,1,1,0], 48:[0,1,1,0,1,0],
+  49:[1,0,1,1,1,0], 50:[0,1,1,1,0,1], 51:[1,0,0,1,0,0], 52:[0,0,1,0,0,1],
+  53:[0,0,1,0,1,1], 54:[1,1,0,1,0,0], 55:[1,0,1,1,0,0], 56:[0,0,1,1,0,1],
+  57:[0,1,1,0,1,1], 58:[1,1,0,1,1,0], 59:[0,1,0,0,1,1], 60:[1,1,0,0,1,0],
+  61:[1,1,0,0,1,1], 62:[0,0,1,1,0,0], 63:[1,0,1,0,1,0], 64:[0,1,0,1,0,1],
+};
+
+// 六爻ミニ表示 HTML を生成する共通関数
+// lines: [初爻, 二爻, 三爻, 四爻, 五爻, 上爻] (index 0 = 下)
+// panelMode: true の場合 panel-lines クラスを付与
+function buildLinesHtml(h, panelMode) {
+  const lines = (h && h.lines) || HEX_LINES[h && h.num];
+  if (!lines || lines.length !== 6) return '';
+  const cls = 'hex-lines' + (panelMode ? ' panel-lines' : '');
+  const inner = lines.map(v => `<div class="hex-line ${v ? 'yang' : 'yin'}"></div>`).join('');
+  return `<div class="${cls}" aria-hidden="true">${inner}</div>`;
+}
+
 function createCard(h) {
   const color = getCatColor(h.cat);
   const card = document.createElement('div');
@@ -1447,7 +1548,10 @@ function createCard(h) {
 
   card.innerHTML = `
     <div class="card-top">
-      <div class="hex-glyph" title="U+${(0x4DBF + h.num).toString(16).toUpperCase()}">${h.glyph}</div>
+      <div class="hex-glyph-wrap">
+        <div class="hex-glyph" title="U+${(0x4DBF + h.num).toString(16).toUpperCase()}">${h.glyph}</div>
+        ${buildLinesHtml(h, false)}
+      </div>
       <div class="hex-meta">
         <div class="hex-number">第 ${h.num} 卦</div>
         <div class="hex-names">
@@ -1652,7 +1756,16 @@ function divinate(mode) {
   const msg = cfg.messages[Math.floor(Math.random() * cfg.messages.length)];
 
   document.getElementById('divinationLabel').textContent = cfg.label;
-  document.getElementById('divinationGlyph').textContent = hex.glyph;
+  document.getElementById('divinationGlyphChar').textContent = hex.glyph;
+  const linesEl = document.getElementById('divinationLines');
+  const linesData = (hex.lines) || HEX_LINES[hex.num];
+  if (linesData && linesData.length === 6) {
+    linesEl.innerHTML = linesData.map(v => `<div class="hex-line ${v ? 'yang' : 'yin'}"></div>`).join('');
+    linesEl.style.display = 'flex';
+  } else {
+    linesEl.innerHTML = '';
+    linesEl.style.display = 'none';
+  }
   document.getElementById('divinationNum').textContent = '第 ' + hex.num + ' 卦';
   document.getElementById('divinationChinese').textContent = hex.chinese;
   document.getElementById('divinationEnglish').textContent = hex.english;
