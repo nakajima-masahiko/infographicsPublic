@@ -373,6 +373,18 @@
   .code-block .string { color: #c3e88d; }
   .code-block .number { color: #f78c6c; }
 
+  /* === INSIGHT === */
+  .prog-insight {
+    font-size: 0.8rem;
+    font-style: italic;
+    color: #c8960a;
+    letter-spacing: 0.03em;
+    line-height: 1.6;
+    border-left: 2px solid rgba(212,160,23,0.35);
+    padding-left: 0.6rem;
+    margin: 0.1rem 0 0.1rem;
+  }
+
   /* === NO RESULTS === */
   .no-results {
     display: none;
@@ -603,6 +615,7 @@ const HEXAGRAMS = [
   {
     num: 1, glyph: '䷀', chinese: '乾', pinyin: 'Qián', english: 'Creative Heaven',
     cat: '型システム',
+    insight: '実装なき原理が、すべての型を生む',
     title: 'abstract class Universe',
     desc: '純粋な陽の力。完全な抽象クラスであり、全メソッドがabstractで宣言され具象実装を持たない。型の頂点に立つ基底クラスとして、すべての型の源泉となる。インターフェースの究極形であり、実装なき契約の完全な体現。',
     code: 'interface Pure {\n  execute(): void;\n  // すべての型の源泉\n}'
@@ -610,6 +623,7 @@ const HEXAGRAMS = [
   {
     num: 2, glyph: '䷁', chinese: '坤', pinyin: 'Kūn', english: 'Receptive Earth',
     cat: '型システム',
+    insight: '何も持たぬ器こそ、すべてを受け入れる',
     title: 'null | void | undefined',
     desc: '純粋な陰の力。空の実装。NullObjectパターンの完全体であり、全メソッドはno-opとして機能する。受容的で副作用なく、何も持たないが何でも受け入れる空の型。',
     code: 'type Void = null & undefined;\n// 何も持たないが受容する型'
@@ -617,6 +631,7 @@ const HEXAGRAMS = [
   {
     num: 3, glyph: '䷂', chinese: '屯', pinyin: 'Zhūn', english: 'Difficulty at Beginning',
     cat: '制御フロー',
+    insight: '始まりのコードは、たいてい混乱している',
     title: 'constructor()',
     desc: '初期化の困難。コンストラクタで発生する複雑な依存解決。依存性注入コンテナの初期化フェーズでは、循環依存や非同期初期化が入り乱れ混乱が生じる。始まりの混乱から秩序へと至る道。',
     code: 'new Promise((resolve) => {\n  // 複雑な初期化フェーズ\n  await initDependencies();\n});'
@@ -624,6 +639,7 @@ const HEXAGRAMS = [
   {
     num: 4, glyph: '䷃', chinese: '蒙', pinyin: 'Méng', english: 'Youthful Folly',
     cat: 'デザインパターン',
+    insight: '未熟な実装は、失敗しながら学んでいく',
     title: 'Logger | DebugMode',
     desc: '学習アルゴリズム。未熟なモデルの訓練フェーズにおいて、デバッグモードで全ログを出力する状態。エラーから学ぶ機械学習の初期フェーズであり、無知から知へと向かう成長プロセス。',
     code: 'console.debug(\'learning...\');\n// エラーから学ぶ初期フェーズ'
@@ -631,6 +647,7 @@ const HEXAGRAMS = [
   {
     num: 5, glyph: '䷄', chinese: '需', pinyin: 'Xū', english: 'Waiting',
     cat: '並行・非同期',
+    insight: '早すぎる実行より、正しく待つ方が強い',
     title: 'async/await | Promise.pending()',
     desc: '非同期待機。イベントループ内でのPromise解決待ち。雲が空に漂うように、結果が来るまで待機するasync関数。焦らずに待つことが最善の戦略であるケースを表す。',
     code: 'const result = await Promise.resolve();\n// 待つことが正しい非同期処理'
@@ -638,6 +655,7 @@ const HEXAGRAMS = [
   {
     num: 6, glyph: '䷅', chinese: '訟', pinyin: 'Sòng', english: 'Conflict',
     cat: 'エラー処理',
+    insight: '競合は、正しさだけでは解決しない',
     title: 'ConflictError | RaceCondition',
     desc: '競合状態。複数スレッドが同一リソースにアクセスするレースコンディション。争いは中途で止めるべきであり、適切な競合解決プロトコルが必要。訴訟のように、仲裁者（排他制御）が必要。',
     code: 'throw new ConflictException(\n  \'resource locked by another thread\'\n);'
@@ -645,6 +663,7 @@ const HEXAGRAMS = [
   {
     num: 7, glyph: '䷆', chinese: '師', pinyin: 'Shī', english: 'The Army',
     cat: 'データ構造',
+    insight: '統率された処理は、大量のデータを動かす',
     title: 'Array.prototype | BatchProcessor',
     desc: '配列処理。大量データの一斉操作。統率のとれた軍隊のように、バッチ処理パイプラインが整然とデータを変換していく。map・filter・reduceの連鎖による統制されたデータ処理。',
     code: 'items\n  .map(fn)\n  .filter(pred)\n  .reduce(acc, 0);'
@@ -652,6 +671,7 @@ const HEXAGRAMS = [
   {
     num: 8, glyph: '䷇', chinese: '比', pinyin: 'Bǐ', english: 'Holding Together',
     cat: 'データ構造',
+    insight: 'つながりが構造を生み、構造が力を持つ',
     title: 'LinkedList | Graph.edge',
     desc: '連結リスト。ノード間の結合。グラフのエッジ定義。親しみによって結びつく連結構造は、力の相互依存によって全体を形成する。隣接リストとしてのグラフ表現。',
     code: 'node.next = adjacentNode;\n// 結びつきが力を生む連結構造'
@@ -659,6 +679,7 @@ const HEXAGRAMS = [
   {
     num: 9, glyph: '䷈', chinese: '小畜', pinyin: 'Xiǎo Chù', english: 'Small Accumulating',
     cat: 'データ構造',
+    insight: '小さな蓄積が、やがて大きな処理を支える',
     title: 'Stack | Buffer',
     desc: '小さなデータを積み上げていくスタック構造。少しずつ蓄積するLIFO（後入れ先出し）構造。バッファリングによって一時的にデータを保持し、適切なタイミングで処理する。',
     code: 'stack.push(item); // 少しずつ蓄積\nconst top = stack.pop();'
@@ -666,6 +687,7 @@ const HEXAGRAMS = [
   {
     num: 10, glyph: '䷉', chinese: '履', pinyin: 'Lǚ', english: 'Treading Carefully',
     cat: '制御フロー',
+    insight: '危険な処理ほど、一歩ずつ確かめて進む',
     title: 'step-by-step execution | Stepper',
     desc: 'ステップ実行。デバッガのステップイン操作。虎の尾を踏むような慎重なコード実行。一歩一歩確認しながら進む手続き的実行は、危険なコードパスを安全に通過するための技術。',
     code: 'debugger; // step into\n// 虎の尾を踏む慎重な実行'
@@ -673,6 +695,7 @@ const HEXAGRAMS = [
   {
     num: 11, glyph: '䷊', chinese: '泰', pinyin: 'Tài', english: 'Peace',
     cat: 'アーキテクチャ',
+    insight: 'よく設計された系では、流れが自然に通る',
     title: 'LoadBalancer | HAProxy',
     desc: '天地が調和した完璧な負荷分散状態。ロードバランサーが各サーバーへ均等にリクエストを振り分け、上下が通じ合う理想的なシステム状態を実現。すべてのノードが協調する平和なアーキテクチャ。',
     code: 'lb.distribute(requests, servers);\n// 天地調和の負荷分散'
@@ -680,6 +703,7 @@ const HEXAGRAMS = [
   {
     num: 12, glyph: '䷋', chinese: '否', pinyin: 'Pǐ', english: 'Standstill',
     cat: 'エラー処理',
+    insight: '通じない設計は、やがて全体を止める',
     title: 'Deadlock | BlockedState',
     desc: 'デッドロック。互いに相手のリソースを待ち続ける膠着状態。天地が不通となり、システムが完全停止する。スレッドAがBを待ち、スレッドBがAを待つ相互依存の罠。',
     code: '// Thread A waits for Lock B\n// Thread B waits for Lock A\n// → Deadlock'
@@ -687,6 +711,7 @@ const HEXAGRAMS = [
   {
     num: 13, glyph: '䷌', chinese: '同人', pinyin: 'Tóng Rén', english: 'Fellowship',
     cat: 'デザインパターン',
+    insight: '共通の約束が、異なる実装を結びつける',
     title: 'interface | implements',
     desc: 'インターフェース実装。同じ契約を共有する複数クラス。プロトコルへの準拠によって、異なる実装が同じ型として扱われる。同じ型シグネチャを持つ者の集いによる多態性の実現。',
     code: 'class A implements IProtocol {\n  execute(): void { /*...*/ }\n}'
@@ -694,6 +719,7 @@ const HEXAGRAMS = [
   {
     num: 14, glyph: '䷍', chinese: '大有', pinyin: 'Dà Yǒu', english: 'Great Possession',
     cat: 'データ構造',
+    insight: '豊かなデータは、管理されて初めて価値になる',
     title: 'Database | DataWarehouse',
     desc: '大規模データの所有と管理。クエリ最適化によって豊かなデータ資産を統治する。データウェアハウスは天下の財を一身に受ける大有の象であり、適切なインデックス設計が富を活かす鍵。',
     code: 'SELECT * FROM universe\nWHERE truth = 1\nORDER BY wisdom DESC;'
@@ -701,6 +727,7 @@ const HEXAGRAMS = [
   {
     num: 15, glyph: '䷎', chinese: '謙', pinyin: 'Qiān', english: 'Modesty',
     cat: 'デザインパターン',
+    insight: '隠すべきものを隠してこそ、設計は美しい',
     title: 'Encapsulation | private',
     desc: 'カプセル化。内部実装を隠蔽するprivateアクセス修飾子。謙虚に内部を隠し外部に最小限のインターフェースだけを公開する設計原則。情報隠蔽は謙の徳に通じる。',
     code: 'class Module {\n  private _data: T; // 謙虚に隠蔽\n  get data() { return this._data; }\n}'
@@ -708,6 +735,7 @@ const HEXAGRAMS = [
   {
     num: 16, glyph: '䷏', chinese: '豫', pinyin: 'Yù', english: 'Enthusiasm',
     cat: '並行・非同期',
+    insight: '良いイベントは、系全体を軽やかに動かす',
     title: 'EventEmitter | Callback',
     desc: 'イベント駆動アーキテクチャ。熱狂的なイベント発火とコールバック処理の連鎖。喜びのイベントが次々と発火し、リスナーを目覚めさせる。Node.jsのEventEmitterがその典型例。',
     code: 'emitter.on(\'data\', handler);\nemitter.emit(\'data\', payload);\n// 喜びのイベント発火'
@@ -1104,6 +1132,7 @@ function createCard(h) {
     </div>
     <div class="card-body">
       <div class="cat-badge" style="background:${color};">${h.cat}</div>
+      ${h.insight ? `<div class="prog-insight">${h.insight}</div>` : ''}
       <div class="prog-title">${h.title}</div>
       <div class="prog-desc">${h.desc}</div>
       <div class="code-block">${buildCodeHtml(h.code)}</div>
