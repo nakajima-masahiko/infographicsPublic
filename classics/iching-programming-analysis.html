@@ -558,6 +558,223 @@
   .card:nth-child(8) { animation-delay: 0.16s; }
   .card:nth-child(9) { animation-delay: 0.18s; }
   .card:nth-child(10) { animation-delay: 0.20s; }
+
+  /* === DIVINATION ROW === */
+  .divination-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    align-items: center;
+    padding-top: 0.1rem;
+  }
+
+  .divination-btn {
+    background: rgba(212,160,23,0.07);
+    border: 1px solid rgba(212,160,23,0.28);
+    border-radius: 20px;
+    padding: 0.3rem 0.85rem;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+    color: var(--gold-dim);
+    letter-spacing: 0.02em;
+  }
+
+  .divination-btn:hover {
+    background: rgba(212,160,23,0.18);
+    border-color: var(--gold-dim);
+    color: var(--gold-light);
+  }
+
+  .divination-btn:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
+  }
+
+  /* === DIVINATION PANEL === */
+  .divination-panel-wrap {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+
+  .divination-panel {
+    position: relative;
+    background: var(--bg-card);
+    border: 1px solid rgba(212,160,23,0.38);
+    border-radius: 14px;
+    padding: 1.4rem 1.8rem 1.4rem 1.6rem;
+    margin: 1rem 0 0;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    grid-template-rows: auto auto auto auto;
+    gap: 0.45rem 1.25rem;
+    align-items: start;
+    box-shadow: 0 0 50px rgba(212,160,23,0.07), var(--shadow);
+    animation: panelReveal 0.25s ease both;
+  }
+
+  .divination-panel[hidden] { display: none; }
+
+  @keyframes panelReveal {
+    from { opacity: 0; transform: translateY(-8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .divination-close {
+    position: absolute;
+    top: 0.6rem;
+    right: 0.6rem;
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    cursor: pointer;
+    font-size: 0.85rem;
+    padding: 0.25rem 0.45rem;
+    border-radius: 4px;
+    transition: color 0.15s;
+    line-height: 1;
+  }
+  .divination-close:hover { color: var(--text-primary); }
+  .divination-close:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+  .divination-header-label {
+    grid-column: 1 / -1;
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    color: var(--gold-dim);
+    text-transform: uppercase;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid rgba(212,160,23,0.18);
+  }
+
+  .divination-glyph {
+    font-size: 82px;
+    color: var(--gold);
+    text-shadow: 0 0 28px rgba(212,160,23,0.55);
+    filter: drop-shadow(0 0 10px rgba(212,160,23,0.3));
+    grid-column: 1;
+    grid-row: 2 / 6;
+    line-height: 1;
+    align-self: center;
+    font-family: 'Segoe UI', 'Apple Color Emoji', serif;
+    min-width: 88px;
+    text-align: center;
+    padding-right: 0.25rem;
+  }
+
+  .divination-info {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  .divination-num {
+    display: inline-block;
+    background: rgba(212,160,23,0.14);
+    color: var(--gold);
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 0.12rem 0.48rem;
+    border-radius: 4px;
+    border: 1px solid rgba(212,160,23,0.28);
+    margin-bottom: 0.3rem;
+    letter-spacing: 0.05em;
+  }
+
+  .divination-names {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .divination-chinese {
+    font-size: 1.55rem;
+    font-weight: 700;
+    color: var(--gold-light);
+    letter-spacing: 0.06em;
+  }
+
+  .divination-english {
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    font-style: italic;
+  }
+
+  .divination-insight {
+    grid-column: 2;
+    grid-row: 3;
+    font-size: 0.82rem;
+    font-style: italic;
+    color: #c8960a;
+    letter-spacing: 0.03em;
+    line-height: 1.6;
+    border-left: 2px solid rgba(212,160,23,0.38);
+    padding-left: 0.55rem;
+  }
+
+  .divination-message {
+    grid-column: 2;
+    grid-row: 4;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    line-height: 1.75;
+  }
+
+  .divination-goto {
+    grid-column: 3;
+    grid-row: 2 / 6;
+    align-self: center;
+    background: rgba(212,160,23,0.09);
+    border: 1px solid rgba(212,160,23,0.32);
+    border-radius: 8px;
+    padding: 0.55rem 1.1rem;
+    color: var(--gold);
+    font-size: 0.78rem;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s;
+    white-space: nowrap;
+    letter-spacing: 0.02em;
+  }
+  .divination-goto:hover {
+    background: rgba(212,160,23,0.2);
+    border-color: var(--gold);
+  }
+  .divination-goto:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+  @media (max-width: 600px) {
+    .divination-panel {
+      grid-template-columns: 1fr;
+      padding: 1.1rem 1.1rem 1.25rem;
+    }
+    .divination-glyph {
+      grid-column: 1;
+      grid-row: auto;
+      font-size: 62px;
+      min-width: unset;
+      text-align: left;
+      padding-right: 0;
+      margin-bottom: 0.2rem;
+    }
+    .divination-info,
+    .divination-insight,
+    .divination-message { grid-column: 1; grid-row: auto; }
+    .divination-goto {
+      grid-column: 1;
+      grid-row: auto;
+      width: 100%;
+      text-align: center;
+      padding: 0.65rem;
+      margin-top: 0.25rem;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .divination-btn { padding: 0.25rem 0.65rem; font-size: 0.7rem; }
+    .divination-panel-wrap { padding: 0 1rem; }
+  }
 </style>
 </head>
 <body>
@@ -602,6 +819,31 @@
       <button class="filter-btn" data-cat="メモリ管理">メモリ管理</button>
       <button class="filter-btn" data-cat="アーキテクチャ">アーキテクチャ</button>
     </div>
+    <div class="divination-row" role="group" aria-label="卦を引く">
+      <span class="filter-label">卦を引く:</span>
+      <button class="divination-btn" data-mode="daily" type="button">今日の開発卦を引く</button>
+      <button class="divination-btn" data-mode="bug"    type="button">バグ対応の卦</button>
+      <button class="divination-btn" data-mode="design" type="button">設計レビューの卦</button>
+      <button class="divination-btn" data-mode="refactor" type="button">リファクタの卦</button>
+    </div>
+  </div>
+</div>
+
+<div class="divination-panel-wrap" aria-live="polite" aria-atomic="true">
+  <div id="divinationPanel" class="divination-panel" hidden>
+    <button class="divination-close" id="divinationClose" aria-label="閉じる" type="button">✕</button>
+    <div class="divination-header-label" id="divinationLabel">今日の開発卦</div>
+    <div class="divination-glyph" id="divinationGlyph" aria-hidden="true">䷀</div>
+    <div class="divination-info">
+      <div class="divination-num" id="divinationNum">第 1 卦</div>
+      <div class="divination-names">
+        <span class="divination-chinese" id="divinationChinese">乾</span>
+        <span class="divination-english" id="divinationEnglish">Creative Heaven</span>
+      </div>
+    </div>
+    <div class="divination-insight" id="divinationInsight" hidden></div>
+    <div class="divination-message" id="divinationMessage"></div>
+    <button class="divination-goto" id="divinationGoto" type="button">このカードへ移動 →</button>
   </div>
 </div>
 
@@ -1310,6 +1552,145 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
 document.getElementById('searchBox').addEventListener('input', e => {
   currentSearch = e.target.value;
   updateDisplay();
+});
+
+// === 今日の開発卦を引く ===
+
+// 重み付きランダム選択
+function weightedPick(entries) {
+  let total = 0;
+  for (const e of entries) total += e.w;
+  let r = Math.random() * total;
+  for (const e of entries) {
+    r -= e.w;
+    if (r <= 0) return HEXAGRAMS.find(h => h.num === e.num);
+  }
+  return HEXAGRAMS[Math.floor(Math.random() * HEXAGRAMS.length)];
+}
+
+// 各モードの重み設定を生成する
+// highNums: 最高重み(8)の卦番号リスト
+// highCats: 高重み(5)のカテゴリ
+// midCats:  中重み(2.5)のカテゴリ
+// それ以外はベース重み 1
+function buildEntries(highNums, highCats, midCats) {
+  return HEXAGRAMS.map(h => {
+    let w = 1;
+    if (highNums && highNums.includes(h.num)) w = 8;
+    else if (highCats && highCats.includes(h.cat)) w = 5;
+    else if (midCats && midCats.includes(h.cat)) w = 2.5;
+    return { num: h.num, w };
+  });
+}
+
+const DIVINATION_MODES = {
+  daily: {
+    label: '今日の開発卦',
+    pick: () => HEXAGRAMS[Math.floor(Math.random() * HEXAGRAMS.length)],
+    messages: [
+      '今日のコードに、この卦の呼吸を重ねてみてください。',
+      '易は変化の書。今日もあなたのコードは変わり続ける。',
+      '一行の実装に、宇宙の構造が宿る。',
+      '今日という位相に引かれた卦です。軽く受け取り、深く問いましょう。',
+      'コードを開く前に、少しだけこの卦を眺めてください。',
+    ]
+  },
+  bug: {
+    label: 'バグ対応の卦',
+    // 坎(29)・解(40)・困(47)・蹇(39) を最高優先、エラー処理カテゴリ全般を高優先
+    pick: () => weightedPick(buildEntries(
+      [29, 40, 47, 39, 6, 12],
+      ['エラー処理'],
+      ['制御フロー', 'アーキテクチャ']
+    )),
+    messages: [
+      '今は直すより、まず観察する時です。',
+      '急いで進むより、競合をほどく方が先です。',
+      'バグは症状。根にあるものを、静かに辿ってください。',
+      'エラーは問いを立てている。答える前に、問いを聞きましょう。',
+      'スタックトレースの奥に、設計の問いが潜んでいます。',
+    ]
+  },
+  design: {
+    label: '設計レビューの卦',
+    // 乾(1)・同人(13)・謙(15)・中孚(61) を最高優先、型システム・デザインパターンを高優先
+    pick: () => weightedPick(buildEntries(
+      [1, 13, 15, 61, 30, 53],
+      ['型システム', 'デザインパターン'],
+      ['アーキテクチャ']
+    )),
+    messages: [
+      '新機能より、設計の呼吸を整える時です。',
+      '型は約束。その約束が、どこまで誠実かを問いましょう。',
+      '依存のかたちに、設計の意図が現れます。',
+      'インターフェースは契約。今日は、その文言を見直してみてください。',
+      '抽象は力であり、同時に負債でもある。',
+    ]
+  },
+  refactor: {
+    label: 'リファクタの卦',
+    // 蠱(18)・謙(15)・損(41)・革(49)・鼎(50)・漸(53) を最高優先、メモリ管理を高優先
+    pick: () => weightedPick(buildEntries(
+      [18, 15, 41, 49, 50, 53],
+      ['メモリ管理'],
+      ['デザインパターン', 'アーキテクチャ']
+    )),
+    messages: [
+      '未完成は失敗ではなく、次の余白です。',
+      '古いコードを責めるより、次の形を思い描きましょう。',
+      '削ることもまた、豊かさの一形態です。',
+      '名前を変えることは、意図を問い直すことです。',
+      'リファクタは戦略であり、哲学です。焦らず、一歩ずつ。',
+    ]
+  }
+};
+
+function divinate(mode) {
+  const cfg = DIVINATION_MODES[mode];
+  if (!cfg) return;
+  const hex = cfg.pick();
+  const msg = cfg.messages[Math.floor(Math.random() * cfg.messages.length)];
+
+  document.getElementById('divinationLabel').textContent = cfg.label;
+  document.getElementById('divinationGlyph').textContent = hex.glyph;
+  document.getElementById('divinationNum').textContent = '第 ' + hex.num + ' 卦';
+  document.getElementById('divinationChinese').textContent = hex.chinese;
+  document.getElementById('divinationEnglish').textContent = hex.english;
+
+  const insightEl = document.getElementById('divinationInsight');
+  if (hex.insight) {
+    insightEl.textContent = hex.insight;
+    insightEl.removeAttribute('hidden');
+  } else {
+    insightEl.textContent = '';
+    insightEl.setAttribute('hidden', '');
+  }
+
+  document.getElementById('divinationMessage').textContent = msg;
+
+  const panel = document.getElementById('divinationPanel');
+  panel.dataset.hexNum = hex.num;
+  panel.removeAttribute('hidden');
+
+  // パネルが画面内に収まるようにスクロール
+  panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// 占いボタン
+document.querySelectorAll('.divination-btn').forEach(btn => {
+  btn.addEventListener('click', () => divinate(btn.dataset.mode));
+});
+
+// 閉じるボタン
+document.getElementById('divinationClose').addEventListener('click', () => {
+  document.getElementById('divinationPanel').setAttribute('hidden', '');
+});
+
+// 「このカードへ移動」ボタン
+document.getElementById('divinationGoto').addEventListener('click', () => {
+  const num = +(document.getElementById('divinationPanel').dataset.hexNum);
+  document.getElementById('divinationPanel').setAttribute('hidden', '');
+  scrollToHex(num);
 });
 </script>
 </body>
