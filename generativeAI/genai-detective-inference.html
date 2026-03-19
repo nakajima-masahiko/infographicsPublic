@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>生成AIは“現場に行かない名探偵”である</title>
+  <style>
+    :root {
+      --bg: #efe5d0;
+      --paper: #f8f2e6;
+      --ink: #26211b;
+      --muted: #5b5248;
+      --brown: #4a3728;
+      --deep-green: #1d3a32;
+      --wine: #6f1d2f;
+      --gold: #c9a24e;
+      --warning: #8b1e2d;
+      --card: #fffaf0;
+      --line: #b99f7d;
+      --shadow: 0 10px 24px rgba(33, 24, 12, 0.15);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 10% 10%, rgba(201, 162, 78, 0.15), transparent 38%),
+        radial-gradient(circle at 85% 5%, rgba(111, 29, 47, 0.14), transparent 33%),
+        linear-gradient(135deg, #e8ddc8, #f2ead9 42%, #e6d9c2);
+      font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", "Noto Sans JP", sans-serif;
+      line-height: 1.75;
+    }
+
+    .container {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 24px 16px 80px;
+    }
+
+    .section {
+      margin: 24px 0;
+      padding: 26px;
+      border: 1px solid rgba(74, 55, 40, 0.2);
+      border-radius: 18px;
+      background: linear-gradient(160deg, rgba(255, 252, 246, 0.96), rgba(250, 242, 227, 0.92));
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .section::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(120deg, rgba(201, 162, 78, 0.08), transparent 35%, rgba(29, 58, 50, 0.06));
+    }
+
+    .evidence-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--deep-green);
+      color: #f5f0e5;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      letter-spacing: 0.06em;
+      margin-bottom: 10px;
+    }
+
+    h1,
+    h2,
+    h3 {
+      margin: 0 0 12px;
+      line-height: 1.35;
+      position: relative;
+      z-index: 1;
+    }
+
+    h1 {
+      font-size: clamp(1.8rem, 3.2vw, 2.8rem);
+      color: var(--brown);
+    }
+
+    h2 {
+      font-size: clamp(1.4rem, 2.8vw, 2rem);
+      color: var(--deep-green);
+      border-left: 6px solid var(--gold);
+      padding-left: 12px;
+    }
+
+    h3 {
+      font-size: 1.1rem;
+      color: #3e3025;
+    }
+
+    p,
+    li,
+    th,
+    td {
+      position: relative;
+      z-index: 1;
+    }
+
+    .lead {
+      font-size: clamp(1rem, 2.1vw, 1.2rem);
+      color: #3f372f;
+      background: rgba(255, 248, 232, 0.82);
+      border-left: 4px solid var(--wine);
+      padding: 14px;
+      border-radius: 8px;
+    }
+
+    .subtitle {
+      font-size: 1.06rem;
+      color: var(--wine);
+      font-weight: 700;
+      margin-bottom: 14px;
+    }
+
+    .motif {
+      display: flex;
+      gap: 8px;
+      font-size: 1.2rem;
+      opacity: 0.85;
+      margin-top: 6px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid rgba(74, 55, 40, 0.25);
+      border-radius: 14px;
+      padding: 14px;
+    }
+
+    .card strong {
+      color: #2f251d;
+    }
+
+    .vs-arrow {
+      text-align: center;
+      font-size: 1.5rem;
+      color: var(--wine);
+      padding: 8px 0;
+    }
+
+    .pair {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 10px;
+      align-items: center;
+      margin: 10px 0;
+      border-bottom: 1px dashed rgba(74, 55, 40, 0.25);
+      padding-bottom: 10px;
+    }
+
+    .label {
+      padding: 9px 10px;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      background: rgba(29, 58, 50, 0.1);
+    }
+
+    .label.ai {
+      background: rgba(111, 29, 47, 0.1);
+    }
+
+    .timeline {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      position: relative;
+    }
+
+    .timeline::before {
+      content: "";
+      position: absolute;
+      left: 17px;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: linear-gradient(var(--gold), var(--deep-green));
+      border-radius: 8px;
+    }
+
+    .timeline li {
+      margin: 14px 0;
+      padding-left: 48px;
+      position: relative;
+    }
+
+    .timeline li::before {
+      content: "";
+      position: absolute;
+      left: 8px;
+      top: 5px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--wine);
+      border: 3px solid #f6ecda;
+      box-shadow: 0 0 0 2px var(--gold);
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(201, 162, 78, 0.22);
+      font-size: 0.8rem;
+      margin-left: 8px;
+    }
+
+    .compare-table {
+      width: 100%;
+      border-collapse: collapse;
+      overflow: hidden;
+      border-radius: 12px;
+      border: 1px solid rgba(139, 30, 45, 0.35);
+    }
+
+    .compare-table th,
+    .compare-table td {
+      border: 1px solid rgba(74, 55, 40, 0.2);
+      padding: 10px;
+      vertical-align: top;
+      font-size: 0.94rem;
+    }
+
+    .compare-table thead th {
+      background: rgba(29, 58, 50, 0.14);
+    }
+
+    .danger {
+      border: 2px solid rgba(139, 30, 45, 0.5);
+      background: linear-gradient(160deg, rgba(255, 245, 244, 0.96), rgba(255, 236, 235, 0.92));
+    }
+
+    .danger h2 {
+      color: var(--warning);
+      border-left-color: var(--warning);
+    }
+
+    .warning-list li {
+      margin-bottom: 8px;
+    }
+
+    .bubble {
+      position: relative;
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(74, 55, 40, 0.22);
+      border-radius: 12px;
+      padding: 12px;
+    }
+
+    .bubble::after {
+      content: "";
+      position: absolute;
+      left: 22px;
+      bottom: -10px;
+      width: 16px;
+      height: 16px;
+      background: inherit;
+      border-right: 1px solid rgba(74, 55, 40, 0.22);
+      border-bottom: 1px solid rgba(74, 55, 40, 0.22);
+      transform: rotate(45deg);
+    }
+
+    .note {
+      font-size: 0.86rem;
+      color: var(--muted);
+    }
+
+    .small {
+      font-size: 0.9rem;
+      color: #423b32;
+    }
+
+    .prompt-good-bad {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .bad {
+      border-left: 6px solid var(--warning);
+      background: rgba(139, 30, 45, 0.08);
+    }
+
+    .good {
+      border-left: 6px solid var(--deep-green);
+      background: rgba(29, 58, 50, 0.08);
+    }
+
+    .checklist li {
+      margin-bottom: 6px;
+    }
+
+    .final-copy {
+      text-align: center;
+      font-size: clamp(1.1rem, 2.3vw, 1.45rem);
+      color: #311c1c;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      padding: 16px;
+      background: linear-gradient(120deg, rgba(201, 162, 78, 0.28), rgba(111, 29, 47, 0.12));
+      border-radius: 12px;
+      border: 1px solid rgba(74, 55, 40, 0.25);
+    }
+
+    .footprint {
+      position: absolute;
+      right: 12px;
+      top: 12px;
+      opacity: 0.15;
+      font-size: 2rem;
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.45s ease, transform 0.45s ease;
+    }
+
+    .reveal.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width: 860px) {
+      .grid-2,
+      .grid-3,
+      .prompt-good-bad {
+        grid-template-columns: 1fr;
+      }
+
+      .pair {
+        grid-template-columns: 1fr;
+        gap: 6px;
+      }
+
+      .vs-arrow {
+        transform: rotate(90deg);
+      }
+
+      .section {
+        padding: 20px;
+      }
+    }
+
+    @media print {
+      body {
+        background: #fff;
+      }
+
+      .section {
+        box-shadow: none;
+        break-inside: avoid;
+        margin: 10px 0;
+        border-color: #777;
+      }
+
+      .reveal {
+        opacity: 1 !important;
+        transform: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <section class="section reveal" id="title">
+      <div class="footprint">🕵️‍♂️</div>
+      <div class="evidence-tag">事件ファイル #01</div>
+      <h1>生成AIは“現場に行かない名探偵”である</h1>
+      <p class="subtitle">推理小説になぞらえて理解する、生成AIのしくみ</p>
+      <p class="lead">
+        生成AIは、世界の真実を直接「見る」存在ではありません。<br />
+        かわりに、膨大な過去の言語パターンを“事件記録”のように参照し、
+        「次に最もありそうな一文」を推理し続ける――そんな名探偵に近いのです。
+      </p>
+      <div class="motif" aria-hidden="true">🔎 📜 🧵 🧠</div>
+    </section>
+
+    <section class="section reveal" id="mapping">
+      <div class="evidence-tag">事件ファイル #02</div>
+      <h2>まず一目でわかる対応表</h2>
+      <div class="card">
+        <div class="pair">
+          <div class="label"><strong>推理小説：</strong>事件</div>
+          <div class="vs-arrow">⇄</div>
+          <div class="label ai"><strong>生成AI：</strong>ユーザーの質問</div>
+        </div>
+        <div class="pair">
+          <div class="label"><strong>推理小説：</strong>手がかり</div>
+          <div class="vs-arrow">⇄</div>
+          <div class="label ai"><strong>生成AI：</strong>入力テキスト（プロンプト）</div>
+        </div>
+        <div class="pair">
+          <div class="label"><strong>推理小説：</strong>過去の事件記録</div>
+          <div class="vs-arrow">⇄</div>
+          <div class="label ai"><strong>生成AI：</strong>学習データ</div>
+        </div>
+        <div class="pair">
+          <div class="label"><strong>推理小説：</strong>推理</div>
+          <div class="vs-arrow">⇄</div>
+          <div class="label ai"><strong>生成AI：</strong>次トークン予測<span class="tag">トークン＝単語のかけら</span></div>
+        </div>
+        <div class="pair">
+          <div class="label"><strong>推理小説：</strong>犯人像の再構成</div>
+          <div class="vs-arrow">⇄</div>
+          <div class="label ai"><strong>生成AI：</strong>回答文の生成</div>
+        </div>
+        <div class="pair">
+          <div class="label"><strong>推理小説：</strong>現場検証</div>
+          <div class="vs-arrow">⇄</div>
+          <div class="label ai"><strong>生成AI：</strong>通常はできない</div>
+        </div>
+        <div class="pair" style="border-bottom: none; padding-bottom: 0;">
+          <div class="label"><strong>推理小説：</strong>尋問・再実験</div>
+          <div class="vs-arrow">⇄</div>
+          <div class="label ai"><strong>生成AI：</strong>外部ツールや追加質問が必要</div>
+        </div>
+      </div>
+      <p class="note">※「次トークン予測」＝文脈の続きを、確率の高い順に選んでいく方法です。</p>
+    </section>
+
+    <section class="section reveal" id="process">
+      <div class="evidence-tag">事件ファイル #03</div>
+      <h2>名探偵として見た生成AIの推理プロセス</h2>
+      <ul class="timeline">
+        <li><strong>1. 依頼人が事件を持ち込む</strong>（プロンプト入力）</li>
+        <li><strong>2. 探偵が手がかりを読む</strong>（トークン解析<span class="tag">入力を細かな単位に分解</span>）</li>
+        <li><strong>3. 類似事件を大量に想起する</strong>（学習済みパターンの活性化）</li>
+        <li><strong>4. 最有力の筋書きを絞り込む</strong>（確率分布<span class="tag">候補ごとの出やすさ</span>）</li>
+        <li><strong>5. 一文ずつ報告書を書く</strong>（逐次生成：1トークンずつ出力）</li>
+        <li><strong>6. もっともらしいが誤ることもある</strong>（幻覚<span class="tag">事実でない補完</span>）</li>
+      </ul>
+    </section>
+
+    <section class="section reveal" id="similarities">
+      <div class="evidence-tag">事件ファイル #04</div>
+      <h2>名探偵と生成AIの「似ているところ」</h2>
+      <div class="grid-3">
+        <article class="card">
+          <h3>① 少ない手がかりから全体像を推定</h3>
+          <p class="small">断片情報から、あり得るシナリオを組み立てる点が共通しています。</p>
+        </article>
+        <article class="card">
+          <h3>② 過去事例が武器になる</h3>
+          <p class="small">経験（学習データ）が豊富なほど、推理の幅が広がります。</p>
+        </article>
+        <article class="card">
+          <h3>③ 内部で照合が進む</h3>
+          <p class="small">外からは直感に見えても、内側では大量のパターン比較が進行します。</p>
+        </article>
+        <article class="card">
+          <h3>④ 違和感を拾うことがある</h3>
+          <p class="small">不自然な語や文脈のズレを、統計的に検出できる場合があります。</p>
+        </article>
+        <article class="card">
+          <h3>⑤ 問い方で答えが変わる</h3>
+          <p class="small">同じ事件でも質問角度が違えば、重点と結論が変化します。</p>
+        </article>
+        <article class="card">
+          <h3>⑥ 途中仮説を更新する</h3>
+          <p class="small">新しい情報が入ると、より整合する筋に推理を修正します。</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section danger reveal" id="differences">
+      <div class="evidence-tag" style="background: var(--warning);">重要警告 #05</div>
+      <h2>名探偵と生成AIの「決定的に違うところ」</h2>
+      <table class="compare-table" aria-label="名探偵と生成AIの違い比較">
+        <thead>
+          <tr>
+            <th>観点</th>
+            <th>名探偵</th>
+            <th>生成AI</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>現場アクセス</td>
+            <td>現場を見て新証拠を得られる</td>
+            <td>通常は現場を直接見ていない</td>
+          </tr>
+          <tr>
+            <td>再確認</td>
+            <td>尋問・実験で検証可能</td>
+            <td>単独では検証できず、外部手段が必要</td>
+          </tr>
+          <tr>
+            <td>因果理解</td>
+            <td>なぜ起きたかを因果で考える</td>
+            <td>主に相関（同時に出やすい関係）を利用</td>
+          </tr>
+          <tr>
+            <td>未知の扱い</td>
+            <td>「わからない」と保留できる</td>
+            <td>もっともらしく補完してしまうことがある</td>
+          </tr>
+          <tr>
+            <td>証拠評価</td>
+            <td>証拠の信頼度を意識的に比較</td>
+            <td>統計的重みづけが中心</td>
+          </tr>
+          <tr>
+            <td>ゴール</td>
+            <td>真相と整合性の追求</td>
+            <td>文脈上もっとも自然な応答の生成</td>
+          </tr>
+          <tr>
+            <td>責任の所在</td>
+            <td>推理者本人が説明責任を負う</td>
+            <td>利用者側の確認と運用設計が不可欠</td>
+          </tr>
+        </tbody>
+      </table>
+      <ul class="warning-list">
+        <li>⚠️ 似ているのは「推理の型」であって、「真実への到達保証」ではありません。</li>
+      </ul>
+    </section>
+
+    <section class="section reveal" id="hallucination">
+      <div class="evidence-tag">事件ファイル #06</div>
+      <h2>誤答は「誤推理」：なぜAIは間違えるのか</h2>
+      <div class="grid-2">
+        <div class="card">
+          <h3>よくある誤推理の原因</h3>
+          <ul>
+            <li>手がかり（入力情報）が少なすぎる</li>
+            <li>紛らわしい証言（曖昧な表現）が混ざる</li>
+            <li>過去の類似事件パターンに引きずられる</li>
+            <li>筋は通るが証拠不足の物語を作る</li>
+            <li>質問が曖昧で、前提がずれている</li>
+          </ul>
+        </div>
+        <div class="bubble">
+          <strong>探偵メモ：</strong>
+          <p class="small">生成AIの「幻覚」は、悪意というより「穴埋めの勢い」が原因です。情報の空白を埋める能力が高いほど、誤った補完も起こり得ます。</p>
+          <p class="note">対策：出典確認・追加質問・外部検証をセットで行う。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section reveal" id="prompt">
+      <div class="evidence-tag">事件ファイル #07</div>
+      <h2>良い質問は「良い依頼書」</h2>
+      <div class="prompt-good-bad">
+        <article class="card bad">
+          <h3>悪い依頼の例</h3>
+          <p>「これについて教えて」</p>
+          <p class="small">目的・対象・深さ・形式が不明で、推理の前提がぶれやすい。</p>
+        </article>
+        <article class="card good">
+          <h3>良い依頼の例</h3>
+          <p>「初心者向けに、3つの要点に絞って、具体例付きで説明してください。」</p>
+          <p class="small">読者像・粒度・出力形式が明確で、回答の精度が上がる。</p>
+        </article>
+      </div>
+      <div class="grid-2" style="margin-top: 14px;">
+        <div class="card">
+          <h3>依頼書に入れるべき要素</h3>
+          <ul class="checklist">
+            <li>🎯 目的を明示する（何のために使うか）</li>
+            <li>📌 前提条件を書く（対象者、知識レベル）</li>
+            <li>🧾 出力形式を指定する（箇条書き、表、文字数）</li>
+            <li>⚖️ 比較対象を与える（AとBを比較、など）</li>
+            <li>🔒 不明点を限定する（どこまで答えるかを決める）</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>実践テンプレート</h3>
+          <p class="small">「<strong>目的</strong>のために、<strong>対象読者</strong>向けに、<strong>形式</strong>で、<strong>具体例</strong>を含めて説明してください。特に<strong>比較ポイント</strong>を重視し、<strong>範囲外</strong>は省いてください。」</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section reveal" id="summary">
+      <div class="evidence-tag">事件ファイル #08</div>
+      <h2>まとめ</h2>
+      <ul>
+        <li>生成AIは魔法ではなく、膨大な記録を基に推理する「現場に行かない名探偵」に近い。</li>
+        <li>ただし現場検証や証拠確認がなければ、名推理は誤推理にもなりうる。</li>
+        <li>良い問いは、AIの推理精度を大きく引き上げる。</li>
+      </ul>
+    </section>
+
+    <section class="section reveal" id="bonus">
+      <div class="evidence-tag">おまけ #09</div>
+      <h2>おまけの一言</h2>
+      <p class="final-copy">「AIは真実そのものではなく、“もっともありそうな物語”を語る探偵である。」</p>
+    </section>
+  </main>
+
+  <script>
+    // 軽いスクロール演出（読み進めに合わせてセクションを表示）
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('show');
+        }
+      });
+    }, { threshold: 0.12 });
+
+    document.querySelectorAll('.reveal').forEach((el) => observer.observe(el));
+  </script>
+</body>
+</html>
