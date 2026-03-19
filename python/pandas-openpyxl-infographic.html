@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>pandas & openpyxl — Pythonライブラリ解説インフォグラフィック</title>
+  <style>
+    :root {
+      font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+      color-scheme: light;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      min-height: 100vh;
+      color: #e2e8f0;
+      padding: 40px 20px 60px;
+    }
+
+    .wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    /* ===== HEADER ===== */
+    header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+    header .badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 100px;
+      padding: 6px 20px;
+      font-size: 13px;
+      letter-spacing: 0.1em;
+      color: #94a3b8;
+      margin-bottom: 16px;
+    }
+    header h1 {
+      font-size: clamp(28px, 5vw, 48px);
+      font-weight: 900;
+      line-height: 1.2;
+      margin-bottom: 12px;
+    }
+    header h1 .pandas { color: #4fc3f7; }
+    header h1 .openpyxl { color: #81c784; }
+    header p {
+      color: #94a3b8;
+      font-size: 15px;
+      max-width: 600px;
+      margin: 0 auto;
+      line-height: 1.7;
+    }
+
+    /* ===== HERO CARDS ===== */
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 48px;
+    }
+    @media (max-width: 680px) {
+      .hero-grid { grid-template-columns: 1fr; }
+    }
+
+    .hero-card {
+      border-radius: 20px;
+      padding: 32px 28px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 20px;
+      padding: 1px;
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+    }
+    .hero-card.pandas-card {
+      background: linear-gradient(135deg, rgba(2,132,199,0.25) 0%, rgba(14,165,233,0.10) 100%);
+      border: 1px solid rgba(79,195,247,0.3);
+    }
+    .hero-card.openpyxl-card {
+      background: linear-gradient(135deg, rgba(22,163,74,0.25) 0%, rgba(34,197,94,0.10) 100%);
+      border: 1px solid rgba(129,199,132,0.3);
+    }
+
+    .hero-icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+    }
+    .hero-card h2 {
+      font-size: 26px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+    .hero-card.pandas-card h2 { color: #4fc3f7; }
+    .hero-card.openpyxl-card h2 { color: #81c784; }
+    .hero-version {
+      display: inline-block;
+      font-size: 12px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 6px;
+      padding: 2px 10px;
+      color: #94a3b8;
+      margin-bottom: 14px;
+    }
+    .hero-card p {
+      font-size: 14px;
+      line-height: 1.7;
+      color: #cbd5e1;
+    }
+
+    /* ===== SECTION TITLES ===== */
+    .section-title {
+      font-size: 22px;
+      font-weight: 800;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(255,255,255,0.1);
+    }
+
+    /* ===== FEATURE GRID ===== */
+    .features-section { margin-bottom: 48px; }
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .feature-card {
+      background: rgba(255,255,255,0.05);
+      border-radius: 16px;
+      padding: 24px 22px;
+      border: 1px solid rgba(255,255,255,0.08);
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .feature-card:hover {
+      transform: translateY(-3px);
+    }
+    .feature-card.pandas-feat { border-left: 3px solid #4fc3f7; }
+    .feature-card.openpyxl-feat { border-left: 3px solid #81c784; }
+
+    .feature-icon {
+      font-size: 28px;
+      margin-bottom: 10px;
+    }
+    .feature-card h3 {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: #f1f5f9;
+    }
+    .feature-card p {
+      font-size: 13px;
+      line-height: 1.7;
+      color: #94a3b8;
+    }
+
+    /* ===== CODE BLOCKS ===== */
+    .code-section { margin-bottom: 48px; }
+    .code-examples {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    @media (max-width: 760px) {
+      .code-examples { grid-template-columns: 1fr; }
+    }
+
+    .code-block {
+      background: #0d1117;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    .code-block-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .code-block-header.pandas-h { background: rgba(79,195,247,0.1); color: #4fc3f7; }
+    .code-block-header.openpyxl-h { background: rgba(129,199,132,0.1); color: #81c784; }
+    .code-block pre {
+      padding: 20px;
+      font-size: 12px;
+      line-height: 1.7;
+      overflow-x: auto;
+      color: #e2e8f0;
+    }
+    /* Syntax highlight */
+    .kw { color: #ff79c6; }
+    .fn { color: #50fa7b; }
+    .st { color: #f1fa8c; }
+    .cm { color: #6272a4; font-style: italic; }
+    .nm { color: #bd93f9; }
+    .op { color: #ff5555; }
+
+    /* ===== USE CASE FLOW ===== */
+    .flow-section { margin-bottom: 48px; }
+    .flow-steps {
+      display: flex;
+      gap: 0;
+      overflow-x: auto;
+      padding-bottom: 8px;
+    }
+    .flow-step {
+      flex: 1;
+      min-width: 140px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 20px 16px;
+      text-align: center;
+      position: relative;
+    }
+    .flow-step + .flow-step {
+      margin-left: 12px;
+    }
+    .flow-step::after {
+      content: '→';
+      position: absolute;
+      right: -16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #4fc3f7;
+      font-size: 18px;
+      z-index: 1;
+    }
+    .flow-step:last-child::after { display: none; }
+    .flow-step .step-num {
+      display: inline-block;
+      width: 28px;
+      height: 28px;
+      background: linear-gradient(135deg, #4fc3f7, #0284c7);
+      border-radius: 50%;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 28px;
+      margin-bottom: 10px;
+      color: #0d1117;
+    }
+    .flow-step h4 {
+      font-size: 13px;
+      font-weight: 700;
+      color: #f1f5f9;
+      margin-bottom: 4px;
+    }
+    .flow-step p {
+      font-size: 11px;
+      color: #94a3b8;
+      line-height: 1.5;
+    }
+    .flow-step.openpyxl-step .step-num {
+      background: linear-gradient(135deg, #81c784, #16a34a);
+    }
+    .flow-step.openpyxl-step::after { color: #81c784; }
+
+    /* ===== COMPARISON TABLE ===== */
+    .compare-section { margin-bottom: 48px; }
+    .compare-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    .compare-table th {
+      padding: 14px 16px;
+      text-align: left;
+      font-weight: 700;
+      background: rgba(255,255,255,0.08);
+      border-bottom: 2px solid rgba(255,255,255,0.1);
+    }
+    .compare-table th:nth-child(2) { color: #4fc3f7; }
+    .compare-table th:nth-child(3) { color: #81c784; }
+    .compare-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      color: #cbd5e1;
+    }
+    .compare-table tr:last-child td { border-bottom: none; }
+    .compare-table tr:hover td { background: rgba(255,255,255,0.03); }
+    .yes { color: #4ade80; font-weight: 700; }
+    .no { color: #f87171; }
+    .partial { color: #fbbf24; }
+    .compare-wrapper {
+      background: rgba(255,255,255,0.03);
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    /* ===== COMBINATION CARD ===== */
+    .combo-card {
+      background: linear-gradient(135deg, rgba(99,102,241,0.2) 0%, rgba(168,85,247,0.15) 100%);
+      border: 1px solid rgba(139,92,246,0.4);
+      border-radius: 20px;
+      padding: 32px 28px;
+      margin-bottom: 48px;
+    }
+    .combo-card h2 {
+      font-size: 22px;
+      font-weight: 800;
+      color: #c4b5fd;
+      margin-bottom: 16px;
+    }
+    .combo-steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px;
+      margin-top: 20px;
+    }
+    .combo-step {
+      background: rgba(255,255,255,0.06);
+      border-radius: 12px;
+      padding: 16px;
+      border: 1px solid rgba(139,92,246,0.2);
+    }
+    .combo-step .lib-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      border-radius: 4px;
+      padding: 2px 8px;
+      margin-bottom: 8px;
+    }
+    .combo-step .lib-badge.pd { background: rgba(79,195,247,0.2); color: #4fc3f7; }
+    .combo-step .lib-badge.xl { background: rgba(129,199,132,0.2); color: #81c784; }
+    .combo-step h4 { font-size: 14px; font-weight: 700; color: #f1f5f9; margin-bottom: 4px; }
+    .combo-step p { font-size: 12px; color: #94a3b8; line-height: 1.5; }
+
+    /* ===== INSTALL BLOCK ===== */
+    .install-section { margin-bottom: 48px; }
+    .install-block {
+      background: #0d1117;
+      border-radius: 16px;
+      padding: 24px 28px;
+      border: 1px solid rgba(255,255,255,0.08);
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+    }
+    .install-block .comment { color: #6272a4; }
+    .install-block .cmd { color: #50fa7b; }
+    .install-block .pkg { color: #bd93f9; }
+
+    /* ===== FOOTER ===== */
+    footer {
+      text-align: center;
+      color: #475569;
+      font-size: 13px;
+      margin-top: 40px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <!-- HEADER -->
+    <header>
+      <div class="badge">🐍 Python ライブラリ解説</div>
+      <h1>
+        <span class="pandas">pandas</span>
+        <span style="color:#64748b"> &amp; </span>
+        <span class="openpyxl">openpyxl</span>
+      </h1>
+      <p>データ操作・分析の定番ライブラリと、Excelファイルを自在に操るライブラリ。<br>何ができるかをビジュアルでわかりやすく解説します。</p>
+    </header>
+
+    <!-- HERO CARDS -->
+    <div class="hero-grid">
+      <div class="hero-card pandas-card">
+        <div class="hero-icon">🐼</div>
+        <h2>pandas</h2>
+        <div class="hero-version">v2.x / 2024+</div>
+        <p>
+          表形式データ（DataFrame）を扱うための強力なライブラリ。
+          CSV・Excel・JSONなど多様な形式の読み込み・書き出しに対応し、
+          フィルタリング・集計・結合・可視化まで一貫して処理できます。
+          データサイエンス・機械学習の前処理に不可欠な存在です。
+        </p>
+      </div>
+      <div class="hero-card openpyxl-card">
+        <div class="hero-icon">📊</div>
+        <h2>openpyxl</h2>
+        <div class="hero-version">v3.x / 2024+</div>
+        <p>
+          Python から Excel（.xlsx / .xlsm）ファイルを読み書きする専用ライブラリ。
+          セルの書式・色・フォント設定、グラフ挿入、数式記入、
+          シートの追加・削除など、Excel操作をコードで完全自動化できます。
+        </p>
+      </div>
+    </div>
+
+    <!-- INSTALL -->
+    <section class="install-section">
+      <h2 class="section-title">📦 インストール</h2>
+      <div class="install-block">
+        <div class="comment"># pip でインストール</div>
+        <div><span class="cmd">pip install</span> <span class="pkg">pandas openpyxl</span></div>
+        <br>
+        <div class="comment"># conda でインストール</div>
+        <div><span class="cmd">conda install</span> <span class="pkg">pandas openpyxl</span></div>
+      </div>
+    </section>
+
+    <!-- PANDAS FEATURES -->
+    <section class="features-section">
+      <h2 class="section-title">🐼 pandas でできること</h2>
+      <div class="feature-grid">
+        <div class="feature-card pandas-feat">
+          <div class="feature-icon">📥</div>
+          <h3>多形式データの読み込み</h3>
+          <p>CSV・Excel・JSON・SQL・Parquet・HTML など多様なフォーマットを一発で DataFrame に変換。<code>pd.read_csv()</code> などひと行で済みます。</p>
+        </div>
+        <div class="feature-card pandas-feat">
+          <div class="feature-icon">🔍</div>
+          <h3>フィルタリング・抽出</h3>
+          <p>条件式でデータを絞り込んだり、特定の列・行を取り出したり。<code>df[df['売上'] &gt; 1000]</code> のような直感的な構文で操作できます。</p>
+        </div>
+        <div class="feature-card pandas-feat">
+          <div class="feature-icon">🧹</div>
+          <h3>データクレンジング</h3>
+          <p>欠損値（NaN）の検出・補完・削除、重複行の除去、データ型変換、文字列の正規化など、データ前処理の全工程をサポートします。</p>
+        </div>
+        <div class="feature-card pandas-feat">
+          <div class="feature-icon">📊</div>
+          <h3>集計・グループ化</h3>
+          <p><code>groupby()</code> でカテゴリ別に集計、<code>pivot_table()</code> でクロス集計。合計・平均・最大最小・カウントを一括計算できます。</p>
+        </div>
+        <div class="feature-card pandas-feat">
+          <div class="feature-icon">🔗</div>
+          <h3>テーブルの結合・マージ</h3>
+          <p><code>merge()</code> でSQL的な INNER / LEFT / RIGHT / OUTER JOIN、<code>concat()</code> で縦横に連結。複数データを自在に組み合わせます。</p>
+        </div>
+        <div class="feature-card pandas-feat">
+          <div class="feature-icon">📈</div>
+          <h3>時系列データの処理</h3>
+          <p>日付インデックス・リサンプリング（日次→月次変換）・移動平均・ラグ計算など、時系列固有の処理を豊富なAPIで実現します。</p>
+        </div>
+        <div class="feature-card pandas-feat">
+          <div class="feature-icon">🎨</div>
+          <h3>可視化（Matplotlib連携）</h3>
+          <p><code>df.plot()</code> ひと行で折れ線・棒・ヒストグラム・散布図を生成。Matplotlib・Seaborn・Plotlyとのシームレスな連携も可能です。</p>
+        </div>
+        <div class="feature-card pandas-feat">
+          <div class="feature-icon">📤</div>
+          <h3>多形式への書き出し</h3>
+          <p>処理後のデータをCSV・Excel・JSON・Parquet・SQLなど好みの形式で保存。<code>to_excel()</code> で Excel ファイルへのエクスポートも簡単です。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- OPENPYXL FEATURES -->
+    <section class="features-section">
+      <h2 class="section-title">📊 openpyxl でできること</h2>
+      <div class="feature-grid">
+        <div class="feature-card openpyxl-feat">
+          <div class="feature-icon">📖</div>
+          <h3>Excel ファイルの読み込み</h3>
+          <p>既存の .xlsx / .xlsm ファイルを開き、シート・セルの値・数式・書式情報をPythonオブジェクトとして取得できます。</p>
+        </div>
+        <div class="feature-card openpyxl-feat">
+          <div class="feature-icon">✏️</div>
+          <h3>セルへの書き込み・編集</h3>
+          <p>特定のセルに値・数式・文字列を書き込みます。<code>ws['A1'] = "売上合計"</code> のように直感的に操作できます。</p>
+        </div>
+        <div class="feature-card openpyxl-feat">
+          <div class="feature-icon">🎨</div>
+          <h3>セルの書式・スタイル設定</h3>
+          <p>フォントの種類・サイズ・太字・色、セルの背景色、罫線スタイル、数値フォーマット（通貨・%表示など）を細かく設定できます。</p>
+        </div>
+        <div class="feature-card openpyxl-feat">
+          <div class="feature-icon">📑</div>
+          <h3>シートの追加・複製・削除</h3>
+          <p>新しいワークシートの追加、既存シートの名前変更・複製・削除、シートの表示順変更をコードで自動化できます。</p>
+        </div>
+        <div class="feature-card openpyxl-feat">
+          <div class="feature-icon">📐</div>
+          <h3>行・列の操作</h3>
+          <p>行・列の挿入・削除、列幅・行高さの設定、セルの結合（merge_cells）・分割、フリーズペインの設定ができます。</p>
+        </div>
+        <div class="feature-card openpyxl-feat">
+          <div class="feature-icon">📉</div>
+          <h3>グラフの挿入</h3>
+          <p>棒グラフ・折れ線グラフ・円グラフ・散布図など多種類のグラフをPythonコードで生成し、シートに埋め込めます。</p>
+        </div>
+        <div class="feature-card openpyxl-feat">
+          <div class="feature-icon">🖼️</div>
+          <h3>画像の挿入</h3>
+          <p>PNGやJPEGなどの画像ファイルをシートの任意の位置に挿入できます。ロゴ・ヘッダー画像の自動挿入に便利です。</p>
+        </div>
+        <div class="feature-card openpyxl-feat">
+          <div class="feature-icon">✅</div>
+          <h3>データバリデーション</h3>
+          <p>ドロップダウンリスト、数値範囲の制限、日付制限などの入力規則（バリデーション）をセル範囲に設定できます。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- CODE EXAMPLES -->
+    <section class="code-section">
+      <h2 class="section-title">💻 コードサンプル</h2>
+      <div class="code-examples">
+
+        <!-- pandas sample -->
+        <div class="code-block">
+          <div class="code-block-header pandas-h">🐼 pandas — CSVを読んで集計・出力</div>
+          <pre><span class="kw">import</span> pandas <span class="kw">as</span> pd
+
+<span class="cm"># CSVファイルを読み込む</span>
+df = pd.<span class="fn">read_csv</span>(<span class="st">"sales.csv"</span>)
+
+<span class="cm"># 欠損値を除去</span>
+df = df.<span class="fn">dropna</span>()
+
+<span class="cm"># 売上が1000以上の行を絞り込む</span>
+filtered = df[df[<span class="st">"売上"</span>] &gt;= <span class="nm">1000</span>]
+
+<span class="cm"># 月別・商品別に集計</span>
+summary = filtered.<span class="fn">groupby</span>(
+    [<span class="st">"月"</span>, <span class="st">"商品"</span>]
+)[<span class="st">"売上"</span>].<span class="fn">sum</span>().<span class="fn">reset_index</span>()
+
+<span class="cm"># Excelファイルとして書き出す</span>
+summary.<span class="fn">to_excel</span>(
+    <span class="st">"output.xlsx"</span>,
+    index=<span class="kw">False</span>
+)</pre>
+        </div>
+
+        <!-- openpyxl sample -->
+        <div class="code-block">
+          <div class="code-block-header openpyxl-h">📊 openpyxl — Excel整形・グラフ挿入</div>
+          <pre><span class="kw">from</span> openpyxl <span class="kw">import</span> load_workbook
+<span class="kw">from</span> openpyxl.styles <span class="kw">import</span> Font, PatternFill
+<span class="kw">from</span> openpyxl.chart <span class="kw">import</span> BarChart, Reference
+
+wb = <span class="fn">load_workbook</span>(<span class="st">"output.xlsx"</span>)
+ws = wb.active
+
+<span class="cm"># ヘッダーを太字・背景色付きに</span>
+<span class="kw">for</span> cell <span class="kw">in</span> ws[<span class="nm">1</span>]:
+    cell.font = <span class="fn">Font</span>(bold=<span class="kw">True</span>, color=<span class="st">"FFFFFF"</span>)
+    cell.fill = <span class="fn">PatternFill</span>(
+        fill_type=<span class="st">"solid"</span>,
+        fgColor=<span class="st">"0284C7"</span>
+    )
+
+<span class="cm"># 棒グラフを生成して挿入</span>
+chart = <span class="fn">BarChart</span>()
+data = <span class="fn">Reference</span>(ws, min_col=<span class="nm">3</span>,
+    min_row=<span class="nm">1</span>, max_row=ws.max_row)
+chart.<span class="fn">add_data</span>(data, titles_from_data=<span class="kw">True</span>)
+ws.<span class="fn">add_chart</span>(chart, <span class="st">"E2"</span>)
+
+wb.<span class="fn">save</span>(<span class="st">"report.xlsx"</span>)</pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- WORKFLOW -->
+    <section class="flow-section">
+      <h2 class="section-title">🔄 pandas の典型的なデータ処理フロー</h2>
+      <div class="flow-steps">
+        <div class="flow-step">
+          <div class="step-num">1</div>
+          <h4>データ読込</h4>
+          <p>CSV / Excel / DB / APIから取得</p>
+        </div>
+        <div class="flow-step">
+          <div class="step-num">2</div>
+          <h4>データ確認</h4>
+          <p>shape・dtypes・info()で構造把握</p>
+        </div>
+        <div class="flow-step">
+          <div class="step-num">3</div>
+          <h4>クレンジング</h4>
+          <p>欠損値処理・型変換・重複削除</p>
+        </div>
+        <div class="flow-step">
+          <div class="step-num">4</div>
+          <h4>変換・加工</h4>
+          <p>フィルタ・結合・特徴量生成</p>
+        </div>
+        <div class="flow-step">
+          <div class="step-num">5</div>
+          <h4>集計・分析</h4>
+          <p>groupby・pivot・統計量算出</p>
+        </div>
+        <div class="flow-step">
+          <div class="step-num">6</div>
+          <h4>出力・可視化</h4>
+          <p>Excel / CSV 保存・グラフ描画</p>
+        </div>
+      </div>
+
+      <br>
+      <h2 class="section-title">🔄 openpyxl の典型的な Excel 操作フロー</h2>
+      <div class="flow-steps">
+        <div class="flow-step openpyxl-step">
+          <div class="step-num">1</div>
+          <h4>ファイルを開く</h4>
+          <p>load_workbook() または Workbook()</p>
+        </div>
+        <div class="flow-step openpyxl-step">
+          <div class="step-num">2</div>
+          <h4>シート選択</h4>
+          <p>wb.active または wb["Sheet1"]</p>
+        </div>
+        <div class="flow-step openpyxl-step">
+          <div class="step-num">3</div>
+          <h4>データ書込</h4>
+          <p>セル・行・列へ値・数式を設定</p>
+        </div>
+        <div class="flow-step openpyxl-step">
+          <div class="step-num">4</div>
+          <h4>スタイル設定</h4>
+          <p>フォント・色・罫線を適用</p>
+        </div>
+        <div class="flow-step openpyxl-step">
+          <div class="step-num">5</div>
+          <h4>グラフ・画像</h4>
+          <p>チャートや画像をシートに挿入</p>
+        </div>
+        <div class="flow-step openpyxl-step">
+          <div class="step-num">6</div>
+          <h4>保存</h4>
+          <p>wb.save("ファイル名.xlsx")</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- COMBINATION -->
+    <div class="combo-card">
+      <h2>🔥 pandas + openpyxl の組み合わせ活用</h2>
+      <p style="color:#c4b5fd; font-size:14px; line-height:1.7;">
+        両ライブラリを組み合わせることで、データ分析から美しいExcelレポート生成まで全自動化できます。
+        pandas は裏でopenpyxlを利用しているため、<code>to_excel()</code> で出力後に openpyxl で装飾するのが王道パターンです。
+      </p>
+      <div class="combo-steps">
+        <div class="combo-step">
+          <span class="lib-badge pd">pandas</span>
+          <h4>データ収集・前処理</h4>
+          <p>複数CSVを結合し、欠損値処理・正規化を行う</p>
+        </div>
+        <div class="combo-step">
+          <span class="lib-badge pd">pandas</span>
+          <h4>集計・分析</h4>
+          <p>月別・部門別に売上を集計し、KPIを算出する</p>
+        </div>
+        <div class="combo-step">
+          <span class="lib-badge pd">pandas</span>
+          <h4>Excelに出力</h4>
+          <p>to_excel() でシートごとにデータを書き出す</p>
+        </div>
+        <div class="combo-step">
+          <span class="lib-badge xl">openpyxl</span>
+          <h4>ヘッダー装飾</h4>
+          <p>背景色・太字・セル結合でヘッダーを見やすくする</p>
+        </div>
+        <div class="combo-step">
+          <span class="lib-badge xl">openpyxl</span>
+          <h4>グラフ追加</h4>
+          <p>棒グラフ・折れ線グラフを自動生成して挿入する</p>
+        </div>
+        <div class="combo-step">
+          <span class="lib-badge xl">openpyxl</span>
+          <h4>完成レポート保存</h4>
+          <p>書式が整ったExcelレポートを自動的に保存・配布</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- COMPARISON TABLE -->
+    <section class="compare-section">
+      <h2 class="section-title">📋 機能比較表</h2>
+      <div class="compare-wrapper">
+        <table class="compare-table">
+          <thead>
+            <tr>
+              <th>機能・用途</th>
+              <th>🐼 pandas</th>
+              <th>📊 openpyxl</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>CSVの読み込み・書き出し</td>
+              <td class="yes">◎ 得意</td>
+              <td class="no">× 非対応</td>
+            </tr>
+            <tr>
+              <td>Excelの読み込み</td>
+              <td class="yes">◎ 対応</td>
+              <td class="yes">◎ 対応</td>
+            </tr>
+            <tr>
+              <td>Excelの書き出し</td>
+              <td class="partial">△ 基本的な書き出し</td>
+              <td class="yes">◎ 高度な書式付き</td>
+            </tr>
+            <tr>
+              <td>大規模データの集計・分析</td>
+              <td class="yes">◎ 得意</td>
+              <td class="no">× 不向き</td>
+            </tr>
+            <tr>
+              <td>セルの書式・スタイル設定</td>
+              <td class="no">× 非対応</td>
+              <td class="yes">◎ 得意</td>
+            </tr>
+            <tr>
+              <td>グラフ生成・挿入</td>
+              <td class="partial">△ Matplotlib連携</td>
+              <td class="yes">◎ Excel内グラフ</td>
+            </tr>
+            <tr>
+              <td>データのフィルタ・ソート</td>
+              <td class="yes">◎ 得意</td>
+              <td class="partial">△ 限定的</td>
+            </tr>
+            <tr>
+              <td>SQL・DBとの連携</td>
+              <td class="yes">◎ 対応</td>
+              <td class="no">× 非対応</td>
+            </tr>
+            <tr>
+              <td>数式の書き込み</td>
+              <td class="no">× 非対応</td>
+              <td class="yes">◎ 対応</td>
+            </tr>
+            <tr>
+              <td>機械学習の前処理</td>
+              <td class="yes">◎ 最適</td>
+              <td class="no">× 不向き</td>
+            </tr>
+            <tr>
+              <td>シート・セルのレイアウト操作</td>
+              <td class="no">× 非対応</td>
+              <td class="yes">◎ 得意</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <footer>
+      <p>© 2026 Infographics Collection — Python Libraries: pandas &amp; openpyxl</p>
+    </footer>
+  </div>
+</body>
+</html>
