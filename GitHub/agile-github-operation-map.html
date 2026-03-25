@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agile Development × GitHub 運用マップ</title>
+<style>
+  @page { size: A4 landscape; margin: 0; }
+  @media print {
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .page { box-shadow: none !important; }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 10px; }
+  body {
+    font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", system-ui, sans-serif;
+    background: #e8ecf1;
+    color: #1a2236;
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+    line-height: 1.5;
+  }
+  .page {
+    width: 297mm;
+    min-height: 210mm;
+    background: #fff;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+    padding: 18px 22px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    overflow: hidden;
+  }
+
+  /* ── Title ── */
+  .title-bar {
+    background: linear-gradient(135deg, #0d1b2a 0%, #1b2d4a 100%);
+    border-radius: 10px;
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    color: #fff;
+  }
+  .title-bar h1 {
+    font-size: 2rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+  }
+  .title-bar .subtitle {
+    font-size: 1.1rem;
+    opacity: 0.7;
+    margin-left: auto;
+  }
+  .title-icon {
+    font-size: 2.4rem;
+  }
+
+  /* ── Grid Layout ── */
+  .grid {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: auto auto auto;
+    gap: 10px;
+  }
+  .span2 { grid-column: span 2; }
+  .span3 { grid-column: span 3; }
+
+  /* ── Section Card ── */
+  .section {
+    background: #f7f9fc;
+    border: 1px solid #dce3ed;
+    border-radius: 8px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+  }
+  .section-head {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 8px;
+    padding-bottom: 5px;
+    border-bottom: 2px solid #3b82f6;
+  }
+  .section-num {
+    background: #3b82f6;
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: 700;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .section-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #0d1b2a;
+  }
+
+  /* ── Agile Flow (Section 1) ── */
+  .agile-flow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    flex: 1;
+  }
+  .flow-node {
+    background: linear-gradient(135deg, #1e3a5f, #2563eb);
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 700;
+    padding: 5px 14px;
+    border-radius: 6px;
+    text-align: center;
+    min-width: 160px;
+    position: relative;
+  }
+  .flow-node.vision {
+    background: linear-gradient(135deg, #0d1b2a, #1b2d4a);
+    font-size: 1.1rem;
+  }
+  .flow-node.sprint {
+    background: linear-gradient(135deg, #059669, #10b981);
+  }
+  .flow-node.review {
+    background: linear-gradient(135deg, #7c3aed, #8b5cf6);
+  }
+  .flow-arrow {
+    color: #94a3b8;
+    font-size: 1.2rem;
+    line-height: 1;
+  }
+  .flow-label {
+    font-size: 0.85rem;
+    color: #64748b;
+    font-style: italic;
+  }
+  .flow-loop {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 2px;
+  }
+  .loop-arrow {
+    font-size: 1.6rem;
+    color: #3b82f6;
+  }
+  .loop-text {
+    font-size: 0.85rem;
+    color: #3b82f6;
+    font-weight: 700;
+  }
+
+  /* ── Kanban (Section 2) ── */
+  .kanban {
+    display: flex;
+    gap: 6px;
+    flex: 1;
+    align-items: stretch;
+  }
+  .kanban-col {
+    flex: 1;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    min-height: 60px;
+  }
+  .kanban-header {
+    background: #0d1b2a;
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-align: center;
+    padding: 4px 6px;
+    border-radius: 5px 5px 0 0;
+  }
+  .kanban-header.ready { background: #1e40af; }
+  .kanban-header.wip { background: #059669; }
+  .kanban-header.review { background: #7c3aed; }
+  .kanban-header.done { background: #16a34a; }
+  .kanban-body {
+    flex: 1;
+    padding: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .kanban-card {
+    background: #f0f4ff;
+    border-left: 3px solid #3b82f6;
+    border-radius: 3px;
+    padding: 3px 6px;
+    font-size: 0.85rem;
+  }
+  .kanban-card.g { border-left-color: #10b981; background: #ecfdf5; }
+  .kanban-card.p { border-left-color: #8b5cf6; background: #f5f3ff; }
+  .kanban-arrow {
+    display: flex;
+    align-items: center;
+    color: #94a3b8;
+    font-size: 1.4rem;
+    flex-shrink: 0;
+    padding: 0 2px;
+  }
+  .wip-note {
+    font-size: 0.8rem;
+    color: #dc2626;
+    font-weight: 600;
+    text-align: center;
+    margin-top: 4px;
+  }
+
+  /* ── GitHub Mapping (Section 3) ── */
+  .mapping {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    flex: 1;
+  }
+  .map-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .map-left {
+    flex: 1;
+    background: #e0f2fe;
+    border: 1px solid #7dd3fc;
+    border-radius: 5px;
+    padding: 4px 10px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-align: center;
+    color: #0c4a6e;
+  }
+  .map-arrow-h {
+    color: #3b82f6;
+    font-size: 1.4rem;
+    flex-shrink: 0;
+  }
+  .map-right {
+    flex: 1;
+    background: #0d1b2a;
+    color: #fff;
+    border-radius: 5px;
+    padding: 4px 10px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .gh-icon {
+    font-size: 1.1rem;
+  }
+
+  /* ── AI Team Model (Section 4) ── */
+  .ai-model {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    flex: 1;
+  }
+  .ai-node {
+    padding: 5px 14px;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 700;
+    text-align: center;
+    min-width: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .ai-node.human {
+    background: linear-gradient(135deg, #1e40af, #3b82f6);
+    color: #fff;
+  }
+  .ai-node.ai {
+    background: linear-gradient(135deg, #059669, #34d399);
+    color: #fff;
+  }
+  .ai-node.pr {
+    background: linear-gradient(135deg, #7c3aed, #a78bfa);
+    color: #fff;
+  }
+  .ai-node.merge {
+    background: linear-gradient(135deg, #0d1b2a, #1b2d4a);
+    color: #fff;
+  }
+  .collab-badge {
+    background: linear-gradient(135deg, #f59e0b, #fbbf24);
+    color: #0d1b2a;
+    font-size: 0.9rem;
+    font-weight: 800;
+    padding: 5px 12px;
+    border-radius: 20px;
+    margin-top: 4px;
+    text-align: center;
+    letter-spacing: 0.02em;
+  }
+
+  /* ── Glossary (Section 5) ── */
+  .glossary-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px 8px;
+    flex: 1;
+  }
+  .gloss-item {
+    display: flex;
+    gap: 6px;
+    align-items: baseline;
+    font-size: 0.85rem;
+  }
+  .gloss-term {
+    font-weight: 700;
+    color: #1e40af;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .gloss-def {
+    color: #475569;
+    line-height: 1.4;
+  }
+
+  /* ── Essence (Section 6) ── */
+  .essence {
+    display: flex;
+    gap: 10px;
+    flex: 1;
+    align-items: stretch;
+  }
+  .essence-card {
+    flex: 1;
+    border-radius: 8px;
+    padding: 10px 14px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+  }
+  .essence-card.e1 {
+    background: linear-gradient(135deg, #1e3a5f, #2563eb);
+    color: #fff;
+  }
+  .essence-card.e2 {
+    background: linear-gradient(135deg, #059669, #10b981);
+    color: #fff;
+  }
+  .essence-card.e3 {
+    background: linear-gradient(135deg, #0d1b2a, #1b2d4a);
+    color: #fff;
+  }
+  .essence-label {
+    font-size: 0.85rem;
+    opacity: 0.8;
+  }
+  .essence-text {
+    font-size: 1.15rem;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+  }
+  .essence-eq {
+    font-size: 1.4rem;
+    font-weight: 800;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <!-- ① Title -->
+  <div class="title-bar">
+    <span class="title-icon">⚡</span>
+    <h1>Agile Development × GitHub 運用マップ</h1>
+    <span class="subtitle">初心者から実務まで — 構造で理解するアジャイルとGitHub</span>
+  </div>
+
+  <div class="grid">
+    <!-- ② Section 1: Agile Structure -->
+    <div class="section">
+      <div class="section-head">
+        <span class="section-num">1</span>
+        <span class="section-title">アジャイル全体構造</span>
+      </div>
+      <div class="agile-flow">
+        <div class="flow-node vision">🎯 プロダクトビジョン</div>
+        <div class="flow-arrow">▼</div>
+        <div class="flow-node">📋 プロダクトバックログ</div>
+        <div class="flow-arrow">▼</div>
+        <div class="flow-label">（スプリント計画）</div>
+        <div class="flow-node sprint">🗂 スプリントバックログ</div>
+        <div class="flow-arrow">▼</div>
+        <div class="flow-node sprint">💻 開発（デイリー）</div>
+        <div class="flow-arrow">▼</div>
+        <div class="flow-node">📦 インクリメント</div>
+        <div class="flow-arrow">▼</div>
+        <div class="flow-node review">🔍 レビュー</div>
+        <div class="flow-arrow">▼</div>
+        <div class="flow-node review">🔄 レトロスペクティブ</div>
+        <div class="flow-arrow">▼</div>
+        <div class="flow-node">📋 バックログ更新</div>
+        <div class="flow-loop">
+          <span class="loop-arrow">⟲</span>
+          <span class="loop-text">スプリント循環</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ③ Section 2: Kanban Flow -->
+    <div class="section span2">
+      <div class="section-head">
+        <span class="section-num">2</span>
+        <span class="section-title">カンバンフロー（横レーン図）</span>
+      </div>
+      <div class="kanban">
+        <div class="kanban-col">
+          <div class="kanban-header">Backlog</div>
+          <div class="kanban-body">
+            <div class="kanban-card">機能A設計</div>
+            <div class="kanban-card">バグ修正#12</div>
+            <div class="kanban-card">API改修</div>
+          </div>
+        </div>
+        <div class="kanban-arrow">→</div>
+        <div class="kanban-col">
+          <div class="kanban-header ready">Ready</div>
+          <div class="kanban-body">
+            <div class="kanban-card">UI改善</div>
+            <div class="kanban-card">テスト追加</div>
+          </div>
+        </div>
+        <div class="kanban-arrow">→</div>
+        <div class="kanban-col">
+          <div class="kanban-header wip">In Progress</div>
+          <div class="kanban-body">
+            <div class="kanban-card g">認証実装</div>
+            <div class="kanban-card g">DB移行</div>
+          </div>
+        </div>
+        <div class="kanban-arrow">→</div>
+        <div class="kanban-col">
+          <div class="kanban-header review">Review</div>
+          <div class="kanban-body">
+            <div class="kanban-card p">検索機能</div>
+          </div>
+        </div>
+        <div class="kanban-arrow">→</div>
+        <div class="kanban-col">
+          <div class="kanban-header done">Done ✓</div>
+          <div class="kanban-body">
+            <div class="kanban-card g">ログイン</div>
+            <div class="kanban-card g">通知</div>
+          </div>
+        </div>
+      </div>
+      <div class="wip-note">⚠ WIP制限：In Progress は最大2〜3タスク — 仕掛品を減らし流れを最適化</div>
+    </div>
+
+    <!-- ④ Section 3: GitHub Mapping -->
+    <div class="section">
+      <div class="section-head">
+        <span class="section-num">3</span>
+        <span class="section-title">GitHub マッピング</span>
+      </div>
+      <div class="mapping">
+        <div class="map-row">
+          <div class="map-left">プロダクトバックログ</div>
+          <div class="map-arrow-h">→</div>
+          <div class="map-right"><span class="gh-icon">🐙</span> Issues</div>
+        </div>
+        <div class="map-row">
+          <div class="map-left">スプリントバックログ</div>
+          <div class="map-arrow-h">→</div>
+          <div class="map-right"><span class="gh-icon">📊</span> Project（カンバン）</div>
+        </div>
+        <div class="map-row">
+          <div class="map-left">作業（実装）</div>
+          <div class="map-arrow-h">→</div>
+          <div class="map-right"><span class="gh-icon">🔀</span> Pull Request</div>
+        </div>
+        <div class="map-row">
+          <div class="map-left">完了（リリース）</div>
+          <div class="map-arrow-h">→</div>
+          <div class="map-right"><span class="gh-icon">✅</span> Merge</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ⑤ Section 4: AI Team Model -->
+    <div class="section">
+      <div class="section-head">
+        <span class="section-num" style="background:#059669;">4</span>
+        <span class="section-title">AIチーム運用モデル</span>
+      </div>
+      <div class="ai-model">
+        <div class="ai-node human">👤 Issue（人間：問題定義）</div>
+        <div class="flow-arrow">▼</div>
+        <div class="ai-node ai">🤖 AI（実装）</div>
+        <div class="flow-arrow">▼</div>
+        <div class="ai-node pr">🔀 Pull Request</div>
+        <div class="flow-arrow">▼</div>
+        <div class="ai-node human">👤 人間レビュー</div>
+        <div class="flow-arrow">▼</div>
+        <div class="ai-node merge">✅ Merge</div>
+        <div class="collab-badge">GitHub = 人間とAIの協働OS</div>
+      </div>
+    </div>
+
+    <!-- ⑥ Section 5: Glossary -->
+    <div class="section span2">
+      <div class="section-head">
+        <span class="section-num" style="background:#7c3aed;">5</span>
+        <span class="section-title">用語集</span>
+      </div>
+      <div class="glossary-grid">
+        <div class="gloss-item">
+          <span class="gloss-term">プロダクトバックログ</span>
+          <span class="gloss-def">— 実現したい機能・改善を優先順位付きで管理する一覧</span>
+        </div>
+        <div class="gloss-item">
+          <span class="gloss-term">スプリント</span>
+          <span class="gloss-def">— 1〜4週間の固定タイムボックスで開発サイクルを回す単位</span>
+        </div>
+        <div class="gloss-item">
+          <span class="gloss-term">ユーザーストーリー</span>
+          <span class="gloss-def">— 「〜として〜したい」形式で記述する要求の最小単位</span>
+        </div>
+        <div class="gloss-item">
+          <span class="gloss-term">インクリメント</span>
+          <span class="gloss-def">— スプリント毎に生まれる動作する成果物</span>
+        </div>
+        <div class="gloss-item">
+          <span class="gloss-term">カンバン</span>
+          <span class="gloss-def">— タスクの流れを可視化し、ボトルネックを発見するボード</span>
+        </div>
+        <div class="gloss-item">
+          <span class="gloss-term">WIP制限</span>
+          <span class="gloss-def">— 同時進行タスク数の上限。流れの最適化に不可欠</span>
+        </div>
+        <div class="gloss-item">
+          <span class="gloss-term">ベロシティ</span>
+          <span class="gloss-def">— 1スプリントで完了するストーリーポイントの合計値</span>
+        </div>
+        <div class="gloss-item">
+          <span class="gloss-term">Definition of Done</span>
+          <span class="gloss-def">— 「完了」とみなす基準の合意（テスト済・レビュー済等）</span>
+        </div>
+        <div class="gloss-item">
+          <span class="gloss-term">Issue</span>
+          <span class="gloss-def">— GitHubでタスク・バグ・要望を管理するチケット</span>
+        </div>
+        <div class="gloss-item">
+          <span class="gloss-term">Pull Request</span>
+          <span class="gloss-def">— コード変更をレビュー・議論してマージする仕組み</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ⑦ Section 6: Essence -->
+    <div class="section span3">
+      <div class="section-head">
+        <span class="section-num" style="background:#0d1b2a;">6</span>
+        <span class="section-title">本質のまとめ</span>
+      </div>
+      <div class="essence">
+        <div class="essence-card e1">
+          <span class="essence-label">Agile</span>
+          <span class="essence-eq">=</span>
+          <span class="essence-text">意思決定の循環</span>
+        </div>
+        <div class="essence-card e2">
+          <span class="essence-label">Backlog</span>
+          <span class="essence-eq">=</span>
+          <span class="essence-text">未来の価値の優先順位</span>
+        </div>
+        <div class="essence-card e3">
+          <span class="essence-label">GitHub</span>
+          <span class="essence-eq">=</span>
+          <span class="essence-text">実行エンジン</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
