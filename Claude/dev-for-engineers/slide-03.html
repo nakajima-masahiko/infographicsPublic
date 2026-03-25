@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Slide 03 — Claudeとは何か</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap');
+    :root {
+      --coral: #da7756; --coral-light: #f0a080; --coral-dark: #b85a35;
+      --navy: #0a0f1e; --card-bg: #141d2b; --card-border: #243044;
+      --text-primary: #f0f4ff; --text-secondary: #8ea8c8; --text-muted: #506070;
+      --accent-blue: #4a9eff; --accent-purple: #a855f7; --accent-green: #22c55e;
+      --accent-teal: #14b8a6;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Noto Sans JP", sans-serif;
+      background: var(--navy); color: var(--text-primary);
+      min-height: 100vh; display: flex; flex-direction: column;
+    }
+    body::before {
+      content: ''; position: fixed; inset: 0;
+      background-image:
+        radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,0.4) 0%, transparent 100%),
+        radial-gradient(1px 1px at 80% 70%, rgba(255,255,255,0.3) 0%, transparent 100%),
+        radial-gradient(2px 2px at 60% 20%, rgba(168,85,247,0.3) 0%, transparent 100%);
+      pointer-events: none; z-index: 0;
+    }
+    .nav {
+      position: relative; z-index: 10;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 32px; border-bottom: 1px solid var(--card-border);
+      background: rgba(10,15,30,0.8); backdrop-filter: blur(8px);
+    }
+    .nav-index a { color: var(--coral); text-decoration: none; font-size: 13px; font-weight: 700; }
+    .nav-index a:hover { text-decoration: underline; }
+    .nav-progress { font-size: 12px; color: var(--text-muted); letter-spacing: 0.08em; }
+    .nav-arrows { display: flex; gap: 8px; }
+    .nav-btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 36px; height: 36px; border-radius: 8px;
+      border: 1px solid var(--card-border); background: var(--card-bg);
+      color: var(--text-secondary); text-decoration: none; font-size: 16px;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .nav-btn:hover { border-color: var(--coral); color: var(--coral); }
+
+    .slide {
+      position: relative; z-index: 1; flex: 1;
+      display: flex; align-items: center; justify-content: center;
+      padding: 40px 32px;
+    }
+    .slide-inner { max-width: 860px; width: 100%; }
+
+    .slide-label { font-size: 11px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent-purple); margin-bottom: 12px; }
+    .slide-title { font-size: clamp(24px, 4vw, 42px); font-weight: 900; line-height: 1.2; margin-bottom: 12px; }
+    .slide-sub { font-size: clamp(14px, 2vw, 16px); color: var(--text-secondary); line-height: 1.7; margin-bottom: 36px; }
+    .slide-sub strong { color: var(--coral-light); }
+
+    /* Before/After comparison */
+    .compare {
+      display: grid; grid-template-columns: 1fr auto 1fr; gap: 0;
+      align-items: stretch; margin-bottom: 32px;
+    }
+    .compare-side {
+      background: var(--card-bg); border: 1px solid var(--card-border);
+      border-radius: 12px; padding: 22px 24px;
+    }
+    .compare-side.before { border-color: rgba(255,80,80,0.25); }
+    .compare-side.after  { border-color: rgba(74,158,255,0.35); }
+    .compare-label {
+      font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; margin-bottom: 14px;
+    }
+    .compare-side.before .compare-label { color: #f87171; }
+    .compare-side.after  .compare-label { color: var(--accent-blue); }
+    .compare-item { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 10px; font-size: 13px; line-height: 1.5; }
+    .compare-item:last-child { margin-bottom: 0; }
+    .compare-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+    .compare-arrow {
+      display: flex; align-items: center; justify-content: center;
+      padding: 0 16px; font-size: 24px; color: var(--coral);
+    }
+
+    /* Role cards */
+    .role-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+    }
+    .role-card {
+      background: var(--card-bg); border: 1px solid var(--card-border);
+      border-radius: 12px; padding: 18px 20px; text-align: center;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .role-card:hover { border-color: var(--coral); transform: translateY(-2px); }
+    .role-icon { font-size: 28px; margin-bottom: 8px; }
+    .role-name { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+    .role-desc { font-size: 11px; color: var(--text-secondary); line-height: 1.5; }
+    .role-card .accent-line {
+      display: block; height: 2px; border-radius: 2px;
+      margin: 10px auto 0; width: 32px;
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-index"><a href="index.html">← 目次</a></div>
+    <div class="nav-progress">SLIDE 03 / 10</div>
+    <div class="nav-arrows">
+      <a href="slide-02.html" class="nav-btn">←</a>
+      <a href="slide-04.html" class="nav-btn">→</a>
+    </div>
+  </nav>
+
+  <main class="slide">
+    <div class="slide-inner">
+      <div class="slide-label">洞察 — Insight</div>
+      <h1 class="slide-title">Claudeとは何か</h1>
+      <p class="slide-sub">
+        「AIに質問する」という発想をリセットしよう。<br>
+        Claudeは<strong>役割を切り替えながら、あなたの開発に並走する存在</strong>だ。
+      </p>
+
+      <div class="compare">
+        <div class="compare-side before">
+          <div class="compare-label">❌ 古い認識</div>
+          <div class="compare-item"><span class="compare-icon">💬</span><span>チャットで質問するツール</span></div>
+          <div class="compare-item"><span class="compare-icon">📖</span><span>答えを教えてもらうだけ</span></div>
+          <div class="compare-item"><span class="compare-icon">🔌</span><span>開発フローの外に置くもの</span></div>
+          <div class="compare-item"><span class="compare-icon">⚠️</span><span>出力を信頼しすぎる</span></div>
+        </div>
+        <div class="compare-arrow">→</div>
+        <div class="compare-side after">
+          <div class="compare-label">✅ 正しい認識</div>
+          <div class="compare-item"><span class="compare-icon">🤝</span><span>一緒にコードを書くパートナー</span></div>
+          <div class="compare-item"><span class="compare-icon">🔄</span><span>反復しながら品質を上げる</span></div>
+          <div class="compare-item"><span class="compare-icon">⚙️</span><span>開発フローに組み込むもの</span></div>
+          <div class="compare-item"><span class="compare-icon">🧪</span><span>出力は必ずレビュー・検証する</span></div>
+        </div>
+      </div>
+
+      <div class="role-grid">
+        <div class="role-card">
+          <div class="role-icon">👨‍💻</div>
+          <div class="role-name">ペアプログラマー</div>
+          <div class="role-desc">コードを一緒に書き、即座にフィードバックをくれる</div>
+          <span class="accent-line" style="background: var(--accent-blue);"></span>
+        </div>
+        <div class="role-card">
+          <div class="role-icon">🔬</div>
+          <div class="role-name">デバッグ探偵</div>
+          <div class="role-desc">エラーの根本原因を論理的に追跡する</div>
+          <span class="accent-line" style="background: var(--coral);"></span>
+        </div>
+        <div class="role-card">
+          <div class="role-icon">📋</div>
+          <div class="role-name">コードレビュアー</div>
+          <div class="role-desc">品質・セキュリティ・可読性を多角的に評価</div>
+          <span class="accent-line" style="background: var(--accent-purple);"></span>
+        </div>
+        <div class="role-card">
+          <div class="role-icon">✍️</div>
+          <div class="role-name">ドキュメントライター</div>
+          <div class="role-desc">コードから自動でドキュメントを生成する</div>
+          <span class="accent-line" style="background: var(--accent-green);"></span>
+        </div>
+        <div class="role-card">
+          <div class="role-icon">🏗️</div>
+          <div class="role-name">設計アドバイザー</div>
+          <div class="role-desc">アーキテクチャや設計の壁打ち相手になる</div>
+          <span class="accent-line" style="background: var(--accent-teal);"></span>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    document.addEventListener('keydown', e => {
+      if (e.key === 'ArrowRight') location.href = 'slide-04.html';
+      if (e.key === 'ArrowLeft')  location.href = 'slide-02.html';
+    });
+  </script>
+</body>
+</html>

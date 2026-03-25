@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Slide 05 — コード生成・実装支援</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=JetBrains+Mono:wght@400;600&display=swap');
+    :root {
+      --coral: #da7756; --coral-light: #f0a080; --coral-dark: #b85a35;
+      --navy: #0a0f1e; --card-bg: #141d2b; --card-border: #243044;
+      --code-bg: #0d1520;
+      --text-primary: #f0f4ff; --text-secondary: #8ea8c8; --text-muted: #506070;
+      --accent-blue: #4a9eff; --accent-purple: #a855f7; --accent-green: #22c55e;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Noto Sans JP", sans-serif;
+      background: var(--navy); color: var(--text-primary);
+      min-height: 100vh; display: flex; flex-direction: column;
+    }
+    body::before {
+      content: ''; position: fixed; inset: 0;
+      background-image:
+        radial-gradient(1px 1px at 10% 80%, rgba(74,158,255,0.3) 0%, transparent 100%),
+        radial-gradient(1px 1px at 90% 20%, rgba(255,255,255,0.4) 0%, transparent 100%);
+      pointer-events: none; z-index: 0;
+    }
+    .nav {
+      position: relative; z-index: 10;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 32px; border-bottom: 1px solid var(--card-border);
+      background: rgba(10,15,30,0.8); backdrop-filter: blur(8px);
+    }
+    .nav-index a { color: var(--coral); text-decoration: none; font-size: 13px; font-weight: 700; }
+    .nav-index a:hover { text-decoration: underline; }
+    .nav-progress { font-size: 12px; color: var(--text-muted); letter-spacing: 0.08em; }
+    .nav-arrows { display: flex; gap: 8px; }
+    .nav-btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 36px; height: 36px; border-radius: 8px;
+      border: 1px solid var(--card-border); background: var(--card-bg);
+      color: var(--text-secondary); text-decoration: none; font-size: 16px;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .nav-btn:hover { border-color: var(--coral); color: var(--coral); }
+
+    .slide {
+      position: relative; z-index: 1; flex: 1;
+      display: flex; align-items: center; justify-content: center;
+      padding: 32px 32px;
+    }
+    .slide-inner { max-width: 900px; width: 100%; }
+
+    .slide-label { font-size: 11px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent-blue); margin-bottom: 12px; }
+    .slide-title { font-size: clamp(22px, 3.5vw, 36px); font-weight: 900; line-height: 1.2; margin-bottom: 8px; }
+    .slide-sub { font-size: 14px; color: var(--text-secondary); line-height: 1.7; margin-bottom: 28px; }
+
+    /* Two-column layout */
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+    @media (max-width: 680px) { .two-col { grid-template-columns: 1fr; } }
+
+    .col-card {
+      background: var(--card-bg); border: 1px solid var(--card-border);
+      border-radius: 12px; overflow: hidden;
+    }
+    .col-header {
+      padding: 10px 16px;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .col-header.prompt { background: rgba(218,119,86,0.12); color: var(--coral-light); border-bottom: 1px solid rgba(218,119,86,0.2); }
+    .col-header.output { background: rgba(74,158,255,0.1); color: #7dd3fc; border-bottom: 1px solid rgba(74,158,255,0.2); }
+    .col-body { padding: 14px 16px; }
+
+    /* Prompt text */
+    .prompt-text {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 12px; color: var(--coral-light);
+      line-height: 1.6; background: var(--code-bg);
+      border-radius: 8px; padding: 12px 14px;
+    }
+
+    /* Code block */
+    .code-block {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 11.5px; line-height: 1.65;
+      background: var(--code-bg); border-radius: 8px;
+      padding: 12px 14px; overflow-x: auto;
+    }
+    .kw { color: #c084fc; } /* keyword */
+    .fn { color: #7dd3fc; } /* function */
+    .str { color: #86efac; } /* string */
+    .cm { color: #506070; font-style: italic; } /* comment */
+    .ty { color: #fde68a; } /* type */
+    .nu { color: #f0a080; } /* number */
+
+    /* Tips */
+    .tips { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+    .tip {
+      background: var(--card-bg); border: 1px solid var(--card-border);
+      border-left: 3px solid var(--accent-blue);
+      border-radius: 8px; padding: 12px 14px;
+      font-size: 12px; line-height: 1.5;
+    }
+    .tip-title { font-weight: 700; margin-bottom: 4px; color: var(--text-primary); }
+    .tip-desc { color: var(--text-secondary); }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-index"><a href="index.html">← 目次</a></div>
+    <div class="nav-progress">SLIDE 05 / 10</div>
+    <div class="nav-arrows">
+      <a href="slide-04.html" class="nav-btn">←</a>
+      <a href="slide-06.html" class="nav-btn">→</a>
+    </div>
+  </nav>
+
+  <main class="slide">
+    <div class="slide-inner">
+      <div class="slide-label">ユースケース 01 — Code Generation</div>
+      <h1 class="slide-title">コード生成・実装支援</h1>
+      <p class="slide-sub">
+        「何を作りたいか」を伝えるだけで、動くコードの雛形を即座に生成。<br>
+        <strong style="color:var(--coral-light)">コンテキスト（言語・フレームワーク・既存コードの制約）を与えるほど精度が上がる。</strong>
+      </p>
+
+      <div class="two-col">
+        <div class="col-card">
+          <div class="col-header prompt">📝 プロンプト例</div>
+          <div class="col-body">
+            <div class="prompt-text">TypeScript + Express で、<br>JWT認証ミドルウェアを作って。<br>
+・アクセストークンは Authorization: Bearer<br>
+・期限切れは401、無効は403を返す<br>
+・ユーザー情報は req.user に格納</div>
+          </div>
+        </div>
+        <div class="col-card">
+          <div class="col-header output">✅ 生成されるコード（抜粋）</div>
+          <div class="col-body">
+            <div class="code-block"><span class="kw">import</span> { <span class="fn">Request</span>, <span class="fn">Response</span>, <span class="fn">NextFunction</span> } <span class="kw">from</span> <span class="str">'express'</span>;
+<span class="kw">import</span> * <span class="kw">as</span> jwt <span class="kw">from</span> <span class="str">'jsonwebtoken'</span>;
+
+<span class="kw">export const</span> <span class="fn">authMiddleware</span> = (
+  req: <span class="ty">Request</span>, res: <span class="ty">Response</span>, next: <span class="ty">NextFunction</span>
+) => {
+  <span class="kw">const</span> token = req.headers.authorization
+    ?.split(<span class="str">' '</span>)[<span class="nu">1</span>];
+  <span class="kw">if</span> (!token) <span class="kw">return</span> res.status(<span class="nu">401</span>).json({...});
+  <span class="kw">try</span> {
+    req.user = jwt.verify(token, process.env.JWT_SECRET);
+    next();
+  } <span class="kw">catch</span> (e) {
+    res.status(<span class="nu">403</span>).json({ error: <span class="str">'Invalid token'</span> });
+  }
+};</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tips">
+        <div class="tip">
+          <div class="tip-title">🎯 コンテキストを渡す</div>
+          <div class="tip-desc">言語・フレームワーク・既存コードの制約を最初に伝える</div>
+        </div>
+        <div class="tip">
+          <div class="tip-title">🔄 反復で精度を上げる</div>
+          <div class="tip-desc">「エラーハンドリングを追加して」「テストも書いて」と続けて依頼</div>
+        </div>
+        <div class="tip">
+          <div class="tip-title">🧪 必ず動作確認</div>
+          <div class="tip-desc">生成コードはそのままコピペせず、ロジックをレビューしてから使う</div>
+        </div>
+        <div class="tip">
+          <div class="tip-title">📁 既存コードを貼る</div>
+          <div class="tip-desc">「このコードに合わせて」と既存ファイルを貼ると一貫性が増す</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    document.addEventListener('keydown', e => {
+      if (e.key === 'ArrowRight') location.href = 'slide-06.html';
+      if (e.key === 'ArrowLeft')  location.href = 'slide-04.html';
+    });
+  </script>
+</body>
+</html>

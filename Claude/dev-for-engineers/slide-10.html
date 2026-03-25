@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Slide 10 — 今日から始める3ステップ</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap');
+    :root {
+      --coral: #da7756; --coral-light: #f0a080; --coral-dark: #b85a35;
+      --navy: #0a0f1e; --card-bg: #141d2b; --card-border: #243044;
+      --text-primary: #f0f4ff; --text-secondary: #8ea8c8; --text-muted: #506070;
+      --accent-blue: #4a9eff; --accent-purple: #a855f7;
+      --accent-green: #22c55e; --accent-yellow: #fbbf24;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Noto Sans JP", sans-serif;
+      background: var(--navy); color: var(--text-primary);
+      min-height: 100vh; display: flex; flex-direction: column;
+    }
+    body::before {
+      content: ''; position: fixed; inset: 0;
+      background-image:
+        radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,0.5) 0%, transparent 100%),
+        radial-gradient(1px 1px at 30% 60%, rgba(255,255,255,0.3) 0%, transparent 100%),
+        radial-gradient(1px 1px at 55% 15%, rgba(255,255,255,0.4) 0%, transparent 100%),
+        radial-gradient(1px 1px at 70% 70%, rgba(255,255,255,0.25) 0%, transparent 100%),
+        radial-gradient(1px 1px at 85% 35%, rgba(255,255,255,0.5) 0%, transparent 100%),
+        radial-gradient(2px 2px at 15% 50%, rgba(218,119,86,0.4) 0%, transparent 100%),
+        radial-gradient(2px 2px at 75% 25%, rgba(74,158,255,0.3) 0%, transparent 100%);
+      pointer-events: none; z-index: 0;
+    }
+    .nav {
+      position: relative; z-index: 10;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 32px; border-bottom: 1px solid var(--card-border);
+      background: rgba(10,15,30,0.8); backdrop-filter: blur(8px);
+    }
+    .nav-index a { color: var(--coral); text-decoration: none; font-size: 13px; font-weight: 700; }
+    .nav-index a:hover { text-decoration: underline; }
+    .nav-progress { font-size: 12px; color: var(--text-muted); letter-spacing: 0.08em; }
+    .nav-arrows { display: flex; gap: 8px; }
+    .nav-btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 36px; height: 36px; border-radius: 8px;
+      border: 1px solid var(--card-border); background: var(--card-bg);
+      color: var(--text-secondary); text-decoration: none; font-size: 16px;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .nav-btn:hover { border-color: var(--coral); color: var(--coral); }
+    .nav-btn.disabled { opacity: 0.3; pointer-events: none; }
+
+    .slide {
+      position: relative; z-index: 1; flex: 1;
+      display: flex; align-items: center; justify-content: center;
+      padding: 40px 32px;
+    }
+    .slide-inner { max-width: 860px; width: 100%; text-align: center; }
+
+    .slide-label { font-size: 11px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--coral); margin-bottom: 12px; }
+    .slide-title {
+      font-size: clamp(28px, 5vw, 52px); font-weight: 900;
+      line-height: 1.15; margin-bottom: 14px;
+      background: linear-gradient(135deg, #fff 0%, var(--coral-light) 55%, var(--coral) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .core-message {
+      font-size: clamp(14px, 2vw, 18px); color: var(--text-secondary);
+      line-height: 1.7; margin-bottom: 40px; max-width: 620px; margin-left: auto; margin-right: auto;
+    }
+    .core-message strong { color: var(--coral-light); }
+
+    /* 3 steps */
+    .steps { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 40px; }
+    .step {
+      background: var(--card-bg); border: 1px solid var(--card-border);
+      border-radius: 16px; padding: 24px 24px 20px;
+      text-align: center; flex: 1; min-width: 220px; max-width: 260px;
+      position: relative;
+    }
+    .step-num {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 40px; height: 40px; border-radius: 50%;
+      font-size: 18px; font-weight: 900;
+      margin: 0 auto 14px;
+    }
+    .s1 .step-num { background: rgba(74,158,255,0.2); color: var(--accent-blue); }
+    .s2 .step-num { background: rgba(218,119,86,0.2); color: var(--coral); }
+    .s3 .step-num { background: rgba(34,197,94,0.2); color: var(--accent-green); }
+
+    .step-title { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+    .step-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 12px; }
+    .step-action {
+      font-size: 12px; font-weight: 700; padding: 6px 14px;
+      border-radius: 100px; display: inline-block;
+    }
+    .s1 .step-action { background: rgba(74,158,255,0.15); color: #7dd3fc; }
+    .s2 .step-action { background: rgba(218,119,86,0.15); color: var(--coral-light); }
+    .s3 .step-action { background: rgba(34,197,94,0.15); color: #86efac; }
+
+    /* Takeaway */
+    .takeaway {
+      display: inline-block;
+      background: linear-gradient(135deg, rgba(218,119,86,0.2), rgba(218,119,86,0.05));
+      border: 1px solid rgba(218,119,86,0.35);
+      border-radius: 12px; padding: 18px 32px;
+      font-size: clamp(14px, 2vw, 17px); line-height: 1.6;
+      margin-bottom: 32px;
+    }
+    .takeaway strong { color: var(--coral-light); }
+
+    /* Back to index */
+    .nav-back {
+      display: inline-flex; align-items: center; gap: 8px;
+      border: 1px solid var(--card-border); border-radius: 100px;
+      padding: 10px 24px; color: var(--text-secondary);
+      text-decoration: none; font-size: 13px; font-weight: 700;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .nav-back:hover { border-color: var(--coral); color: var(--coral); }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-index"><a href="index.html">← 目次</a></div>
+    <div class="nav-progress">SLIDE 10 / 10</div>
+    <div class="nav-arrows">
+      <a href="slide-09.html" class="nav-btn">←</a>
+      <a class="nav-btn disabled" aria-disabled="true">→</a>
+    </div>
+  </nav>
+
+  <main class="slide">
+    <div class="slide-inner">
+      <div class="slide-label">テイクアウェイ — Takeaway</div>
+      <h1 class="slide-title">今日から始める3ステップ</h1>
+      <p class="core-message">
+        Claudeを試す障壁は低い。<br>
+        <strong>まず小さく始めて、実感してから広げる</strong>のが成功パターン。
+      </p>
+
+      <div class="steps">
+        <div class="step s1">
+          <div class="step-num">1</div>
+          <div class="step-title">今日：アカウント取得</div>
+          <div class="step-desc">Claude.ai にサインアップして、手元のバグやコードを1つ投げてみる</div>
+          <span class="step-action">claude.ai</span>
+        </div>
+        <div class="step s2">
+          <div class="step-num">2</div>
+          <div class="step-title">今週：実務で使う</div>
+          <div class="step-desc">コードレビュー・テスト作成・ドキュメントの1つをClaudeに任せてみる</div>
+          <span class="step-action">小さいタスクから</span>
+        </div>
+        <div class="step s3">
+          <div class="step-num">3</div>
+          <div class="step-title">今月：チームで共有</div>
+          <div class="step-desc">効果があった使い方をSlack・社内Wikiでチームにシェアする</div>
+          <span class="step-action">知見を広める</span>
+        </div>
+      </div>
+
+      <div class="takeaway">
+        「Claudeを使えるエンジニア」と「使えないエンジニア」の<br>
+        <strong>生産性の差は、これからますます広がる。</strong><br>
+        今日から1つ、試してみよう。
+      </div>
+
+      <a href="index.html" class="nav-back">← 目次に戻る</a>
+    </div>
+  </main>
+
+  <script>
+    document.addEventListener('keydown', e => {
+      if (e.key === 'ArrowLeft') location.href = 'slide-09.html';
+    });
+  </script>
+</body>
+</html>

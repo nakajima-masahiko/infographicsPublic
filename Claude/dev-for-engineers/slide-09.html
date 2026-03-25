@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Slide 09 — 効果を最大化するベストプラクティス</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=JetBrains+Mono:wght@400&display=swap');
+    :root {
+      --coral: #da7756; --coral-light: #f0a080; --coral-dark: #b85a35;
+      --navy: #0a0f1e; --card-bg: #141d2b; --card-border: #243044;
+      --text-primary: #f0f4ff; --text-secondary: #8ea8c8; --text-muted: #506070;
+      --accent-blue: #4a9eff; --accent-purple: #a855f7;
+      --accent-green: #22c55e; --accent-yellow: #fbbf24; --accent-teal: #14b8a6;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Noto Sans JP", sans-serif;
+      background: var(--navy); color: var(--text-primary);
+      min-height: 100vh; display: flex; flex-direction: column;
+    }
+    body::before {
+      content: ''; position: fixed; inset: 0;
+      background-image:
+        radial-gradient(2px 2px at 30% 80%, rgba(34,197,94,0.2) 0%, transparent 100%),
+        radial-gradient(1px 1px at 80% 15%, rgba(255,255,255,0.35) 0%, transparent 100%);
+      pointer-events: none; z-index: 0;
+    }
+    .nav {
+      position: relative; z-index: 10;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 32px; border-bottom: 1px solid var(--card-border);
+      background: rgba(10,15,30,0.8); backdrop-filter: blur(8px);
+    }
+    .nav-index a { color: var(--coral); text-decoration: none; font-size: 13px; font-weight: 700; }
+    .nav-index a:hover { text-decoration: underline; }
+    .nav-progress { font-size: 12px; color: var(--text-muted); letter-spacing: 0.08em; }
+    .nav-arrows { display: flex; gap: 8px; }
+    .nav-btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 36px; height: 36px; border-radius: 8px;
+      border: 1px solid var(--card-border); background: var(--card-bg);
+      color: var(--text-secondary); text-decoration: none; font-size: 16px;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .nav-btn:hover { border-color: var(--coral); color: var(--coral); }
+
+    .slide {
+      position: relative; z-index: 1; flex: 1;
+      display: flex; align-items: center; justify-content: center;
+      padding: 32px 32px;
+    }
+    .slide-inner { max-width: 900px; width: 100%; }
+
+    .slide-label { font-size: 11px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent-teal); margin-bottom: 12px; }
+    .slide-title { font-size: clamp(22px, 3.5vw, 36px); font-weight: 900; line-height: 1.2; margin-bottom: 8px; }
+    .slide-sub { font-size: 14px; color: var(--text-secondary); line-height: 1.7; margin-bottom: 28px; }
+
+    /* Three big principles */
+    .principle-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 16px; margin-bottom: 24px;
+    }
+    @media (max-width: 640px) { .principle-grid { grid-template-columns: 1fr; } }
+
+    .principle {
+      background: var(--card-bg); border: 1px solid var(--card-border);
+      border-radius: 16px; padding: 24px 20px; text-align: center;
+      position: relative; overflow: hidden;
+    }
+    .principle::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    }
+    .p1::before { background: linear-gradient(90deg, var(--accent-blue), var(--accent-teal)); }
+    .p2::before { background: linear-gradient(90deg, var(--coral), var(--coral-light)); }
+    .p3::before { background: linear-gradient(90deg, var(--accent-green), var(--accent-yellow)); }
+
+    .p-num { font-size: 36px; font-weight: 900; line-height: 1; margin-bottom: 8px; }
+    .p1 .p-num { color: var(--accent-blue); }
+    .p2 .p-num { color: var(--coral); }
+    .p3 .p-num { color: var(--accent-green); }
+
+    .p-title { font-size: 16px; font-weight: 900; margin-bottom: 8px; }
+    .p-desc { font-size: 12px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 12px; }
+
+    .p-dos { text-align: left; }
+    .p-do-item {
+      display: flex; gap: 6px; font-size: 11px;
+      color: var(--text-secondary); margin-bottom: 4px; align-items: flex-start;
+    }
+    .p-do-item .ok { color: var(--accent-green); flex-shrink: 0; }
+    .p-do-item .ng { color: #f87171; flex-shrink: 0; }
+
+    /* Anti-patterns */
+    .anti-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    @media (max-width: 500px) { .anti-grid { grid-template-columns: 1fr; } }
+    .anti-card {
+      background: rgba(248,113,113,0.06); border: 1px solid rgba(248,113,113,0.2);
+      border-radius: 10px; padding: 12px 14px;
+      display: flex; gap: 10px; align-items: flex-start;
+    }
+    .anti-icon { font-size: 16px; flex-shrink: 0; }
+    .anti-title { font-size: 12px; font-weight: 700; margin-bottom: 2px; color: #fca5a5; }
+    .anti-desc { font-size: 11px; color: var(--text-secondary); line-height: 1.4; }
+    .anti-fix { font-size: 11px; color: var(--accent-green); margin-top: 4px; }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-index"><a href="index.html">← 目次</a></div>
+    <div class="nav-progress">SLIDE 09 / 10</div>
+    <div class="nav-arrows">
+      <a href="slide-08.html" class="nav-btn">←</a>
+      <a href="slide-10.html" class="nav-btn">→</a>
+    </div>
+  </nav>
+
+  <main class="slide">
+    <div class="slide-inner">
+      <div class="slide-label">品質向上 — Best Practices</div>
+      <h1 class="slide-title">効果を最大化するベストプラクティス</h1>
+      <p class="slide-sub">
+        Claudeの出力品質は「<strong style="color:var(--coral-light)">どう伝えるか</strong>」で大きく変わる。3つの原則を守るだけで精度が劇的に向上する。
+      </p>
+
+      <div class="principle-grid">
+        <div class="principle p1">
+          <div class="p-num">01</div>
+          <div class="p-title">コンテキストを豊かに</div>
+          <div class="p-desc">背景情報が多いほど、的外れな回答が減る</div>
+          <div class="p-dos">
+            <div class="p-do-item"><span class="ok">✓</span>言語・FW・バージョンを明示</div>
+            <div class="p-do-item"><span class="ok">✓</span>「なぜ作るか」の目的を伝える</div>
+            <div class="p-do-item"><span class="ok">✓</span>既存コードを貼り付ける</div>
+            <div class="p-do-item"><span class="ng">✗</span>「コード書いて」だけではNG</div>
+          </div>
+        </div>
+        <div class="principle p2">
+          <div class="p-num">02</div>
+          <div class="p-title">反復して精度を上げる</div>
+          <div class="p-desc">1回で完成を求めず、会話で磨き上げる</div>
+          <div class="p-dos">
+            <div class="p-do-item"><span class="ok">✓</span>「〇〇を追加して」と続ける</div>
+            <div class="p-do-item"><span class="ok">✓</span>「ここが違う。〇〇にして」と修正</div>
+            <div class="p-do-item"><span class="ok">✓</span>出力の一部だけ修正依頼OK</div>
+            <div class="p-do-item"><span class="ng">✗</span>1プロンプトで完璧を求めない</div>
+          </div>
+        </div>
+        <div class="principle p3">
+          <div class="p-num">03</div>
+          <div class="p-title">出力は必ず検証する</div>
+          <div class="p-desc">Claudeは間違える。レビューが品質の砦</div>
+          <div class="p-dos">
+            <div class="p-do-item"><span class="ok">✓</span>ロジックを自分の目で確認</div>
+            <div class="p-do-item"><span class="ok">✓</span>テストを実行して動作確認</div>
+            <div class="p-do-item"><span class="ok">✓</span>セキュリティは特に慎重に</div>
+            <div class="p-do-item"><span class="ng">✗</span>コピペしてそのまま本番は危険</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="anti-grid">
+        <div class="anti-card">
+          <span class="anti-icon">⚠️</span>
+          <div>
+            <div class="anti-title">過信は禁物</div>
+            <div class="anti-desc">Claudeは自信を持って間違えることがある</div>
+            <div class="anti-fix">→ 重要な事実は必ず一次情報で確認</div>
+          </div>
+        </div>
+        <div class="anti-card">
+          <span class="anti-icon">🔒</span>
+          <div>
+            <div class="anti-title">機密情報は貼らない</div>
+            <div class="anti-desc">APIキー・個人情報・社外秘コードは送信しない</div>
+            <div class="anti-fix">→ ダミーデータや抽象化してから共有</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    document.addEventListener('keydown', e => {
+      if (e.key === 'ArrowRight') location.href = 'slide-10.html';
+      if (e.key === 'ArrowLeft')  location.href = 'slide-08.html';
+    });
+  </script>
+</body>
+</html>
