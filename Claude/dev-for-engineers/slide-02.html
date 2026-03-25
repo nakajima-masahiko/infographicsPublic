@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Slide 02 — あなたの開発時間、本当に使えていますか？</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap');
+    :root {
+      --coral: #da7756; --coral-light: #f0a080; --coral-dark: #b85a35;
+      --navy: #0a0f1e; --card-bg: #141d2b; --card-border: #243044;
+      --text-primary: #f0f4ff; --text-secondary: #8ea8c8; --text-muted: #506070;
+      --accent-blue: #4a9eff; --accent-purple: #a855f7; --accent-green: #22c55e;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Noto Sans JP", sans-serif;
+      background: var(--navy); color: var(--text-primary);
+      min-height: 100vh; display: flex; flex-direction: column;
+    }
+    body::before {
+      content: ''; position: fixed; inset: 0;
+      background-image:
+        radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,0.5) 0%, transparent 100%),
+        radial-gradient(1px 1px at 30% 60%, rgba(255,255,255,0.3) 0%, transparent 100%),
+        radial-gradient(1px 1px at 75% 25%, rgba(74,158,255,0.3) 0%, transparent 100%);
+      pointer-events: none; z-index: 0;
+    }
+    .nav {
+      position: relative; z-index: 10;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 32px; border-bottom: 1px solid var(--card-border);
+      background: rgba(10,15,30,0.8); backdrop-filter: blur(8px);
+    }
+    .nav-index a { color: var(--coral); text-decoration: none; font-size: 13px; font-weight: 700; }
+    .nav-index a:hover { text-decoration: underline; }
+    .nav-progress { font-size: 12px; color: var(--text-muted); letter-spacing: 0.08em; }
+    .nav-arrows { display: flex; gap: 8px; }
+    .nav-btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 36px; height: 36px; border-radius: 8px;
+      border: 1px solid var(--card-border); background: var(--card-bg);
+      color: var(--text-secondary); text-decoration: none; font-size: 16px;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .nav-btn:hover { border-color: var(--coral); color: var(--coral); }
+
+    .slide {
+      position: relative; z-index: 1; flex: 1;
+      display: flex; align-items: center; justify-content: center;
+      padding: 40px 32px;
+    }
+    .slide-inner { max-width: 860px; width: 100%; }
+
+    .slide-label {
+      font-size: 11px; font-weight: 700; letter-spacing: 0.18em;
+      text-transform: uppercase; color: var(--coral); margin-bottom: 12px;
+    }
+    .slide-title {
+      font-size: clamp(24px, 4vw, 42px); font-weight: 900;
+      line-height: 1.2; margin-bottom: 12px;
+    }
+    .slide-hook {
+      font-size: clamp(14px, 2vw, 17px); color: var(--text-secondary);
+      line-height: 1.7; margin-bottom: 40px;
+    }
+    .slide-hook strong { color: var(--coral-light); }
+
+    /* Big number highlight */
+    .highlight-box {
+      background: linear-gradient(135deg, rgba(218,119,86,0.15), rgba(218,119,86,0.05));
+      border: 1px solid rgba(218,119,86,0.3);
+      border-radius: 16px; padding: 28px 32px;
+      text-align: center; margin-bottom: 32px;
+    }
+    .highlight-num {
+      font-size: clamp(56px, 10vw, 88px); font-weight: 900;
+      color: var(--coral); line-height: 1;
+    }
+    .highlight-desc {
+      font-size: clamp(14px, 2vw, 18px); color: var(--text-secondary);
+      margin-top: 8px; line-height: 1.5;
+    }
+    .highlight-desc strong { color: var(--text-primary); }
+
+    /* Time breakdown bar */
+    .time-breakdown { margin-bottom: 32px; }
+    .time-breakdown-label {
+      font-size: 12px; color: var(--text-muted); margin-bottom: 12px;
+      letter-spacing: 0.06em;
+    }
+    .bar-track {
+      height: 36px; border-radius: 8px; overflow: hidden;
+      display: flex; background: var(--card-bg);
+      border: 1px solid var(--card-border);
+    }
+    .bar-seg {
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700;
+    }
+    .bar-seg-label { margin-top: 6px; font-size: 11px; color: var(--text-muted); }
+    .bar-wrap { display: flex; gap: 0; }
+    .bar-legend {
+      display: flex; gap: 20px; flex-wrap: wrap; margin-top: 10px;
+    }
+    .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-secondary); }
+    .legend-dot { width: 10px; height: 10px; border-radius: 2px; }
+
+    /* Pain points */
+    .pain-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+    }
+    .pain-card {
+      background: var(--card-bg); border: 1px solid var(--card-border);
+      border-radius: 12px; padding: 18px 20px;
+    }
+    .pain-icon { font-size: 22px; margin-bottom: 8px; display: block; }
+    .pain-title { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+    .pain-desc { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-index"><a href="index.html">← 目次</a></div>
+    <div class="nav-progress">SLIDE 02 / 10</div>
+    <div class="nav-arrows">
+      <a href="slide-01.html" class="nav-btn">←</a>
+      <a href="slide-03.html" class="nav-btn">→</a>
+    </div>
+  </nav>
+
+  <main class="slide">
+    <div class="slide-inner">
+      <div class="slide-label">フック — Hook</div>
+      <h1 class="slide-title">あなたの開発時間、<br>本当に使えていますか？</h1>
+      <p class="slide-hook">
+        エンジニアが「コードを書く時間」は、実は開発時間全体の半分以下。<br>
+        残りは<strong>調査・デバッグ・レビュー・ドキュメント</strong>に消えている。
+      </p>
+
+      <div class="highlight-box">
+        <div class="highlight-num">45%</div>
+        <div class="highlight-desc">
+          開発者の時間のうち<strong>約45%</strong>は、<br>
+          本質的なコーディング以外の作業に費やされている
+        </div>
+      </div>
+
+      <div class="time-breakdown">
+        <div class="time-breakdown-label">開発時間の内訳（概算）</div>
+        <div class="bar-track">
+          <div class="bar-seg" style="width:55%; background: linear-gradient(90deg,#4a9eff,#7dd3fc); color:#0a0f1e;">コーディング 55%</div>
+          <div class="bar-seg" style="width:20%; background: rgba(218,119,86,0.7); color:#fff;">デバッグ 20%</div>
+          <div class="bar-seg" style="width:15%; background: rgba(168,85,247,0.7); color:#fff;">レビュー 15%</div>
+          <div class="bar-seg" style="width:10%; background: rgba(34,197,94,0.6); color:#0a0f1e; font-size:10px;">Doc 10%</div>
+        </div>
+        <div class="bar-legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#4a9eff;"></div>コーディング</div>
+          <div class="legend-item"><div class="legend-dot" style="background:rgba(218,119,86,0.8);"></div>デバッグ</div>
+          <div class="legend-item"><div class="legend-dot" style="background:rgba(168,85,247,0.8);"></div>コードレビュー</div>
+          <div class="legend-item"><div class="legend-dot" style="background:rgba(34,197,94,0.7);"></div>ドキュメント</div>
+        </div>
+      </div>
+
+      <div class="pain-grid">
+        <div class="pain-card">
+          <span class="pain-icon">🔁</span>
+          <div class="pain-title">繰り返し作業</div>
+          <div class="pain-desc">ボイラープレート・型定義・テストコードを毎回手書き</div>
+        </div>
+        <div class="pain-card">
+          <span class="pain-icon">🔎</span>
+          <div class="pain-title">デバッグの長期化</div>
+          <div class="pain-desc">エラーの原因調査にドキュメントを延々と読む</div>
+        </div>
+        <div class="pain-card">
+          <span class="pain-icon">📝</span>
+          <div class="pain-title">ドキュメント後回し</div>
+          <div class="pain-desc">「後でやろう」が積み重なって技術的負債になる</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    document.addEventListener('keydown', e => {
+      if (e.key === 'ArrowRight') location.href = 'slide-03.html';
+      if (e.key === 'ArrowLeft')  location.href = 'slide-01.html';
+    });
+  </script>
+</body>
+</html>
