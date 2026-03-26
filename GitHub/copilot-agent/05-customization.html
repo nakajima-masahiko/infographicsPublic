@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>カスタマイズ全解説 — GitHub Copilot 完全ガイド</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: linear-gradient(135deg, #0d1117 0%, #001a2e 60%, #0c4a6e 100%);
+      color: #1b1f2a;
+      min-height: 100vh;
+    }
+    .wrap {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 36px 20px 60px;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: rgba(255,255,255,0.7);
+      text-decoration: none;
+      font-size: 14px;
+      margin-bottom: 24px;
+      transition: color 0.2s;
+    }
+    .back-link:hover { color: #fff; }
+
+    header {
+      text-align: center;
+      margin-bottom: 32px;
+      color: #fff;
+    }
+    .page-badge {
+      display: inline-block;
+      background: rgba(8,145,178,0.25);
+      border: 1px solid rgba(34,211,238,0.4);
+      border-radius: 100px;
+      padding: 5px 16px;
+      font-size: 12px;
+      color: #67e8f9;
+      margin-bottom: 14px;
+      font-weight: 600;
+    }
+    header h1 { font-size: 30px; margin: 0 0 10px; line-height: 1.3; }
+    header p { color: rgba(255,255,255,0.75); font-size: 15px; margin: 0; }
+
+    .card {
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      padding: 36px;
+      margin-bottom: 24px;
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 2px solid #e5e7eb;
+    }
+    .card-icon {
+      width: 44px; height: 44px;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      background: linear-gradient(135deg, #0c4a6e, #0891b2);
+      flex-shrink: 0;
+    }
+    .card-header h2 { font-size: 20px; font-weight: 700; color: #1f2937; margin: 0; }
+
+    /* Method card */
+    .method {
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+      padding: 22px;
+      margin-bottom: 16px;
+      border-left: 5px solid;
+    }
+    .method.blue   { border-left-color: #0891b2; }
+    .method.indigo { border-left-color: #4f46e5; }
+    .method.green  { border-left-color: #16a34a; }
+    .method.orange { border-left-color: #ea580c; }
+    .method-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #1f2937;
+      margin: 0 0 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .method-path {
+      font-family: monospace;
+      font-size: 13px;
+      color: #6b7280;
+      background: #f3f4f6;
+      border-radius: 6px;
+      padding: 3px 10px;
+      display: inline-block;
+      margin-bottom: 12px;
+    }
+    .method-desc { font-size: 14px; color: #374151; line-height: 1.7; margin: 0 0 14px; }
+
+    /* Code block */
+    .code-block {
+      background: #0d1117;
+      border-radius: 10px;
+      padding: 16px 18px;
+      font-family: monospace;
+      font-size: 12.5px;
+      color: #c9d1d9;
+      line-height: 1.7;
+      overflow-x: auto;
+      margin-bottom: 0;
+    }
+    .code-block .comment { color: #8b949e; }
+    .code-block .key     { color: #79c0ff; }
+    .code-block .str     { color: #a5d6ff; }
+    .code-block .green   { color: #56d364; }
+    .code-block .yellow  { color: #e3b341; }
+
+    /* Priority system */
+    .priority-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .priority-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 12px 16px;
+    }
+    .priority-rank {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+    .priority-rank.p1 { background: #fef3c7; color: #92400e; }
+    .priority-rank.p2 { background: #ede9fe; color: #5b21b6; }
+    .priority-rank.p3 { background: #dbeafe; color: #1e40af; }
+    .priority-name  { font-size: 14px; font-weight: 700; color: #1f2937; margin: 0 0 2px; }
+    .priority-where { font-size: 12px; color: #6b7280; margin: 0; }
+    .priority-note  { font-size: 12px; color: #9ca3af; margin-left: auto; }
+
+    /* Custom agents */
+    .agent-anatomy {
+      background: #0d1117;
+      border-radius: 14px;
+      padding: 22px;
+    }
+    .agent-section {
+      margin-bottom: 16px;
+    }
+    .agent-section:last-child { margin-bottom: 0; }
+    .agent-section-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #8b949e;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin: 0 0 8px;
+    }
+    .agent-section-content {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-family: monospace;
+      font-size: 12.5px;
+      color: #c9d1d9;
+      line-height: 1.7;
+    }
+    .agent-section-content .comment { color: #8b949e; }
+    .agent-section-content .key     { color: #79c0ff; }
+    .agent-section-content .str     { color: #a5d6ff; }
+    .agent-section-content .green   { color: #56d364; }
+
+    /* Skills & Hooks */
+    .sh-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+    @media (max-width: 600px) { .sh-grid { grid-template-columns: 1fr; } }
+    .sh-card {
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+      padding: 20px;
+    }
+    .sh-card.skills { border-top: 4px solid #0891b2; }
+    .sh-card.hooks  { border-top: 4px solid #16a34a; }
+    .sh-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #1f2937;
+      margin: 0 0 6px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .sh-path {
+      font-family: monospace;
+      font-size: 12px;
+      color: #6b7280;
+      background: #f3f4f6;
+      border-radius: 4px;
+      padding: 2px 8px;
+      display: inline-block;
+      margin-bottom: 12px;
+    }
+    .sh-desc { font-size: 13px; color: #374151; line-height: 1.6; margin: 0 0 12px; }
+    .sh-items { list-style: none; margin: 0; padding: 0; }
+    .sh-items li {
+      font-size: 13px;
+      color: #6b7280;
+      padding: 3px 0;
+      display: flex; align-items: flex-start; gap: 8px;
+    }
+    .sh-items li::before { content: '▸'; flex-shrink: 0; }
+    .sh-card.skills .sh-items li::before { color: #0891b2; }
+    .sh-card.hooks  .sh-items li::before { color: #16a34a; }
+
+    /* Nav */
+    .nav-bottom {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 8px;
+    }
+    .nav-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 10px 18px;
+      font-size: 14px;
+      color: #374151;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .nav-btn:hover { border-color: #0891b2; color: #0c4a6e; background: #ecfeff; }
+
+    footer {
+      text-align: center;
+      margin-top: 32px;
+      color: rgba(255,255,255,0.5);
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <a href="index.html" class="back-link">← Copilot Agent ガイド一覧に戻る</a>
+
+    <header>
+      <div class="page-badge">05 / 06 — カスタマイズ</div>
+      <h1>カスタマイズ全解説</h1>
+      <p>カスタム指示 / Custom Agents / セットアップステップ / Agent Skills / Hooks</p>
+    </header>
+
+    <!-- カスタム指示 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">📝</div>
+        <h2>カスタム指示（Custom Instructions）</h2>
+      </div>
+
+      <div class="method blue">
+        <p class="method-title">📄 リポジトリ共通指示</p>
+        <span class="method-path">.github/copilot-instructions.md</span>
+        <p class="method-desc">
+          リポジトリ内のすべての Copilot リクエストに適用されます。プロジェクトの概要・ビルド/テスト/リントコマンド・
+          コーディング規約・命名規則などを記載してください。
+          すべての Copilot プランで利用可能です。
+        </p>
+        <div class="code-block">
+<span class="comment"># プロジェクト概要</span><br>
+このプロジェクトは TypeScript + React 製のダッシュボードアプリです。<br><br>
+<span class="comment"># 開発コマンド</span><br>
+<span class="green">- ビルド:</span> <span class="str">npm run build</span><br>
+<span class="green">- テスト:</span> <span class="str">npm test -- --coverage</span><br>
+<span class="green">- リント:</span> <span class="str">npm run lint</span><br><br>
+<span class="comment"># 規約</span><br>
+<span class="green">- コンポーネント名:</span> PascalCase<br>
+<span class="green">- 関数名:</span> camelCase<br>
+<span class="green">- 型は必ず明示的に定義すること</span>
+        </div>
+      </div>
+
+      <div class="method indigo">
+        <p class="method-title">🗂️ パス別指示ファイル</p>
+        <span class="method-path">.github/instructions/*.instructions.md</span>
+        <p class="method-desc">
+          特定のファイルパスやディレクトリに対してのみ適用される指示ファイル。
+          YAML フロントマターで適用対象を指定します。
+          <code>excludeAgent: "coding-agent"</code> を指定すると Coding Agent からは除外されます。
+        </p>
+        <div class="code-block">
+<span class="comment">---</span><br>
+<span class="key">applyTo</span>: <span class="str">"app/models/**/*.rb"</span><br>
+<span class="comment">---</span><br><br>
+<span class="comment"># Rails モデル規約</span><br>
+- バリデーションは必ず書くこと<br>
+- スコープは named scope で定義すること<br>
+- N+1 問題に注意し includes を適切に使用すること
+        </div>
+      </div>
+
+      <!-- 優先順位 -->
+      <p style="font-size:14px;font-weight:700;color:#1f2937;margin:20px 0 12px;">指示の優先順位（高い順）</p>
+      <div class="priority-list">
+        <div class="priority-item">
+          <div class="priority-rank p1">1</div>
+          <div>
+            <p class="priority-name">個人設定</p>
+            <p class="priority-where">VS Code / JetBrains の個人設定</p>
+          </div>
+          <span class="priority-note">最優先</span>
+        </div>
+        <div class="priority-item">
+          <div class="priority-rank p2">2</div>
+          <div>
+            <p class="priority-name">リポジトリ指示</p>
+            <p class="priority-where">.github/copilot-instructions.md / .github/instructions/</p>
+          </div>
+          <span class="priority-note">通常はここで管理</span>
+        </div>
+        <div class="priority-item">
+          <div class="priority-rank p3">3</div>
+          <div>
+            <p class="priority-name">Organization 指示</p>
+            <p class="priority-where">{org}/.github リポジトリ内の指示</p>
+          </div>
+          <span class="priority-note">組織共通設定</span>
+        </div>
+      </div>
+      <p style="font-size:12px;color:#9ca3af;margin:10px 0 0;">
+        ※ すべての指示は Copilot に提供されます。優先順位は競合時の解決順です。
+      </p>
+    </div>
+
+    <!-- 環境セットアップ -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">🛠️</div>
+        <h2>環境セットアップ（copilot-setup-steps.yml）</h2>
+      </div>
+      <div class="method green">
+        <p class="method-title">⚙️ 事前環境構築ワークフロー</p>
+        <span class="method-path">.github/workflows/copilot-setup-steps.yml</span>
+        <p class="method-desc">
+          Copilot がタスクを開始する前に実行されるセットアップステップを定義する GitHub Actions ワークフローファイルです。
+          依存関係のインストールや言語ランタイムのセットアップに使用します。
+          ファイルへの変更は Actions タブから通常のワークフローとして検証できます。
+        </p>
+        <div class="code-block">
+<span class="key">name</span>: <span class="str">Copilot Setup Steps</span><br>
+<span class="key">on</span>: workflow_dispatch<br><br>
+<span class="key">jobs</span>:<br>
+&nbsp;&nbsp;<span class="key">copilot-setup-steps</span>:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">runs-on</span>: <span class="str">ubuntu-latest</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">steps</span>:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># Node.js のセットアップ</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="key">uses</span>: <span class="str">actions/setup-node@v4</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">with</span>:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">node-version</span>: <span class="str">'20'</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># 依存関係のインストール</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="key">name</span>: <span class="str">Install dependencies</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">run</span>: <span class="str">npm ci</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Custom Agents -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">🤖</div>
+        <h2>Custom Agents（カスタムエージェント）</h2>
+      </div>
+      <p style="font-size:14px;color:#374151;margin:0 0 16px;line-height:1.7;">
+        特定タスクに特化した Copilot の専門家バージョンを作成できます。
+        Markdown ファイルとして <code>.github/agents/</code> ディレクトリに保存します。
+        最大 <strong>30,000文字</strong>のプロンプトで動作を定義可能です。
+      </p>
+      <div class="agent-anatomy">
+        <div class="agent-section">
+          <p class="agent-section-title">YAML フロントマター（設定）</p>
+          <div class="agent-section-content">
+<span class="comment">---</span><br>
+<span class="key">name</span>: <span class="str">"frontend-specialist"</span><br>
+<span class="key">description</span>: <span class="str">"Tailwind CSS と TypeScript を使ったフロントエンド専門家"</span><br>
+<span class="key">tools</span>: [<span class="str">"read_file"</span>, <span class="str">"write_file"</span>, <span class="str">"run_command"</span>]<br>
+<span class="key">mcp-servers</span>:<br>
+&nbsp;&nbsp;<span class="key">playwright</span>:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">command</span>: <span class="str">"npx"</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">args</span>: [<span class="str">"@playwright/mcp@latest"</span>]<br>
+<span class="comment">---</span>
+          </div>
+        </div>
+        <div class="agent-section">
+          <p class="agent-section-title">Markdown 本文（エージェントの指示・ペルソナ）</p>
+          <div class="agent-section-content">
+あなたはフロントエンドエンジニアの専門家です。<br><br>
+<span class="comment"># 専門スキル</span><br>
+- React + TypeScript でのコンポーネント設計<br>
+- Tailwind CSS を使ったレスポンシブデザイン<br>
+- Playwright を使った E2E テスト<br><br>
+<span class="comment"># 作業規約</span><br>
+- コンポーネントは必ず単一責任の原則を守ること<br>
+- カラーはデザイントークン変数のみ使用すること
+          </div>
+        </div>
+      </div>
+      <p style="font-size:12px;color:#6b7280;margin:12px 0 0;line-height:1.6;">
+        <strong>保存場所:</strong> リポジトリ個別 → <code>.github/agents/</code> ／ 組織共通 → <code>{org}/.github/agents/</code> または <code>{org}/.github-private/agents/</code>
+      </p>
+    </div>
+
+    <!-- Skills & Hooks -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">🔧</div>
+        <h2>Agent Skills と Hooks</h2>
+      </div>
+      <div class="sh-grid">
+        <div class="sh-card skills">
+          <p class="sh-title">🎯 Agent Skills</p>
+          <span class="sh-path">SKILL.md + 関連ファイル</span>
+          <p class="sh-desc">
+            Copilot が特定タスクで参照する指示・スクリプト・リソースのフォルダ。
+            関連タスクが来たときに自動で読み込まれ、専門知識として活用されます。
+          </p>
+          <ul class="sh-items">
+            <li>SKILL.md に手順・ノウハウを記述</li>
+            <li>補助的な Markdown やスクリプトを参照</li>
+            <li>リポジトリ内またはホームディレクトリに配置</li>
+            <li>適切なタスクで自動的にロード</li>
+          </ul>
+        </div>
+        <div class="sh-card hooks">
+          <p class="sh-title">🪝 Hooks</p>
+          <span class="sh-path">エージェント実行イベント時</span>
+          <p class="sh-desc">
+            エージェント実行の特定ポイントでカスタムシェルコマンドを実行できる仕組み。
+            バリデーション・ログ・セキュリティスキャン・ワークフロー自動化に活用します。
+          </p>
+          <ul class="sh-items">
+            <li>実行開始時フック</li>
+            <li>コミット前フック</li>
+            <li>ツール呼び出し後フック</li>
+            <li>カスタムバリデーション追加</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Nav -->
+    <div class="nav-bottom">
+      <a href="04-mcp.html" class="nav-btn">← MCP 統合</a>
+      <a href="06-security.html" class="nav-btn">セキュリティ →</a>
+    </div>
+
+    <footer>
+      <p>情報源: GitHub Docs / GitHub Blog（2025–2026）</p>
+    </footer>
+  </div>
+</body>
+</html>

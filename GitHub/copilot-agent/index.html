@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GitHub Copilot Coding Agent 完全ガイド</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: linear-gradient(135deg, #0d1117 0%, #24292e 60%, #1a237e 100%);
+      color: #1b1f2a;
+      min-height: 100vh;
+    }
+    .wrap {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 40px 20px 60px;
+    }
+
+    /* Back link */
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: rgba(255,255,255,0.7);
+      text-decoration: none;
+      font-size: 14px;
+      margin-bottom: 28px;
+      transition: color 0.2s;
+    }
+    .back-link:hover { color: #fff; }
+
+    /* Hero */
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+      color: #ffffff;
+    }
+    .hero-badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 100px;
+      padding: 6px 18px;
+      font-size: 13px;
+      color: rgba(255,255,255,0.85);
+      margin-bottom: 16px;
+    }
+    header h1 {
+      font-size: 34px;
+      margin: 0 0 14px;
+      text-shadow: 0 2px 16px rgba(0,0,0,0.4);
+      line-height: 1.3;
+    }
+    .gradient-text {
+      background: linear-gradient(90deg, #58a6ff, #79c0ff, #a8d8ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    header p {
+      margin: 0;
+      color: rgba(255,255,255,0.8);
+      font-size: 15px;
+      line-height: 1.7;
+    }
+
+    /* Stats strip */
+    .stats {
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      flex-wrap: wrap;
+      margin: 28px 0 0;
+    }
+    .stat {
+      text-align: center;
+    }
+    .stat-num {
+      font-size: 28px;
+      font-weight: 800;
+      color: #58a6ff;
+      line-height: 1;
+    }
+    .stat-label {
+      font-size: 12px;
+      color: rgba(255,255,255,0.6);
+      margin-top: 4px;
+    }
+
+    /* Main container */
+    .main-container {
+      background: #ffffff;
+      border-radius: 24px;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.35);
+      padding: 40px;
+    }
+
+    /* Section intro */
+    .section-intro {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 28px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid #e5e7eb;
+    }
+    .section-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #24292e, #586069);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+    .section-intro h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #1f2937;
+      margin: 0 0 4px;
+    }
+    .section-intro p {
+      font-size: 14px;
+      color: #6b7280;
+      margin: 0;
+    }
+
+    /* Cards grid */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 18px;
+      margin-bottom: 36px;
+    }
+    .card {
+      display: block;
+      text-decoration: none;
+      color: inherit;
+      border-radius: 16px;
+      border: 1px solid #e5e7eb;
+      padding: 24px;
+      background: #f9fafb;
+      transition: all 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 4px;
+      border-radius: 16px 16px 0 0;
+    }
+    .card.blue::before   { background: linear-gradient(90deg, #0366d6, #58a6ff); }
+    .card.green::before  { background: linear-gradient(90deg, #28a745, #56d364); }
+    .card.purple::before { background: linear-gradient(90deg, #6f42c1, #a78bfa); }
+    .card.orange::before { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+    .card.teal::before   { background: linear-gradient(90deg, #0891b2, #22d3ee); }
+    .card.red::before    { background: linear-gradient(90deg, #dc2626, #f87171); }
+    .card:hover {
+      background: #f0f4ff;
+      border-color: #58a6ff;
+      transform: translateY(-3px);
+      box-shadow: 0 10px 28px rgba(88,166,255,0.18);
+    }
+    .card-num {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: #9ca3af;
+      text-transform: uppercase;
+      margin: 0 0 10px;
+    }
+    .card-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: #1f2937;
+      margin: 0 0 8px;
+      line-height: 1.4;
+    }
+    .card-desc {
+      font-size: 13px;
+      color: #6b7280;
+      margin: 0 0 14px;
+      line-height: 1.6;
+    }
+    .card-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .tag {
+      font-size: 11px;
+      padding: 3px 10px;
+      border-radius: 100px;
+      background: #e5e7eb;
+      color: #374151;
+      font-weight: 500;
+    }
+    .card-arrow {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      font-size: 18px;
+      color: #d1d5db;
+      transition: color 0.2s, transform 0.2s;
+    }
+    .card:hover .card-arrow {
+      color: #58a6ff;
+      transform: translateX(4px);
+    }
+
+    /* What is section */
+    .what-is {
+      background: linear-gradient(135deg, #f0f7ff 0%, #e8f4ff 100%);
+      border: 1px solid #bfdbfe;
+      border-radius: 16px;
+      padding: 28px;
+      margin-bottom: 28px;
+    }
+    .what-is h3 {
+      font-size: 16px;
+      font-weight: 700;
+      color: #1e40af;
+      margin: 0 0 12px;
+    }
+    .what-is p {
+      font-size: 14px;
+      color: #1e3a8a;
+      line-height: 1.75;
+      margin: 0;
+    }
+
+    /* Source */
+    .source-note {
+      text-align: center;
+      font-size: 12px;
+      color: #9ca3af;
+      margin-top: 28px;
+      padding-top: 20px;
+      border-top: 1px solid #e5e7eb;
+    }
+    .source-note a {
+      color: #6b7280;
+      text-decoration: none;
+    }
+    .source-note a:hover { color: #374151; }
+
+    footer {
+      text-align: center;
+      margin-top: 36px;
+      color: rgba(255,255,255,0.55);
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <a href="../../index.html" class="back-link">← インフォグラフィック一覧に戻る</a>
+
+    <header>
+      <div class="hero-badge">🐙 GitHub Copilot — 技術解説シリーズ</div>
+      <h1>GitHub Copilot<br><span class="gradient-text">Coding Agent</span> 完全ガイド</h1>
+      <p>AIエージェントとしての Copilot の全技術仕様を<br>GitHub Docs / GitHub Blog をもとにわかりやすく解説</p>
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-num">6</div>
+          <div class="stat-label">解説ページ</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">8</div>
+          <div class="stat-label">ワークフローステップ</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">2</div>
+          <div class="stat-label">組み込みMCPサーバー</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">4</div>
+          <div class="stat-label">対応プラン</div>
+        </div>
+      </div>
+    </header>
+
+    <div class="main-container">
+      <div class="section-intro">
+        <div class="section-icon">🤖</div>
+        <div>
+          <h2>インフォグラフィック一覧</h2>
+          <p>各テーマをクリックして詳細ページへ</p>
+        </div>
+      </div>
+
+      <div class="what-is">
+        <h3>GitHub Copilot Coding Agent とは</h3>
+        <p>
+          GitHub Copilot Coding Agent は、GitHub Actions が動力源の <strong>自律型 AI ソフトウェアエンジニア</strong> です。
+          GitHub Issues やCopilot Chatでタスクを割り当てると、クラウド上のエフェメラルな開発環境で
+          コードを読み・書き・テスト・レビューし、最終的に <strong>Pull Request を作成</strong> して人間のレビューを依頼します。
+          IDE で使う「エージェントモード」とは異なり、完全に非同期・バックグラウンドで動作します。
+        </p>
+      </div>
+
+      <div class="card-grid">
+        <a href="01-overview.html" class="card blue">
+          <p class="card-num">01 — 概要</p>
+          <p class="card-title">Copilot Coding Agent とは</p>
+          <p class="card-desc">定義・3種のエージェント比較・得意タスク・対応プラン</p>
+          <div class="card-tags">
+            <span class="tag">定義</span>
+            <span class="tag">エージェント比較</span>
+            <span class="tag">ユースケース</span>
+          </div>
+          <span class="card-arrow">→</span>
+        </a>
+
+        <a href="02-workflow.html" class="card green">
+          <p class="card-num">02 — ワークフロー</p>
+          <p class="card-title">Issue → PR 自動化フロー</p>
+          <p class="card-desc">タスク割り当てからPR作成・反復サイクルまでの8ステップ</p>
+          <div class="card-tags">
+            <span class="tag">Issue</span>
+            <span class="tag">Pull Request</span>
+            <span class="tag">自動化</span>
+          </div>
+          <span class="card-arrow">→</span>
+        </a>
+
+        <a href="03-architecture.html" class="card purple">
+          <p class="card-num">03 — アーキテクチャ</p>
+          <p class="card-title">内部アーキテクチャ</p>
+          <p class="card-desc">GitHub Actions サンドボックス・コミット透明性・実行ループ</p>
+          <div class="card-tags">
+            <span class="tag">GitHub Actions</span>
+            <span class="tag">サンドボックス</span>
+            <span class="tag">透明性</span>
+          </div>
+          <span class="card-arrow">→</span>
+        </a>
+
+        <a href="04-mcp.html" class="card orange">
+          <p class="card-num">04 — MCP 統合</p>
+          <p class="card-title">Model Context Protocol 統合</p>
+          <p class="card-desc">組み込みサーバー（GitHub・Playwright）・拡張設定・制約</p>
+          <div class="card-tags">
+            <span class="tag">MCP</span>
+            <span class="tag">GitHub MCP</span>
+            <span class="tag">Playwright</span>
+          </div>
+          <span class="card-arrow">→</span>
+        </a>
+
+        <a href="05-customization.html" class="card teal">
+          <p class="card-num">05 — カスタマイズ</p>
+          <p class="card-title">カスタマイズ全解説</p>
+          <p class="card-desc">カスタム指示・Custom Agents・セットアップステップ・Hooks</p>
+          <div class="card-tags">
+            <span class="tag">instructions.md</span>
+            <span class="tag">Custom Agents</span>
+            <span class="tag">Hooks</span>
+          </div>
+          <span class="card-arrow">→</span>
+        </a>
+
+        <a href="06-security.html" class="card red">
+          <p class="card-num">06 — セキュリティ</p>
+          <p class="card-title">セキュリティ・制約・プラン</p>
+          <p class="card-desc">Firewall・PR承認ルール・コスト・利用制限・対応プラン一覧</p>
+          <div class="card-tags">
+            <span class="tag">Firewall</span>
+            <span class="tag">承認ルール</span>
+            <span class="tag">コスト</span>
+          </div>
+          <span class="card-arrow">→</span>
+        </a>
+      </div>
+
+      <div class="source-note">
+        情報源:
+        <a href="https://docs.github.com/en/copilot" target="_blank">GitHub Docs — Copilot</a> /
+        <a href="https://github.blog/ai-and-ml/github-copilot/" target="_blank">GitHub Blog</a>
+        （2025–2026年公開情報をもとに作成）
+      </div>
+    </div>
+
+    <footer>
+      <p>© 2026 Infographics Collection — GitHub Copilot Coding Agent シリーズ</p>
+    </footer>
+  </div>
+</body>
+</html>

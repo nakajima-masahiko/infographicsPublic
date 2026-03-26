@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>内部アーキテクチャ — GitHub Copilot 完全ガイド</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: linear-gradient(135deg, #0d1117 0%, #1e1040 60%, #3b0764 100%);
+      color: #1b1f2a;
+      min-height: 100vh;
+    }
+    .wrap {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 36px 20px 60px;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: rgba(255,255,255,0.7);
+      text-decoration: none;
+      font-size: 14px;
+      margin-bottom: 24px;
+      transition: color 0.2s;
+    }
+    .back-link:hover { color: #fff; }
+
+    header {
+      text-align: center;
+      margin-bottom: 32px;
+      color: #fff;
+    }
+    .page-badge {
+      display: inline-block;
+      background: rgba(139,92,246,0.25);
+      border: 1px solid rgba(196,181,253,0.4);
+      border-radius: 100px;
+      padding: 5px 16px;
+      font-size: 12px;
+      color: #c4b5fd;
+      margin-bottom: 14px;
+      font-weight: 600;
+    }
+    header h1 { font-size: 30px; margin: 0 0 10px; line-height: 1.3; }
+    header p { color: rgba(255,255,255,0.75); font-size: 15px; margin: 0; }
+
+    .card {
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      padding: 36px;
+      margin-bottom: 24px;
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 2px solid #e5e7eb;
+    }
+    .card-icon {
+      width: 44px; height: 44px;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      background: linear-gradient(135deg, #3b0764, #7c3aed);
+      flex-shrink: 0;
+    }
+    .card-header h2 { font-size: 20px; font-weight: 700; color: #1f2937; margin: 0; }
+
+    /* Architecture diagram (CSS-based) */
+    .arch-diagram {
+      background: #0d1117;
+      border-radius: 16px;
+      padding: 28px;
+      color: #c9d1d9;
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+    .arch-row {
+      display: flex;
+      align-items: stretch;
+      gap: 12px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+    .arch-box {
+      border-radius: 10px;
+      padding: 14px 18px;
+      flex: 1;
+      min-width: 140px;
+    }
+    .arch-box.blue   { background: rgba(88,166,255,0.15); border: 1px solid rgba(88,166,255,0.35); }
+    .arch-box.purple { background: rgba(197,140,255,0.15); border: 1px solid rgba(197,140,255,0.35); }
+    .arch-box.green  { background: rgba(86,211,100,0.15); border: 1px solid rgba(86,211,100,0.35); }
+    .arch-box.orange { background: rgba(255,166,70,0.15); border: 1px solid rgba(255,166,70,0.35); }
+    .arch-box.red    { background: rgba(255,100,100,0.15); border: 1px solid rgba(255,100,100,0.35); }
+    .arch-box-title {
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .arch-box.blue   .arch-box-title { color: #79c0ff; }
+    .arch-box.purple .arch-box-title { color: #d2a8ff; }
+    .arch-box.green  .arch-box-title { color: #56d364; }
+    .arch-box.orange .arch-box-title { color: #ffa657; }
+    .arch-box.red    .arch-box-title { color: #ff7b72; }
+    .arch-box-items {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .arch-box-items li {
+      font-size: 12px;
+      color: #8b949e;
+      padding: 2px 0;
+    }
+    .arch-arrow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      color: #30363d;
+      flex-shrink: 0;
+    }
+    .arch-label {
+      font-size: 11px;
+      color: #8b949e;
+      text-align: center;
+      margin: -6px 0 12px;
+    }
+
+    /* Tool-use loop */
+    .loop-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 14px;
+    }
+    .loop-item {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 18px 16px;
+      border-top: 3px solid #7c3aed;
+    }
+    .loop-icon { font-size: 26px; margin-bottom: 8px; }
+    .loop-title { font-size: 14px; font-weight: 700; color: #1f2937; margin: 0 0 6px; }
+    .loop-desc  { font-size: 13px; color: #6b7280; line-height: 1.6; margin: 0; }
+
+    /* Spec table */
+    .spec-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .spec-table tr { border-top: 1px solid #e5e7eb; }
+    .spec-table tr:first-child { border-top: none; }
+    .spec-table td { padding: 13px 12px; color: #374151; vertical-align: top; }
+    .spec-table td:first-child {
+      font-weight: 700;
+      color: #1f2937;
+      width: 220px;
+      white-space: nowrap;
+    }
+    .spec-table td:nth-child(2) { color: #374151; }
+    .highlight-row { background: #f5f3ff; }
+
+    /* Runner options */
+    .runner-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    @media (max-width: 600px) { .runner-grid { grid-template-columns: 1fr; } }
+    .runner-card {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+      padding: 20px;
+    }
+    .runner-card.primary { border-color: #7c3aed; background: #faf5ff; }
+    .runner-title { font-size: 15px; font-weight: 700; color: #1f2937; margin: 0 0 8px; }
+    .runner-tag {
+      display: inline-block;
+      font-size: 11px;
+      padding: 3px 10px;
+      border-radius: 100px;
+      background: #ede9fe;
+      color: #5b21b6;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+    .runner-tag.gray { background: #f3f4f6; color: #374151; }
+    .runner-desc { font-size: 13px; color: #6b7280; line-height: 1.6; margin: 0; }
+
+    /* Nav */
+    .nav-bottom {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 8px;
+    }
+    .nav-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 10px 18px;
+      font-size: 14px;
+      color: #374151;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .nav-btn:hover { border-color: #7c3aed; color: #5b21b6; background: #faf5ff; }
+
+    footer {
+      text-align: center;
+      margin-top: 32px;
+      color: rgba(255,255,255,0.5);
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <a href="index.html" class="back-link">← Copilot Agent ガイド一覧に戻る</a>
+
+    <header>
+      <div class="page-badge">03 / 06 — アーキテクチャ</div>
+      <h1>内部アーキテクチャ</h1>
+      <p>GitHub Actions サンドボックス・エフェメラル環境・Tool-Use ループ</p>
+    </header>
+
+    <!-- システム全体図 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">🏗️</div>
+        <h2>システム全体アーキテクチャ</h2>
+      </div>
+
+      <div class="arch-diagram">
+        <!-- 入力層 -->
+        <div class="arch-row">
+          <div class="arch-box blue">
+            <p class="arch-box-title">入力（エントリポイント）</p>
+            <ul class="arch-box-items">
+              <li>📌 GitHub Issues</li>
+              <li>💬 Copilot Chat</li>
+              <li>⌨️ GitHub CLI</li>
+              <li>🔗 MCP クライアント</li>
+            </ul>
+          </div>
+        </div>
+        <div class="arch-label">↓ タスク情報（Issue本文・コメント・カスタム指示）</div>
+
+        <!-- オーケストレーション層 -->
+        <div class="arch-row">
+          <div class="arch-box purple">
+            <p class="arch-box-title">Copilot Orchestrator（LLM）</p>
+            <ul class="arch-box-items">
+              <li>タスク解析・計画立案</li>
+              <li>ツール選択・呼び出し</li>
+              <li>実行ループ制御</li>
+              <li>自己レビュー・修正</li>
+            </ul>
+          </div>
+        </div>
+        <div class="arch-label">↓ Tool-Use API / MCP プロトコル</div>
+
+        <!-- 実行環境 -->
+        <div class="arch-row">
+          <div class="arch-box green">
+            <p class="arch-box-title">GitHub Actions Runner（エフェメラル）</p>
+            <ul class="arch-box-items">
+              <li>リポジトリクローン</li>
+              <li>ファイル読み書き</li>
+              <li>テスト・リント実行</li>
+              <li>コミット・プッシュ</li>
+            </ul>
+          </div>
+          <div class="arch-arrow">+</div>
+          <div class="arch-box orange">
+            <p class="arch-box-title">MCP サーバー（組み込み）</p>
+            <ul class="arch-box-items">
+              <li>🐙 GitHub MCP</li>
+              <li>🎭 Playwright MCP</li>
+              <li>+ カスタム MCP</li>
+            </ul>
+          </div>
+          <div class="arch-arrow">+</div>
+          <div class="arch-box red">
+            <p class="arch-box-title">セキュリティ層</p>
+            <ul class="arch-box-items">
+              <li>🛡️ Firewall（Allow List）</li>
+              <li>🔍 Secret Scanning</li>
+              <li>📦 Dependency Review</li>
+            </ul>
+          </div>
+        </div>
+        <div class="arch-label">↓ Draft PR へ随時コミット</div>
+
+        <!-- 出力層 -->
+        <div class="arch-row">
+          <div class="arch-box blue">
+            <p class="arch-box-title">出力</p>
+            <ul class="arch-box-items">
+              <li>🔀 Pull Request（Draft → Open）</li>
+              <li>📝 PR 説明文（自動生成）</li>
+              <li>📊 エージェントセッションログ</li>
+              <li>👥 レビュー依頼（担当者へ通知）</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tool-Use ループ -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">⚙️</div>
+        <h2>Tool-Use 実行ループ</h2>
+      </div>
+      <p style="font-size:14px;color:#374151;margin:0 0 20px;line-height:1.7;">
+        Copilot は LLM の Tool-Use（関数呼び出し）機能を使い、以下のツール群を自律的に組み合わせながらタスクを遂行します。
+      </p>
+      <div class="loop-grid">
+        <div class="loop-item">
+          <div class="loop-icon">📂</div>
+          <p class="loop-title">ファイル操作</p>
+          <p class="loop-desc">ファイルの読み込み・作成・編集・削除。ディレクトリ構造の探索。</p>
+        </div>
+        <div class="loop-item">
+          <div class="loop-icon">🖥️</div>
+          <p class="loop-title">ターミナル実行</p>
+          <p class="loop-desc">テスト・リント・ビルドコマンドを実行し、出力を確認して次の行動を決定。</p>
+        </div>
+        <div class="loop-item">
+          <div class="loop-icon">🐙</div>
+          <p class="loop-title">GitHub API（MCP経由）</p>
+          <p class="loop-desc">Issues・PR・コメントの読み取り。コミットのプッシュ。</p>
+        </div>
+        <div class="loop-item">
+          <div class="loop-icon">🌐</div>
+          <p class="loop-title">Web アクセス（Playwright）</p>
+          <p class="loop-desc">ローカルホストのプレビューを閲覧・操作・スクリーンショット撮影。</p>
+        </div>
+        <div class="loop-item">
+          <div class="loop-icon">🔄</div>
+          <p class="loop-title">エラー検出→自動修正</p>
+          <p class="loop-desc">テスト失敗・リントエラーを検知し、原因を分析して自動的に修正を試みる。</p>
+        </div>
+        <div class="loop-item">
+          <div class="loop-icon">📋</div>
+          <p class="loop-title">チェックリスト管理</p>
+          <p class="loop-desc">タスクを項目分解し、完了のたびにPR説明欄のチェックリストを更新。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- エフェメラル環境の仕様 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">☁️</div>
+        <h2>エフェメラル環境の仕様</h2>
+      </div>
+      <table class="spec-table">
+        <tr class="highlight-row">
+          <td>動力源</td>
+          <td>GitHub Actions（ジョブとして実行）</td>
+        </tr>
+        <tr>
+          <td>ライフサイクル</td>
+          <td>タスクごとに新規作成、完了後に破棄（エフェメラル）</td>
+        </tr>
+        <tr class="highlight-row">
+          <td>ブランチ命名</td>
+          <td><code>copilot/[task-description]</code> または <code>copilot/issue-[番号]</code></td>
+        </tr>
+        <tr>
+          <td>PR の種類</td>
+          <td>最初はドラフト PR、完了後に正式 PR としてオープン</td>
+        </tr>
+        <tr class="highlight-row">
+          <td>コスト（Actions）</td>
+          <td>GitHub Actions 使用分（月次 Actions minutes 枠から消費）</td>
+        </tr>
+        <tr>
+          <td>コスト（AI）</td>
+          <td>1セッション = 1 プレミアムリクエスト（2025年7月〜）</td>
+        </tr>
+        <tr class="highlight-row">
+          <td>セッションログ</td>
+          <td>各コミットにセッションログへの URL が含まれ、詳細な実行記録を参照可能</td>
+        </tr>
+        <tr>
+          <td>ネットワーク</td>
+          <td>デフォルトで Firewall 有効（許可リストで管理）</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- ランナーオプション -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">🖥️</div>
+        <h2>ランナーオプション</h2>
+      </div>
+      <div class="runner-grid">
+        <div class="runner-card primary">
+          <p class="runner-title">GitHub ホステッドランナー</p>
+          <span class="runner-tag">デフォルト</span>
+          <p class="runner-desc">
+            GitHub が管理するクラウドランナー。設定不要ですぐに使用可能。
+            Firewall による保護が自動的に適用される。
+          </p>
+        </div>
+        <div class="runner-card">
+          <p class="runner-title">セルフホステッドランナー</p>
+          <span class="runner-tag gray">ARC スケールセット（2025年10月〜）</span>
+          <p class="runner-desc">
+            Actions Runner Controller（ARC）を使用。内部ネットワークへのアクセスが必要な場合に有効。
+            Firewall との互換性なし（自動無効化）。Windows は非対応。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Nav -->
+    <div class="nav-bottom">
+      <a href="02-workflow.html" class="nav-btn">← ワークフロー</a>
+      <a href="04-mcp.html" class="nav-btn">MCP 統合 →</a>
+    </div>
+
+    <footer>
+      <p>情報源: GitHub Docs / GitHub Blog（2025–2026）</p>
+    </footer>
+  </div>
+</body>
+</html>

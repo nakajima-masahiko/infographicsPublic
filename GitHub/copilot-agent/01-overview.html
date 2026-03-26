@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Copilot Coding Agent とは — GitHub Copilot 完全ガイド</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: linear-gradient(135deg, #0d1117 0%, #24292e 60%, #0366d6 100%);
+      color: #1b1f2a;
+      min-height: 100vh;
+    }
+    .wrap {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 36px 20px 60px;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: rgba(255,255,255,0.7);
+      text-decoration: none;
+      font-size: 14px;
+      margin-bottom: 24px;
+      transition: color 0.2s;
+    }
+    .back-link:hover { color: #fff; }
+
+    /* Header */
+    header {
+      text-align: center;
+      margin-bottom: 32px;
+      color: #fff;
+    }
+    .page-badge {
+      display: inline-block;
+      background: rgba(3,102,214,0.35);
+      border: 1px solid rgba(88,166,255,0.4);
+      border-radius: 100px;
+      padding: 5px 16px;
+      font-size: 12px;
+      color: #79c0ff;
+      margin-bottom: 14px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+    }
+    header h1 {
+      font-size: 30px;
+      margin: 0 0 10px;
+      line-height: 1.3;
+    }
+    header p {
+      color: rgba(255,255,255,0.75);
+      font-size: 15px;
+      margin: 0;
+    }
+
+    /* Card container */
+    .card {
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      padding: 36px;
+      margin-bottom: 24px;
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 2px solid #e5e7eb;
+    }
+    .card-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      background: linear-gradient(135deg, #0366d6, #58a6ff);
+      flex-shrink: 0;
+    }
+    .card-header h2 {
+      font-size: 20px;
+      font-weight: 700;
+      color: #1f2937;
+      margin: 0;
+    }
+
+    /* Definition box */
+    .definition {
+      background: linear-gradient(135deg, #eff6ff, #dbeafe);
+      border-left: 5px solid #0366d6;
+      border-radius: 0 12px 12px 0;
+      padding: 20px 24px;
+      margin-bottom: 24px;
+    }
+    .definition p {
+      font-size: 15px;
+      line-height: 1.8;
+      color: #1e40af;
+      margin: 0;
+    }
+    .definition strong { color: #1e3a8a; }
+
+    /* Key points */
+    .key-points {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 14px;
+      margin-bottom: 8px;
+    }
+    .kp {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 16px;
+    }
+    .kp-icon { font-size: 24px; margin-bottom: 8px; }
+    .kp-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #1f2937;
+      margin: 0 0 6px;
+    }
+    .kp-desc {
+      font-size: 13px;
+      color: #6b7280;
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    /* Comparison table */
+    .table-wrap {
+      overflow-x: auto;
+      border-radius: 12px;
+      border: 1px solid #e5e7eb;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    thead tr {
+      background: linear-gradient(135deg, #24292e, #586069);
+      color: #fff;
+    }
+    thead th {
+      padding: 14px 16px;
+      text-align: left;
+      font-weight: 700;
+    }
+    thead th:first-child { border-radius: 12px 0 0 0; }
+    thead th:last-child  { border-radius: 0 12px 0 0; }
+    tbody tr:nth-child(odd)  { background: #f9fafb; }
+    tbody tr:nth-child(even) { background: #fff; }
+    tbody td {
+      padding: 13px 16px;
+      color: #374151;
+      border-top: 1px solid #e5e7eb;
+    }
+    tbody td:first-child { font-weight: 600; color: #111827; }
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 100px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .badge-blue   { background: #dbeafe; color: #1e40af; }
+    .badge-green  { background: #d1fae5; color: #065f46; }
+    .badge-purple { background: #ede9fe; color: #4c1d95; }
+    .badge-gray   { background: #f3f4f6; color: #374151; }
+
+    /* Use cases */
+    .usecase-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+    }
+    .uc {
+      border-radius: 12px;
+      padding: 16px;
+      border: 1px solid;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .uc.good  { background: #f0fdf4; border-color: #86efac; }
+    .uc.caution { background: #fffbeb; border-color: #fcd34d; }
+    .uc-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+    .uc-content {}
+    .uc-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #111827;
+      margin: 0 0 4px;
+    }
+    .uc-desc {
+      font-size: 12px;
+      color: #6b7280;
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    /* Plan table */
+    .plan-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+    }
+    .plan {
+      background: #f9fafb;
+      border: 2px solid #e5e7eb;
+      border-radius: 14px;
+      padding: 18px;
+      text-align: center;
+    }
+    .plan.highlight {
+      border-color: #0366d6;
+      background: linear-gradient(135deg, #eff6ff, #dbeafe);
+    }
+    .plan-name {
+      font-size: 16px;
+      font-weight: 700;
+      color: #1f2937;
+      margin: 0 0 6px;
+    }
+    .plan-tag {
+      font-size: 12px;
+      color: #6b7280;
+    }
+
+    /* Nav */
+    .nav-bottom {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 8px;
+    }
+    .nav-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 10px 18px;
+      font-size: 14px;
+      color: #374151;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .nav-btn:hover {
+      border-color: #0366d6;
+      color: #0366d6;
+      background: #eff6ff;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 32px;
+      color: rgba(255,255,255,0.5);
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <a href="index.html" class="back-link">← Copilot Agent ガイド一覧に戻る</a>
+
+    <header>
+      <div class="page-badge">01 / 06 — 概要</div>
+      <h1>Copilot Coding Agent とは</h1>
+      <p>定義・3種のエージェント比較・得意タスク・対応プラン</p>
+    </header>
+
+    <!-- 定義 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">🎯</div>
+        <h2>定義</h2>
+      </div>
+      <div class="definition">
+        <p>
+          <strong>GitHub Copilot Coding Agent</strong> は、<strong>GitHub Actions が動力源のクラウドホスト型・自律 AI ソフトウェアエンジニア</strong>です。
+          GitHub Issues や Copilot Chat でタスクを割り当てると、バックグラウンドで動作し、
+          コードを読み込み・編集・テスト・自己レビューして <strong>Pull Request を作成・提出</strong> します。<br><br>
+          IDE 上でリアルタイムに動作する「エージェントモード」とは<strong>明確に異なります</strong>。
+          Coding Agent は <em>完全に非同期</em> で動作し、開発者が作業している間にバックグラウンドでタスクを進めます。
+        </p>
+      </div>
+
+      <div class="key-points">
+        <div class="kp">
+          <div class="kp-icon">☁️</div>
+          <p class="kp-title">クラウド上のエフェメラル環境</p>
+          <p class="kp-desc">GitHub Actions が提供する安全なサンドボックスで動作。タスクごとに新しい環境が立ち上がる。</p>
+        </div>
+        <div class="kp">
+          <div class="kp-icon">🔄</div>
+          <p class="kp-title">非同期・バックグラウンド実行</p>
+          <p class="kp-desc">開発者はタスクを割り当てた後、他の作業に集中できる。完了したら PR でレビューを依頼。</p>
+        </div>
+        <div class="kp">
+          <div class="kp-icon">🔍</div>
+          <p class="kp-title">自己レビュー機能</p>
+          <p class="kp-desc">人間へのレビュー依頼前に Copilot Code Review を自分のコードに適用し品質を確保する。</p>
+        </div>
+        <div class="kp">
+          <div class="kp-icon">📝</div>
+          <p class="kp-title">完全な透明性</p>
+          <p class="kp-desc">すべてのステップがコミットとして記録され、エージェントセッションログで監査可能。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3種のエージェント比較 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">🔀</div>
+        <h2>GitHub Copilot の 3 種のエージェント</h2>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>エージェント種別</th>
+              <th>動作場所</th>
+              <th>実行形態</th>
+              <th>入力方法</th>
+              <th>出力</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>🤖 Coding Agent</td>
+              <td>GitHub クラウド<br>（GitHub Actions）</td>
+              <td><span class="badge badge-blue">完全非同期</span></td>
+              <td>Issues / Copilot Chat / CLI / MCP</td>
+              <td>Pull Request</td>
+            </tr>
+            <tr>
+              <td>💻 Agent Mode（IDE）</td>
+              <td>ローカル開発環境<br>（VS Code / JetBrains）</td>
+              <td><span class="badge badge-green">リアルタイム</span></td>
+              <td>Copilot Chat（IDE 内）</td>
+              <td>ファイル編集・コマンド実行</td>
+            </tr>
+            <tr>
+              <td>💬 Chat Agents（Extensions）</td>
+              <td>Copilot Chat 内</td>
+              <td><span class="badge badge-purple">対話型</span></td>
+              <td>@拡張名 でチャット</td>
+              <td>テキスト応答・情報提供</td>
+            </tr>
+            <tr>
+              <td>🛠️ Custom Agents</td>
+              <td>GitHub クラウド<br>（Coding Agent 上）</td>
+              <td><span class="badge badge-blue">完全非同期</span></td>
+              <td>Issues / Chat（Coding Agent 経由）</td>
+              <td>Pull Request</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 得意タスク -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">✅</div>
+        <h2>得意タスク・不得意タスク</h2>
+      </div>
+      <p style="font-size:13px;color:#6b7280;margin:0 0 16px;">
+        Coding Agent は <strong>低〜中複雑度のタスク</strong>、特にテストが充実したコードベースで最大のパフォーマンスを発揮します。
+      </p>
+      <div class="usecase-grid">
+        <div class="uc good">
+          <span class="uc-icon">✅</span>
+          <div class="uc-content">
+            <p class="uc-title">機能追加</p>
+            <p class="uc-desc">仕様が明確な新機能の実装</p>
+          </div>
+        </div>
+        <div class="uc good">
+          <span class="uc-icon">✅</span>
+          <div class="uc-content">
+            <p class="uc-title">バグ修正</p>
+            <p class="uc-desc">再現手順が明確なバグの修正</p>
+          </div>
+        </div>
+        <div class="uc good">
+          <span class="uc-icon">✅</span>
+          <div class="uc-content">
+            <p class="uc-title">テスト追加</p>
+            <p class="uc-desc">既存コードへのテストケース追加</p>
+          </div>
+        </div>
+        <div class="uc good">
+          <span class="uc-icon">✅</span>
+          <div class="uc-content">
+            <p class="uc-title">リファクタリング</p>
+            <p class="uc-desc">明確なスコープでのコード整理</p>
+          </div>
+        </div>
+        <div class="uc good">
+          <span class="uc-icon">✅</span>
+          <div class="uc-content">
+            <p class="uc-title">ドキュメント改善</p>
+            <p class="uc-desc">README・コメント・API ドキュメント</p>
+          </div>
+        </div>
+        <div class="uc caution">
+          <span class="uc-icon">⚠️</span>
+          <div class="uc-content">
+            <p class="uc-title">超大規模リファクタリング</p>
+            <p class="uc-desc">コードベース全体を横断する複雑な変更</p>
+          </div>
+        </div>
+        <div class="uc caution">
+          <span class="uc-icon">⚠️</span>
+          <div class="uc-content">
+            <p class="uc-title">複数リポジトリ変更</p>
+            <p class="uc-desc">1タスクで複数リポジトリへの変更（非対応）</p>
+          </div>
+        </div>
+        <div class="uc caution">
+          <span class="uc-icon">⚠️</span>
+          <div class="uc-content">
+            <p class="uc-title">曖昧な仕様のタスク</p>
+            <p class="uc-desc">詳細が不明確なタスクは人間の追記が必要</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 対応プラン -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">💳</div>
+        <h2>対応プラン</h2>
+      </div>
+      <div class="plan-grid">
+        <div class="plan">
+          <p class="plan-name">Copilot Pro</p>
+          <p class="plan-tag">個人向け</p>
+        </div>
+        <div class="plan highlight">
+          <p class="plan-name">Copilot Pro+</p>
+          <p class="plan-tag">個人向け — サードパーティエージェント対応</p>
+        </div>
+        <div class="plan">
+          <p class="plan-name">Copilot Business</p>
+          <p class="plan-tag">組織向け — 管理者の有効化が必要</p>
+        </div>
+        <div class="plan">
+          <p class="plan-name">Copilot Enterprise</p>
+          <p class="plan-tag">大規模組織向け — サードパーティエージェント対応</p>
+        </div>
+      </div>
+      <p style="font-size:12px;color:#9ca3af;margin-top:14px;text-align:center;">
+        ※ Business / Enterprise は管理者がポリシーで Coding Agent を有効化する必要あり
+      </p>
+    </div>
+
+    <!-- Navigation -->
+    <div class="nav-bottom">
+      <a href="index.html" class="nav-btn">← 一覧へ</a>
+      <a href="02-workflow.html" class="nav-btn">ワークフロー →</a>
+    </div>
+
+    <footer>
+      <p>情報源: GitHub Docs / GitHub Blog（2025–2026）</p>
+    </footer>
+  </div>
+</body>
+</html>

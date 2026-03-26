@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Issue → PR 自動化フロー — GitHub Copilot 完全ガイド</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: linear-gradient(135deg, #0d1117 0%, #1a2f1a 60%, #1a4731 100%);
+      color: #1b1f2a;
+      min-height: 100vh;
+    }
+    .wrap {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 36px 20px 60px;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: rgba(255,255,255,0.7);
+      text-decoration: none;
+      font-size: 14px;
+      margin-bottom: 24px;
+      transition: color 0.2s;
+    }
+    .back-link:hover { color: #fff; }
+
+    header {
+      text-align: center;
+      margin-bottom: 32px;
+      color: #fff;
+    }
+    .page-badge {
+      display: inline-block;
+      background: rgba(34,197,94,0.25);
+      border: 1px solid rgba(134,239,172,0.4);
+      border-radius: 100px;
+      padding: 5px 16px;
+      font-size: 12px;
+      color: #86efac;
+      margin-bottom: 14px;
+      font-weight: 600;
+    }
+    header h1 { font-size: 30px; margin: 0 0 10px; line-height: 1.3; }
+    header p { color: rgba(255,255,255,0.75); font-size: 15px; margin: 0; }
+
+    .card {
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      padding: 36px;
+      margin-bottom: 24px;
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 2px solid #e5e7eb;
+    }
+    .card-icon {
+      width: 44px; height: 44px;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      background: linear-gradient(135deg, #1a4731, #28a745);
+      flex-shrink: 0;
+    }
+    .card-header h2 { font-size: 20px; font-weight: 700; color: #1f2937; margin: 0; }
+
+    /* Flow steps */
+    .flow {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .step {
+      display: flex;
+      gap: 20px;
+      position: relative;
+    }
+    .step:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      left: 22px;
+      top: 48px;
+      bottom: 0;
+      width: 2px;
+      background: linear-gradient(180deg, #28a745, #86efac);
+    }
+    .step-left {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .step-num {
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #1a4731, #28a745);
+      color: #fff;
+      font-size: 16px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      position: relative;
+      z-index: 1;
+    }
+    .step-right {
+      padding: 4px 0 32px;
+      flex: 1;
+    }
+    .step-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: #1f2937;
+      margin: 0 0 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .step-emoji { font-size: 18px; }
+    .step-desc {
+      font-size: 14px;
+      color: #374151;
+      line-height: 1.75;
+      margin: 0 0 10px;
+    }
+    .step-note {
+      background: #f0fdf4;
+      border: 1px solid #86efac;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 13px;
+      color: #166534;
+    }
+    .step-note code {
+      background: #dcfce7;
+      border-radius: 4px;
+      padding: 1px 6px;
+      font-family: monospace;
+      font-size: 12px;
+    }
+
+    /* Entry points */
+    .entry-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 12px;
+    }
+    .entry {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+    }
+    .entry-icon { font-size: 28px; margin-bottom: 8px; }
+    .entry-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: #1f2937;
+      margin: 0 0 4px;
+    }
+    .entry-desc {
+      font-size: 12px;
+      color: #6b7280;
+      margin: 0;
+    }
+
+    /* Iteration cycle */
+    .cycle {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0;
+      background: #f0fdf4;
+      border: 1px solid #86efac;
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .cycle-item {
+      flex: 1;
+      min-width: 120px;
+      padding: 18px 14px;
+      text-align: center;
+      position: relative;
+    }
+    .cycle-item:not(:last-child)::after {
+      content: '→';
+      position: absolute;
+      right: -8px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #28a745;
+      font-size: 18px;
+      font-weight: 700;
+    }
+    .cycle-icon { font-size: 26px; margin-bottom: 6px; }
+    .cycle-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: #166534;
+      margin: 0 0 3px;
+    }
+    .cycle-sub { font-size: 11px; color: #4ade80; margin: 0; }
+
+    /* Important note */
+    .important {
+      background: #fffbeb;
+      border: 1px solid #fcd34d;
+      border-radius: 12px;
+      padding: 16px 20px;
+      font-size: 14px;
+      color: #92400e;
+      line-height: 1.7;
+    }
+    .important strong { color: #78350f; }
+
+    /* Commit info */
+    .commit-box {
+      background: #0d1117;
+      border-radius: 12px;
+      padding: 16px 20px;
+      font-family: monospace;
+      font-size: 13px;
+      color: #c9d1d9;
+      line-height: 1.8;
+    }
+    .commit-box .green { color: #56d364; }
+    .commit-box .blue  { color: #58a6ff; }
+    .commit-box .gray  { color: #8b949e; }
+
+    /* Nav */
+    .nav-bottom {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 8px;
+    }
+    .nav-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 10px 18px;
+      font-size: 14px;
+      color: #374151;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .nav-btn:hover { border-color: #28a745; color: #166534; background: #f0fdf4; }
+
+    footer {
+      text-align: center;
+      margin-top: 32px;
+      color: rgba(255,255,255,0.5);
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <a href="index.html" class="back-link">← Copilot Agent ガイド一覧に戻る</a>
+
+    <header>
+      <div class="page-badge">02 / 06 — ワークフロー</div>
+      <h1>Issue → PR 自動化フロー</h1>
+      <p>タスク割り当てから Pull Request 作成・反復サイクルまでの全ステップ</p>
+    </header>
+
+    <!-- 8ステップフロー -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">🔄</div>
+        <h2>8 ステップ実行フロー</h2>
+      </div>
+
+      <div class="flow">
+        <div class="step">
+          <div class="step-left"><div class="step-num">1</div></div>
+          <div class="step-right">
+            <p class="step-title"><span class="step-emoji">📋</span> タスク割り当て</p>
+            <p class="step-desc">GitHub Issue を Copilot にアサイン、または Copilot Chat でタスクを依頼します。Issue のタイトル・説明・コメントすべてが Copilot へ渡されます。</p>
+            <div class="step-note">割り当て後に Issue へ追加したコメントは <strong>Copilot には届きません</strong>。追加情報はPRコメントで行います。</div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-left"><div class="step-num">2</div></div>
+          <div class="step-right">
+            <p class="step-title"><span class="step-emoji">🌿</span> ブランチ＆ドラフトPR 即時作成</p>
+            <p class="step-desc">Copilot は即座に <code>copilot/*</code> ブランチを作成し、空のコミットでドラフト Pull Request を開きます。作業の進捗はここに随時プッシュされます。</p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-left"><div class="step-num">3</div></div>
+          <div class="step-right">
+            <p class="step-title"><span class="step-emoji">⚙️</span> 環境セットアップ</p>
+            <p class="step-desc">GitHub Actions のエフェメラルサンドボックスが起動し、リポジトリをクローン。<code>copilot-setup-steps.yml</code> が設定されていれば依存関係のインストールや言語ランタイムのセットアップを自動実行します。</p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-left"><div class="step-num">4</div></div>
+          <div class="step-right">
+            <p class="step-title"><span class="step-emoji">🔍</span> コンテキスト分析</p>
+            <p class="step-desc">リポジトリ構造・ファイル内容・Issue の詳細・カスタム指示ファイルを読み込み、タスクのチェックリストを作成。PRの説明欄に計画を書き込みます。</p>
+            <div class="step-note">読み込む情報: <code>copilot-instructions.md</code> / <code>.github/instructions/</code> 内ファイル / Issue コメント</div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-left"><div class="step-num">5</div></div>
+          <div class="step-right">
+            <p class="step-title"><span class="step-emoji">💻</span> 実行ループ（コード・テスト・修正）</p>
+            <p class="step-desc">ファイル編集 → テスト実行 → リンター実行 → エラー確認 → 自動修正 のループを繰り返します。チェックリストの各項目を順番に完了させ、コミットをプッシュしながら進めます。</p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-left"><div class="step-num">6</div></div>
+          <div class="step-right">
+            <p class="step-title"><span class="step-emoji">🛡️</span> セキュリティスキャン</p>
+            <p class="step-desc">GitHub の Secret Protection・Code Security・Supply Chain Security ツールを使い、作成したコードに脆弱性・シークレットの漏洩がないかチェックします。問題があれば修正してから次へ。</p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-left"><div class="step-num">7</div></div>
+          <div class="step-right">
+            <p class="step-title"><span class="step-emoji">🔬</span> 自己レビュー</p>
+            <p class="step-desc">Copilot Code Review を自分の PR に適用し、フィードバックを取り込んで品質を高めます。人間にレビューを依頼する前に可能な限り自己改善します。</p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-left"><div class="step-num">8</div></div>
+          <div class="step-right">
+            <p class="step-title"><span class="step-emoji">👤</span> 人間レビュー依頼＆反復</p>
+            <p class="step-desc">ドラフト PR を正式にオープンし、担当開発者へレビューを依頼します。PR コメントで <strong>@copilot</strong> をタグ付けしてフィードバックを伝えると、Copilot が修正を反復します。</p>
+            <div class="step-note">Copilot は自分の PR を<strong>承認・マージできません</strong>。また、タスクを依頼した本人も承認者になれません（必ず独立したレビューが必要）。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- タスク入力経路 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">📡</div>
+        <h2>タスク入力経路（エントリポイント）</h2>
+      </div>
+      <div class="entry-grid">
+        <div class="entry">
+          <div class="entry-icon">📌</div>
+          <p class="entry-name">GitHub Issues</p>
+          <p class="entry-desc">Assignees に Copilot を選択</p>
+        </div>
+        <div class="entry">
+          <div class="entry-icon">💬</div>
+          <p class="entry-name">Copilot Chat</p>
+          <p class="entry-desc">Web / VS Code / Mobile / JetBrains</p>
+        </div>
+        <div class="entry">
+          <div class="entry-icon">🖥️</div>
+          <p class="entry-name">Agents Panel</p>
+          <p class="entry-desc">GitHub の全ページで利用可能</p>
+        </div>
+        <div class="entry">
+          <div class="entry-icon">⌨️</div>
+          <p class="entry-name">GitHub CLI</p>
+          <p class="entry-desc">ターミナルから直接操作</p>
+        </div>
+        <div class="entry">
+          <div class="entry-icon">🔗</div>
+          <p class="entry-name">MCP 連携ツール</p>
+          <p class="entry-desc">Azure Boards / Jira / Linear / Raycast</p>
+        </div>
+        <div class="entry">
+          <div class="entry-icon">💡</div>
+          <p class="entry-name">VS Code ボタン</p>
+          <p class="entry-desc">「Delegate to coding agent」ボタン</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 反復サイクル -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">🔁</div>
+        <h2>レビュー＆反復サイクル</h2>
+      </div>
+      <div class="cycle">
+        <div class="cycle-item">
+          <div class="cycle-icon">👤</div>
+          <p class="cycle-label">レビュー</p>
+          <p class="cycle-sub">PR を確認</p>
+        </div>
+        <div class="cycle-item">
+          <div class="cycle-icon">💬</div>
+          <p class="cycle-label">フィードバック</p>
+          <p class="cycle-sub">@copilot でコメント</p>
+        </div>
+        <div class="cycle-item">
+          <div class="cycle-icon">🤖</div>
+          <p class="cycle-label">Copilot が修正</p>
+          <p class="cycle-sub">コミットをプッシュ</p>
+        </div>
+        <div class="cycle-item">
+          <div class="cycle-icon">✅</div>
+          <p class="cycle-label">承認</p>
+          <p class="cycle-sub">別の人がマージ</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- コミット透明性 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">📦</div>
+        <h2>コミットの透明性</h2>
+      </div>
+      <p style="font-size:14px;color:#374151;margin:0 0 16px;line-height:1.7;">
+        Copilot が作成するすべてのコミットには以下の情報が含まれ、監査・コードレビューを容易にします。
+      </p>
+      <div class="commit-box">
+        <span class="green">feat: Implement dark mode toggle for settings panel</span><br><br>
+        <span class="gray">Co-authored-by: </span><span class="blue">yamada-taro &lt;yamada@example.com&gt;</span><br>
+        <span class="gray">Agent session: </span><span class="blue">https://github.com/org/repo/actions/runs/xxxxx</span>
+      </div>
+      <p style="font-size:13px;color:#6b7280;margin:14px 0 0;line-height:1.6;">
+        コミットの著者: <strong>Copilot</strong>（自動生成） / 共著者: <strong>タスクを依頼した開発者</strong><br>
+        コミットメッセージにはエージェントセッションログへのリンクが含まれ、実行内容を詳細に確認できます。
+      </p>
+    </div>
+
+    <div class="important">
+      <strong>重要:</strong> Copilot が作成した PR の CI/CD ワークフローは、<strong>書き込み権限を持つユーザーが承認するまで自動実行されません</strong>。
+      これはセキュリティ上の保護であり、権限昇格攻撃を防ぎます。
+    </div>
+
+    <!-- Nav -->
+    <div class="nav-bottom" style="margin-top:24px;">
+      <a href="01-overview.html" class="nav-btn">← 概要</a>
+      <a href="03-architecture.html" class="nav-btn">アーキテクチャ →</a>
+    </div>
+
+    <footer>
+      <p>情報源: GitHub Docs / GitHub Blog（2025–2026）</p>
+    </footer>
+  </div>
+</body>
+</html>

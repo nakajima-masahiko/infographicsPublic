@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>セキュリティ・制約・プラン — GitHub Copilot 完全ガイド</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: linear-gradient(135deg, #0d1117 0%, #1a0a0a 60%, #7f1d1d 100%);
+      color: #1b1f2a;
+      min-height: 100vh;
+    }
+    .wrap {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 36px 20px 60px;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: rgba(255,255,255,0.7);
+      text-decoration: none;
+      font-size: 14px;
+      margin-bottom: 24px;
+      transition: color 0.2s;
+    }
+    .back-link:hover { color: #fff; }
+
+    header {
+      text-align: center;
+      margin-bottom: 32px;
+      color: #fff;
+    }
+    .page-badge {
+      display: inline-block;
+      background: rgba(220,38,38,0.25);
+      border: 1px solid rgba(252,165,165,0.4);
+      border-radius: 100px;
+      padding: 5px 16px;
+      font-size: 12px;
+      color: #fca5a5;
+      margin-bottom: 14px;
+      font-weight: 600;
+    }
+    header h1 { font-size: 30px; margin: 0 0 10px; line-height: 1.3; }
+    header p { color: rgba(255,255,255,0.75); font-size: 15px; margin: 0; }
+
+    .card {
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      padding: 36px;
+      margin-bottom: 24px;
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 2px solid #e5e7eb;
+    }
+    .card-icon {
+      width: 44px; height: 44px;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      background: linear-gradient(135deg, #7f1d1d, #dc2626);
+      flex-shrink: 0;
+    }
+    .card-header h2 { font-size: 20px; font-weight: 700; color: #1f2937; margin: 0; }
+
+    /* Security pillars */
+    .pillar-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 14px;
+      margin-bottom: 8px;
+    }
+    .pillar {
+      border-radius: 14px;
+      padding: 20px;
+      border: 1px solid;
+    }
+    .pillar.red    { background: #fef2f2; border-color: #fecaca; }
+    .pillar.orange { background: #fff7ed; border-color: #fed7aa; }
+    .pillar.blue   { background: #eff6ff; border-color: #bfdbfe; }
+    .pillar.green  { background: #f0fdf4; border-color: #bbf7d0; }
+    .pillar-icon { font-size: 28px; margin-bottom: 10px; }
+    .pillar-title { font-size: 14px; font-weight: 700; margin: 0 0 6px; }
+    .pillar.red    .pillar-title { color: #991b1b; }
+    .pillar.orange .pillar-title { color: #9a3412; }
+    .pillar.blue   .pillar-title { color: #1e40af; }
+    .pillar.green  .pillar-title { color: #166534; }
+    .pillar-desc { font-size: 13px; line-height: 1.6; margin: 0; color: #374151; }
+
+    /* Firewall detail */
+    .firewall-box {
+      background: linear-gradient(135deg, #fef2f2, #ffe4e6);
+      border: 1px solid #fecaca;
+      border-radius: 14px;
+      padding: 22px;
+    }
+    .firewall-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .firewall-icon { font-size: 28px; }
+    .firewall-title { font-size: 17px; font-weight: 700; color: #991b1b; margin: 0; }
+    .firewall-desc  { font-size: 14px; color: #374151; line-height: 1.7; margin: 0 0 16px; }
+    .firewall-list  { list-style: none; margin: 0; padding: 0; }
+    .firewall-list li {
+      font-size: 13px;
+      color: #374151;
+      padding: 5px 0;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    .firewall-list li::before { content: '▸'; color: #dc2626; flex-shrink: 0; }
+
+    /* PR rules */
+    .rule-list { list-style: none; margin: 0; padding: 0; }
+    .rule-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 14px 0;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .rule-item:last-child { border-bottom: none; }
+    .rule-icon {
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .rule-icon.block { background: #fee2e2; }
+    .rule-icon.check { background: #d1fae5; }
+    .rule-icon.warn  { background: #fef3c7; }
+    .rule-content {}
+    .rule-title { font-size: 14px; font-weight: 700; color: #1f2937; margin: 0 0 4px; }
+    .rule-desc  { font-size: 13px; color: #6b7280; line-height: 1.5; margin: 0; }
+
+    /* Limitations */
+    .limit-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 12px;
+    }
+    .limit-item {
+      background: #fff8f8;
+      border: 1px solid #fecaca;
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .limit-icon { font-size: 20px; flex-shrink: 0; }
+    .limit-text {}
+    .limit-title { font-size: 13px; font-weight: 700; color: #991b1b; margin: 0 0 4px; }
+    .limit-desc  { font-size: 12px; color: #6b7280; margin: 0; line-height: 1.5; }
+
+    /* Plans table */
+    .plan-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .plan-table thead tr {
+      background: linear-gradient(135deg, #1f2937, #374151);
+      color: #fff;
+    }
+    .plan-table thead th {
+      padding: 12px 14px;
+      text-align: left;
+      font-weight: 700;
+    }
+    .plan-table thead th:first-child { border-radius: 12px 0 0 0; }
+    .plan-table thead th:last-child  { border-radius: 0 12px 0 0; }
+    .plan-table tbody tr:nth-child(odd)  { background: #f9fafb; }
+    .plan-table tbody tr:nth-child(even) { background: #fff; }
+    .plan-table tbody td {
+      padding: 12px 14px;
+      color: #374151;
+      border-top: 1px solid #e5e7eb;
+      vertical-align: middle;
+    }
+    .plan-table tbody td:first-child { font-weight: 700; color: #1f2937; }
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 100px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .badge-ok   { background: #d1fae5; color: #065f46; }
+    .badge-no   { background: #fee2e2; color: #991b1b; }
+    .badge-req  { background: #fef3c7; color: #92400e; }
+
+    /* Cost breakdown */
+    .cost-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    @media (max-width: 600px) { .cost-grid { grid-template-columns: 1fr; } }
+    .cost-card {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+      padding: 20px;
+      text-align: center;
+    }
+    .cost-icon { font-size: 32px; margin-bottom: 10px; }
+    .cost-amount { font-size: 28px; font-weight: 800; color: #1f2937; margin: 0 0 4px; }
+    .cost-unit   { font-size: 13px; font-weight: 600; color: #6b7280; margin: 0 0 8px; }
+    .cost-desc   { font-size: 12px; color: #9ca3af; line-height: 1.5; margin: 0; }
+
+    /* Nav */
+    .nav-bottom {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 8px;
+    }
+    .nav-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 10px 18px;
+      font-size: 14px;
+      color: #374151;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .nav-btn:hover { border-color: #dc2626; color: #991b1b; background: #fef2f2; }
+
+    footer {
+      text-align: center;
+      margin-top: 32px;
+      color: rgba(255,255,255,0.5);
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <a href="index.html" class="back-link">← Copilot Agent ガイド一覧に戻る</a>
+
+    <header>
+      <div class="page-badge">06 / 06 — セキュリティ</div>
+      <h1>セキュリティ・制約・プラン</h1>
+      <p>Firewall / PR 承認ルール / コスト / 利用制限 / 対応プラン一覧</p>
+    </header>
+
+    <!-- セキュリティ4本柱 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">🛡️</div>
+        <h2>セキュリティ設計の 4 本柱</h2>
+      </div>
+      <div class="pillar-grid">
+        <div class="pillar red">
+          <div class="pillar-icon">🔥</div>
+          <p class="pillar-title">Firewall による通信制限</p>
+          <p class="pillar-desc">デフォルトで外部通信を遮断。npm・pip 等のコアサービスのみ許可。データ漏洩リスクを最小化。</p>
+        </div>
+        <div class="pillar orange">
+          <div class="pillar-icon">🔍</div>
+          <p class="pillar-title">コード・シークレットスキャン</p>
+          <p class="pillar-desc">Secret Protection・Code Security・Supply Chain Security を実行。PR 確定前に脆弱性を検出・修正。</p>
+        </div>
+        <div class="pillar blue">
+          <div class="pillar-icon">✅</div>
+          <p class="pillar-title">強制的な人間レビュー</p>
+          <p class="pillar-desc">Copilot は自分の PR を承認・マージできない。依頼者本人も承認不可。必ず独立したレビューが必要。</p>
+        </div>
+        <div class="pillar green">
+          <div class="pillar-icon">📋</div>
+          <p class="pillar-title">完全な監査ログ</p>
+          <p class="pillar-desc">全コミットにエージェントセッションログへのリンクを付与。すべての変更履歴を追跡・監査可能。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Firewall 詳細 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">🔥</div>
+        <h2>Firewall 詳細設定</h2>
+      </div>
+      <div class="firewall-box">
+        <div class="firewall-header">
+          <span class="firewall-icon">🛡️</span>
+          <p class="firewall-title">デフォルト Firewall（ON）</p>
+        </div>
+        <p class="firewall-desc">
+          Copilot Coding Agent はデフォルトで Firewall が有効化されており、外部ネットワークへのアクセスが制限されます。
+          これにより意図しないデータ送信や外部サービスへの不正アクセスを防ぎます。
+        </p>
+        <ul class="firewall-list">
+          <li>デフォルト許可: npm・pip・Docker Hub・GitHub.com 等のコアサービス</li>
+          <li>カスタム許可: リポジトリ Settings → Copilot → Coding agent の Allow List で追加</li>
+          <li>セルフホステッドランナー使用時は自動的に Firewall が無効化される</li>
+          <li>Windows ランナーは Firewall 非対応</li>
+          <li>Firewall を完全無効化することも可能（セキュリティリスクに注意）</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- PR 承認ルール -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">🔐</div>
+        <h2>PR 承認・マージのルール</h2>
+      </div>
+      <ul class="rule-list">
+        <li class="rule-item">
+          <div class="rule-icon block">🚫</div>
+          <div class="rule-content">
+            <p class="rule-title">Copilot は自分の PR を承認・マージできない</p>
+            <p class="rule-desc">Copilot が作成した PR は、必ず別の人間の開発者がレビューし承認する必要があります。</p>
+          </div>
+        </li>
+        <li class="rule-item">
+          <div class="rule-icon block">🚫</div>
+          <div class="rule-content">
+            <p class="rule-title">タスク依頼者本人は承認できない</p>
+            <p class="rule-desc">Copilot にタスクを割り当てた開発者は、そのPRの承認者になれません。独立したレビューが保証されます。</p>
+          </div>
+        </li>
+        <li class="rule-item">
+          <div class="rule-icon warn">⚠️</div>
+          <div class="rule-content">
+            <p class="rule-title">CI/CD は書き込み権限者の承認後に実行</p>
+            <p class="rule-desc">Copilot が作成した PR の CI/CD ワークフローは、書き込み権限を持つユーザーが承認するまで自動実行されません。権限昇格攻撃を防ぐセキュリティ機能です。</p>
+          </div>
+        </li>
+        <li class="rule-item">
+          <div class="rule-icon check">✅</div>
+          <div class="rule-content">
+            <p class="rule-title">既存のブランチ保護ルールがそのまま適用される</p>
+            <p class="rule-desc">リポジトリに設定した Required Reviews・Status Checks 等のブランチ保護ルールはすべて Copilot の PR にも適用されます。</p>
+          </div>
+        </li>
+        <li class="rule-item">
+          <div class="rule-icon check">✅</div>
+          <div class="rule-content">
+            <p class="rule-title">組織のポリシーが自動的に尊重される</p>
+            <p class="rule-desc">Organization レベルで設定したポリシーやコードオーナー設定は自動的に反映されます。</p>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <!-- 利用制限 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">⚠️</div>
+        <h2>利用制限（Limitations）</h2>
+      </div>
+      <div class="limit-grid">
+        <div class="limit-item">
+          <span class="limit-icon">📁</span>
+          <div class="limit-text">
+            <p class="limit-title">単一リポジトリのみ変更可能</p>
+            <p class="limit-desc">1タスクで変更できるのは割り当て時に指定した1つのリポジトリのみ。複数リポジトリの横断変更は不可。</p>
+          </div>
+        </div>
+        <div class="limit-item">
+          <span class="limit-icon">🔀</span>
+          <div class="limit-text">
+            <p class="limit-title">PR は1タスクにつき1件のみ</p>
+            <p class="limit-desc">1つのタスクに対して Copilot が開く PR は必ず1件。複数 PR を同時作成することはできない。</p>
+          </div>
+        </div>
+        <div class="limit-item">
+          <span class="limit-icon">💬</span>
+          <div class="limit-text">
+            <p class="limit-title">割り当て後のIssueコメントは無視</p>
+            <p class="limit-desc">タスク割り当て後にIssueへ追加したコメントはCopilotに届かない。フィードバックはPRコメントで行う。</p>
+          </div>
+        </div>
+        <div class="limit-item">
+          <span class="limit-icon">🔒</span>
+          <div class="limit-text">
+            <p class="limit-title">自分が作成していないPRは変更不可</p>
+            <p class="limit-desc">Copilot は自分が作成した PR のみ修正可能。他のPRへの変更は行えない。</p>
+          </div>
+        </div>
+        <div class="limit-item">
+          <span class="limit-icon">🔌</span>
+          <div class="limit-text">
+            <p class="limit-title">OAuth 認証 MCP は非対応</p>
+            <p class="limit-desc">OAuth を使うリモート MCP サーバーには接続できない。API Key 認証方式を使用すること。</p>
+          </div>
+        </div>
+        <div class="limit-item">
+          <span class="limit-icon">🏢</span>
+          <div class="limit-text">
+            <p class="limit-title">GitHub ホステッドランナーが必要（デフォルト）</p>
+            <p class="limit-desc">org 全体でホステッドランナーが無効化されている場合、セルフホステッドランナーへの切り替えが必要。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- コスト -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">💰</div>
+        <h2>コスト構造</h2>
+      </div>
+      <div class="cost-grid">
+        <div class="cost-card">
+          <div class="cost-icon">🤖</div>
+          <p class="cost-amount">1</p>
+          <p class="cost-unit">プレミアムリクエスト / セッション</p>
+          <p class="cost-desc">2025年7月以降の料金体系。1タスク（セッション）あたり1プレミアムリクエストを消費。</p>
+        </div>
+        <div class="cost-card">
+          <div class="cost-icon">⚙️</div>
+          <p class="cost-amount">変動</p>
+          <p class="cost-unit">GitHub Actions minutes</p>
+          <p class="cost-desc">タスクの複雑さに応じた変動料金。月次 Actions minutes 枠（他ワークフローと共有）から消費。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 対応プラン -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">📊</div>
+        <h2>対応プラン詳細</h2>
+      </div>
+      <div style="overflow-x:auto;border-radius:12px;border:1px solid #e5e7eb;">
+        <table class="plan-table">
+          <thead>
+            <tr>
+              <th>プラン</th>
+              <th>対象</th>
+              <th>Coding Agent</th>
+              <th>サードパーティ Agent</th>
+              <th>管理者有効化</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Copilot Pro</td>
+              <td>個人</td>
+              <td><span class="badge badge-ok">利用可</span></td>
+              <td><span class="badge badge-no">非対応</span></td>
+              <td>不要</td>
+            </tr>
+            <tr>
+              <td>Copilot Pro+</td>
+              <td>個人（パワーユーザー）</td>
+              <td><span class="badge badge-ok">利用可</span></td>
+              <td><span class="badge badge-ok">対応</span></td>
+              <td>不要</td>
+            </tr>
+            <tr>
+              <td>Copilot Business</td>
+              <td>組織・チーム</td>
+              <td><span class="badge badge-ok">利用可</span></td>
+              <td><span class="badge badge-no">非対応</span></td>
+              <td><span class="badge badge-req">必要</span></td>
+            </tr>
+            <tr>
+              <td>Copilot Enterprise</td>
+              <td>大規模組織</td>
+              <td><span class="badge badge-ok">利用可</span></td>
+              <td><span class="badge badge-ok">対応</span></td>
+              <td><span class="badge badge-req">必要</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:12px;color:#9ca3af;margin:12px 0 0;line-height:1.6;">
+        ※ Business / Enterprise では管理者が組織の Policies 設定で Coding Agent を有効化する必要があります。<br>
+        ※ マネージドユーザーアカウント（EMU）のリポジトリや明示的に除外されたリポジトリは利用不可。
+      </p>
+    </div>
+
+    <!-- Nav -->
+    <div class="nav-bottom">
+      <a href="05-customization.html" class="nav-btn">← カスタマイズ</a>
+      <a href="index.html" class="nav-btn">一覧へ戻る →</a>
+    </div>
+
+    <footer>
+      <p>情報源: GitHub Docs / GitHub Blog（2025–2026）</p>
+    </footer>
+  </div>
+</body>
+</html>
