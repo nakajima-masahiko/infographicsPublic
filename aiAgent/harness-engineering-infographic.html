@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ハーネスエンジニアリングとは？ AI時代の新しいソフトウェア開発手法</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0f9ff',
+              100: '#e0f2fe',
+              500: '#0ea5e9',
+              600: '#0284c7',
+              700: '#0369a1',
+              800: '#075985'
+            },
+            tealx: {
+              500: '#14b8a6',
+              600: '#0d9488'
+            }
+          },
+          boxShadow: {
+            glow: '0 20px 60px rgba(2,132,199,0.15)'
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-slate-950 text-slate-100 antialiased">
+  <div class="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(14,165,233,0.2),_transparent_55%),radial-gradient(circle_at_80%_20%,_rgba(20,184,166,0.16),_transparent_40%)]">
+    <main class="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
+      <header class="mb-10 rounded-3xl border border-sky-400/30 bg-slate-900/80 p-6 text-center shadow-glow sm:p-10">
+        <p class="mb-3 inline-flex items-center gap-2 rounded-full border border-sky-300/40 bg-sky-900/40 px-4 py-1 text-xs font-semibold tracking-widest text-sky-200">INFOGRAPHIC FOR SOFTWARE ENGINEERS</p>
+        <h1 class="mx-auto max-w-4xl text-3xl font-extrabold leading-tight text-white sm:text-4xl lg:text-5xl">
+          ハーネスエンジニアリングとは？ AI時代の新しいソフトウェア開発手法
+        </h1>
+        <p class="mx-auto mt-4 max-w-3xl text-sm leading-relaxed text-slate-300 sm:text-base">
+          AIコーディングエージェントを「速く動く」だけでなく「安全に・再現性高く・継続的に」運用するための設計思想を、5つの観点で視覚的に解説します。
+        </p>
+      </header>
+
+      <section class="mb-8 rounded-3xl border border-sky-400/25 bg-slate-900/75 p-6 shadow-xl sm:p-8">
+        <h2 class="mb-5 text-2xl font-bold text-sky-300 sm:text-3xl">1. ハーネスエンジニアリングとは？</h2>
+        <div class="grid gap-6 lg:grid-cols-2">
+          <div class="space-y-4 rounded-2xl border border-slate-700 bg-slate-900/60 p-5">
+            <h3 class="text-lg font-bold text-white">定義</h3>
+            <p class="text-sm leading-relaxed text-slate-200 sm:text-base">
+              AIコーディングエージェント（Codex、Claude Codeなど）を信頼性高く、長期間運用するための「足場（ハーネス）」を設計・構築する手法。
+            </p>
+            <div class="rounded-xl border border-sky-400/30 bg-sky-500/10 p-4">
+              <p class="text-sm leading-relaxed text-sky-100">
+                目的は、単発の生成品質ではなく、継続的に「壊れにくい開発システム」を作ることです。
+              </p>
+            </div>
+          </div>
+
+          <div class="space-y-4 rounded-2xl border border-teal-400/30 bg-teal-900/15 p-5">
+            <h3 class="text-lg font-bold text-teal-200">馬具（手綱）のメタファー</h3>
+            <div class="flex items-start gap-3">
+              <div class="mt-1 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-teal-500/20 text-teal-200">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-6 w-6" fill="currentColor"><path d="M5 4a1 1 0 0 0-.894 1.447l1.6 3.2A4.998 4.998 0 0 0 3 13v4a1 1 0 0 0 1 1h2.382l1.724 2.585A1 1 0 0 0 8.938 21H12a1 1 0 1 0 0-2H9.473l-1.2-1.8A1 1 0 0 0 7.44 17H5v-3a3 3 0 0 1 3-3h2.697l1.406 1.406A1 1 0 0 0 12.81 13H16a3 3 0 0 1 3 3v1h-1a1 1 0 1 0 0 2h2a1 1 0 0 0 1-1v-2a5 5 0 0 0-5-5h-2.777l-1.93-1.93A1 1 0 0 0 10.586 9H7.618L6.618 7h2.764a1 1 0 1 0 0-2H5zm10 1a1 1 0 0 0 0 2h1.382l1 2H15a1 1 0 1 0 0 2h4a1 1 0 0 0 .894-1.447l-2-4A1 1 0 0 0 17 5h-2z"/></svg>
+              </div>
+              <p class="text-sm leading-relaxed text-slate-200 sm:text-base">
+                強力だが予測しにくいAIの力を、人間が制御し、有用な方向へ導く仕組み。馬のパワーを活かすには、馬具と騎乗技術が必要なのと同じです。
+              </p>
+            </div>
+          </div>
+        </div>
+        <blockquote class="mt-6 rounded-2xl border-l-4 border-sky-300 bg-sky-500/10 p-5 text-base font-semibold text-sky-100 sm:text-lg">
+          “Agents aren't hard; the Harness is hard.” — Ryan Lopopolo (OpenAI)
+        </blockquote>
+      </section>
+
+      <section class="mb-8 rounded-3xl border border-sky-400/25 bg-slate-900/75 p-6 shadow-xl sm:p-8">
+        <h2 class="mb-5 text-2xl font-bold text-sky-300 sm:text-3xl">2. AIエンジニアリングの進化</h2>
+        <div class="grid gap-4 md:grid-cols-3">
+          <article class="rounded-2xl border border-slate-700 bg-slate-900/60 p-5">
+            <div class="mb-3 flex items-center gap-2 text-sky-200">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="h-6 w-6"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-2.844-.813a4.5 4.5 0 0 1-1.86-7.755L10.5 4.5a4.5 4.5 0 0 1 7.364 5.364l-5.682 6.204a4.5 4.5 0 0 1-2.37 1.356Z"/></svg>
+              <h3 class="text-lg font-bold">Prompt Engineering</h3>
+            </div>
+            <p class="text-sm leading-relaxed text-slate-300">良い指示文を設計し、単発回答の精度を上げる段階。</p>
+          </article>
+
+          <article class="rounded-2xl border border-slate-700 bg-slate-900/60 p-5 md:translate-y-4">
+            <div class="mb-3 flex items-center gap-2 text-teal-200">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="h-6 w-6"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6h16.5M3.75 12h16.5m-16.5 6h16.5"/></svg>
+              <h3 class="text-lg font-bold">Context Engineering</h3>
+            </div>
+            <p class="text-sm leading-relaxed text-slate-300">必要な履歴・仕様・知識を適切に供給し、文脈理解を高める段階。</p>
+          </article>
+
+          <article class="rounded-2xl border border-sky-400/40 bg-gradient-to-br from-sky-600/20 to-teal-500/20 p-5 md:translate-y-8">
+            <div class="mb-3 flex items-center gap-2 text-sky-100">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="h-6 w-6"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h10.125M10.5 12h10.125M10.5 18h10.125M3.375 6h.008v.008h-.008V6Zm0 6h.008v.008h-.008V12Zm0 6h.008v.008h-.008V18Z"/></svg>
+              <h3 class="text-lg font-bold">Harness Engineering</h3>
+            </div>
+            <p class="text-sm leading-relaxed text-slate-100">ガードレール・評価・自動修正・権限設計を統合し、運用品質を最大化する段階。</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="mb-8 rounded-3xl border border-sky-400/25 bg-slate-900/75 p-6 shadow-xl sm:p-8">
+        <h2 class="mb-5 text-2xl font-bold text-sky-300 sm:text-3xl">3. ハーネスの主な構成要素</h2>
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <article class="rounded-2xl border border-slate-700 bg-slate-900/60 p-5">
+            <h3 class="mb-2 text-base font-bold text-white">構造化ドキュメント</h3>
+            <p class="text-sm text-slate-300">AGENTS.md などで役割・手順・制約を明文化し、挙動の再現性を高める。</p>
+          </article>
+          <article class="rounded-2xl border border-slate-700 bg-slate-900/60 p-5">
+            <h3 class="mb-2 text-base font-bold text-white">アーキテクチャ制約</h3>
+            <p class="text-sm text-slate-300">レイヤー境界、命名、依存方向などをルール化し、破壊的変更を抑止する。</p>
+          </article>
+          <article class="rounded-2xl border border-slate-700 bg-slate-900/60 p-5">
+            <h3 class="mb-2 text-base font-bold text-white">カスタムリンター + 自動修正</h3>
+            <p class="text-sm text-slate-300">違反を即検知し、修正方針まで提示してエージェントの自律回復を支援する。</p>
+          </article>
+          <article class="rounded-2xl border border-slate-700 bg-slate-900/60 p-5">
+            <h3 class="mb-2 text-base font-bold text-white">評価とフィードバックループ</h3>
+            <p class="text-sm text-slate-300">エバリュエーターで成果物を評価し、次の実行に反映して継続的に品質改善する。</p>
+          </article>
+          <article class="rounded-2xl border border-slate-700 bg-slate-900/60 p-5">
+            <h3 class="mb-2 text-base font-bold text-white">ツール厳選と権限管理</h3>
+            <p class="text-sm text-slate-300">必要最小限のツールのみ公開し、操作権限を段階的に管理して安全性を確保する。</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="mb-8 rounded-3xl border border-teal-400/30 bg-gradient-to-br from-sky-600/15 to-teal-500/15 p-6 shadow-xl sm:p-8">
+        <h2 class="mb-5 text-2xl font-bold text-teal-200 sm:text-3xl">4. 実世界でのインパクト（OpenAIの実例）</h2>
+        <div class="rounded-2xl border border-sky-300/40 bg-slate-900/75 p-6 text-center">
+          <p class="text-xl font-extrabold leading-relaxed text-sky-100 sm:text-3xl">
+            人間が1行もコードを書かずに、<br class="hidden sm:block"/>5ヶ月で約100万行のプロダクションコードを構築
+          </p>
+        </div>
+
+        <div class="mt-6 grid gap-4 md:grid-cols-2">
+          <div class="rounded-2xl border border-rose-300/30 bg-rose-500/10 p-5">
+            <h3 class="mb-3 text-lg font-bold text-rose-200">Before：従来のコーディング</h3>
+            <ul class="space-y-2 text-sm text-slate-200">
+              <li>・人手中心でスループットが限定的</li>
+              <li>・レビューと修正に多くの時間</li>
+              <li>・知識が個人に依存しやすい</li>
+            </ul>
+          </div>
+          <div class="rounded-2xl border border-emerald-300/35 bg-emerald-500/10 p-5">
+            <h3 class="mb-3 text-lg font-bold text-emerald-200">After：AIエージェント + ハーネス</h3>
+            <ul class="space-y-2 text-sm text-slate-100">
+              <li>・開発速度の大幅向上</li>
+              <li>・信頼性向上（評価と制約で品質安定）</li>
+              <li>・人為的ミスの削減</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="rounded-3xl border border-sky-400/30 bg-slate-900/80 p-6 shadow-glow sm:p-8">
+        <h2 class="mb-5 text-2xl font-bold text-sky-300 sm:text-3xl">5. なぜ重要なのか？</h2>
+        <div class="space-y-4 text-sm leading-relaxed text-slate-200 sm:text-lg">
+          <p class="rounded-xl border border-slate-700 bg-slate-800/60 p-4">
+            モデル自体の性能ではなく、周囲の環境設計（ハーネス）がAIエージェントの品質を決定する。
+          </p>
+          <p class="rounded-xl border border-teal-400/30 bg-teal-500/10 p-4 text-teal-100">
+            例え：モデル = CPU / ハーネス = オペレーティングシステム
+          </p>
+        </div>
+      </section>
+
+      <footer class="mt-8 text-center text-xs text-slate-400">
+        Based on OpenAI (Ryan Lopopolo), Martin Fowler, LangChain 2026
+      </footer>
+    </main>
+  </div>
+</body>
+</html>
