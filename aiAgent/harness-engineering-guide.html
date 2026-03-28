@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ハーネスエンジニアリング完全ガイド（2026）</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            navy: '#0b1220',
+            cyanx: '#22d3ee',
+            mintx: '#34d399',
+            amberx: '#f59e0b'
+          },
+          boxShadow: {
+            soft: '0 12px 40px rgba(34,211,238,0.15)'
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-slate-950 text-slate-100 antialiased">
+  <div class="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(34,211,238,0.14),_transparent_52%),radial-gradient(circle_at_80%_20%,_rgba(52,211,153,0.14),_transparent_36%)]">
+    <main class="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
+      <header class="rounded-3xl border border-cyan-300/30 bg-slate-900/85 p-6 shadow-soft sm:p-10">
+        <p class="mb-4 inline-flex rounded-full border border-cyan-300/40 bg-cyan-500/10 px-4 py-1 text-xs font-bold tracking-widest text-cyan-200">DETAILED EXPLAINER · 2026-03 EDITION</p>
+        <h1 class="text-3xl font-extrabold leading-tight text-white sm:text-4xl lg:text-5xl">ハーネスエンジニアリング完全ガイド</h1>
+        <p class="mt-4 max-w-4xl text-sm leading-relaxed text-slate-300 sm:text-base">
+          OpenAI / Martin Fowler / LangChain / nxcode / Medium などで議論された内容を、
+          <span class="font-semibold text-cyan-200">現場導入の手順</span>として再構成しました。
+          「モデルを変える」よりも「環境を設計する」ことが成果を左右する理由を、具体策まで落とし込みます。
+        </p>
+        <div class="mt-6 flex flex-wrap gap-3 text-xs">
+          <a href="harness-engineering-infographic.html" class="rounded-lg border border-slate-600 bg-slate-800/70 px-3 py-2 text-slate-100 hover:border-cyan-300">← インフォグラフィックへ戻る</a>
+          <a href="#playbook" class="rounded-lg border border-cyan-300/40 bg-cyan-500/10 px-3 py-2 text-cyan-100 hover:bg-cyan-500/20">導入プレイブックへ</a>
+          <a href="#sources" class="rounded-lg border border-emerald-300/40 bg-emerald-500/10 px-3 py-2 text-emerald-100 hover:bg-emerald-500/20">原典リンクへ</a>
+        </div>
+      </header>
+
+      <section class="mt-8 grid gap-4 lg:grid-cols-3">
+        <article class="rounded-2xl border border-cyan-300/25 bg-slate-900/75 p-5">
+          <h2 class="text-lg font-bold text-cyan-200">結論①</h2>
+          <p class="mt-2 text-sm leading-relaxed text-slate-200">エージェント開発のボトルネックは「モデル能力不足」より、<span class="font-semibold">ハーネス（制約・文脈・検証）不足</span>である。</p>
+        </article>
+        <article class="rounded-2xl border border-emerald-300/25 bg-slate-900/75 p-5">
+          <h2 class="text-lg font-bold text-emerald-200">結論②</h2>
+          <p class="mt-2 text-sm leading-relaxed text-slate-200">ハーネス改善だけで、同一モデルでも性能は大きく伸びうる（LangChainの実証）。</p>
+        </article>
+        <article class="rounded-2xl border border-amber-300/25 bg-slate-900/75 p-5">
+          <h2 class="text-lg font-bold text-amber-200">結論③</h2>
+          <p class="mt-2 text-sm leading-relaxed text-slate-200">実運用では「初期構築」より「継続メンテ（ドキュメント更新・ガーベジコレクション）」が勝負を分ける。</p>
+        </article>
+      </section>
+
+      <section class="mt-8 rounded-3xl border border-cyan-300/25 bg-slate-900/75 p-6 sm:p-8">
+        <h2 class="text-2xl font-bold text-cyan-200 sm:text-3xl">1. 原典から見る“ハーネス”の定義</h2>
+        <div class="mt-4 space-y-4 text-sm leading-relaxed text-slate-200 sm:text-base">
+          <p>
+            OpenAI（Ryan Lopopolo, 2026-02-11）の実験は、
+            <span class="font-semibold text-white">人間が1行もコードを書かない</span>制約下で、
+            5ヶ月・約100万行規模を運用可能にした事例です。
+            そこで示された中核は「<span class="font-semibold text-cyan-200">Humans steer. Agents execute.</span>」という役割分担でした。
+          </p>
+          <p>
+            つまり、エンジニアの仕事は「コードを書くこと」から、
+            「エージェントが正しく書ける環境（ハーネス）を設計すること」へシフトします。
+            ハーネスは単一のプロンプトではなく、<span class="font-semibold">文脈設計・制約設計・検証ループ</span>を束ねた運用システムです。
+          </p>
+        </div>
+        <div class="mt-5 grid gap-4 md:grid-cols-3">
+          <div class="rounded-xl border border-slate-700 bg-slate-900/70 p-4">
+            <h3 class="font-bold text-white">Context</h3>
+            <p class="mt-2 text-sm text-slate-300">AGENTS.mdを目次化し、真の知識はdocs配下の構造化ドキュメントに分散。</p>
+          </div>
+          <div class="rounded-xl border border-slate-700 bg-slate-900/70 p-4">
+            <h3 class="font-bold text-white">Constraints</h3>
+            <p class="mt-2 text-sm text-slate-300">カスタムリンター・構造テストで依存方向や設計規約を機械的に強制。</p>
+          </div>
+          <div class="rounded-xl border border-slate-700 bg-slate-900/70 p-4">
+            <h3 class="font-bold text-white">Continuous Cleanup</h3>
+            <p class="mt-2 text-sm text-slate-300">定期的な自動リファクタPRでエントロピーを返済（ガーベジコレクション）。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="mt-8 rounded-3xl border border-emerald-300/25 bg-slate-900/75 p-6 sm:p-8">
+        <h2 class="text-2xl font-bold text-emerald-200 sm:text-3xl">2. 批評から学ぶ：なぜ“効く”のか、どこが難しいのか</h2>
+        <div class="mt-5 grid gap-4 lg:grid-cols-2">
+          <article class="rounded-xl border border-emerald-300/20 bg-emerald-500/10 p-4">
+            <h3 class="font-bold text-emerald-100">Martin Fowler系の論点（2026-02-17）</h3>
+            <ul class="mt-2 list-disc space-y-2 pl-5 text-sm text-slate-200">
+              <li>OpenAI事例を、①Context Engineering ②Architectural Constraints ③Garbage Collection の3軸で整理。</li>
+              <li>将来は「ハーネス＝サービステンプレート化」する可能性を示唆。</li>
+              <li>同時に、既存巨大コードベースへの適用や機能検証の厳密化は未解決課題として指摘。</li>
+            </ul>
+          </article>
+          <article class="rounded-xl border border-amber-300/25 bg-amber-500/10 p-4">
+            <h3 class="font-bold text-amber-100">現場で詰まりやすいポイント</h3>
+            <ul class="mt-2 list-disc space-y-2 pl-5 text-sm text-slate-200">
+              <li>制約が弱い：速いが壊れる。</li>
+              <li>制約が強すぎる：安全だが進まない。</li>
+              <li>ドキュメントが古い：エージェントが過去の前提で誤実装する。</li>
+              <li>評価不足：見かけの成功に対し、本番要件を満たしていない。</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section class="mt-8 rounded-3xl border border-cyan-300/30 bg-gradient-to-br from-cyan-500/10 to-emerald-500/10 p-6 sm:p-8">
+        <h2 class="text-2xl font-bold text-cyan-100 sm:text-3xl">3. 実証：モデル固定でも性能は上がる（LangChain）</h2>
+        <div class="mt-4 rounded-2xl border border-cyan-300/30 bg-slate-900/80 p-5 text-center">
+          <p class="text-lg font-extrabold text-cyan-100 sm:text-2xl">Terminal Bench 2.0 で 52.8 → 66.5（Top 30 → Top 5）</p>
+          <p class="mt-2 text-sm text-slate-300">変更したのはモデルではなく、ハーネス（自己検証、環境コンテキスト注入、ループ検出、推論配分）。</p>
+        </div>
+        <div class="mt-5 overflow-x-auto">
+          <table class="min-w-full border-collapse text-sm">
+            <thead>
+              <tr class="bg-slate-900/80 text-left text-slate-100">
+                <th class="border border-slate-700 px-3 py-2">施策</th>
+                <th class="border border-slate-700 px-3 py-2">実装例</th>
+                <th class="border border-slate-700 px-3 py-2">効果</th>
+              </tr>
+            </thead>
+            <tbody class="text-slate-200">
+              <tr>
+                <td class="border border-slate-700 px-3 py-2">自己検証ループ</td>
+                <td class="border border-slate-700 px-3 py-2">終了前にPreCompletionChecklistでテスト実行を強制</td>
+                <td class="border border-slate-700 px-3 py-2">「書いて終わり」を減らし正答率改善</td>
+              </tr>
+              <tr>
+                <td class="border border-slate-700 px-3 py-2">環境コンテキスト注入</td>
+                <td class="border border-slate-700 px-3 py-2">起動時にディレクトリとツールを探索・注入</td>
+                <td class="border border-slate-700 px-3 py-2">探索ミス減、初動高速化</td>
+              </tr>
+              <tr>
+                <td class="border border-slate-700 px-3 py-2">ループ検出</td>
+                <td class="border border-slate-700 px-3 py-2">同一ファイル編集回数を監視し警告</td>
+                <td class="border border-slate-700 px-3 py-2">doom loop抑制</td>
+              </tr>
+              <tr>
+                <td class="border border-slate-700 px-3 py-2">推論予算配分</td>
+                <td class="border border-slate-700 px-3 py-2">xhigh-high-xhigh の reasoning sandwich</td>
+                <td class="border border-slate-700 px-3 py-2">品質と時間制限のバランス最適化</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="playbook" class="mt-8 rounded-3xl border border-emerald-300/30 bg-slate-900/80 p-6 sm:p-8">
+        <h2 class="text-2xl font-bold text-emerald-200 sm:text-3xl">4. 90日導入プレイブック（実務向け）</h2>
+        <div class="mt-5 grid gap-4 md:grid-cols-3">
+          <article class="rounded-xl border border-slate-700 bg-slate-900/70 p-4">
+            <h3 class="font-bold text-white">Day 1-14</h3>
+            <ul class="mt-2 list-disc space-y-1 pl-5 text-sm text-slate-300">
+              <li>AGENTS.mdを100行前後に圧縮（目次化）</li>
+              <li>docs配下に設計判断の一次情報を移設</li>
+              <li>最低限のlint / test / CIゲートを整備</li>
+            </ul>
+          </article>
+          <article class="rounded-xl border border-slate-700 bg-slate-900/70 p-4">
+            <h3 class="font-bold text-white">Day 15-45</h3>
+            <ul class="mt-2 list-disc space-y-1 pl-5 text-sm text-slate-300">
+              <li>カスタムリンター導入（依存方向・命名・ログ）</li>
+              <li>エージェントの自己検証チェックリスト導入</li>
+              <li>失敗トレース収集と失敗分類を開始</li>
+            </ul>
+          </article>
+          <article class="rounded-xl border border-slate-700 bg-slate-900/70 p-4">
+            <h3 class="font-bold text-white">Day 46-90</h3>
+            <ul class="mt-2 list-disc space-y-1 pl-5 text-sm text-slate-300">
+              <li>定期ガーベジコレクションPRを自動化</li>
+              <li>ドキュメント鮮度チェックをCIへ組み込み</li>
+              <li>モデル差し替え耐性（provider-agnostic）を検証</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section class="mt-8 rounded-3xl border border-amber-300/30 bg-amber-500/10 p-6 sm:p-8">
+        <h2 class="text-2xl font-bold text-amber-100 sm:text-3xl">5. よくある誤解</h2>
+        <div class="mt-4 space-y-3 text-sm leading-relaxed text-slate-100 sm:text-base">
+          <p class="rounded-lg border border-amber-300/30 bg-slate-900/70 p-4"><span class="font-bold">誤解：</span>良いモデルを選べば解決する。<br><span class="text-amber-100">実際：</span>同一モデルでもハーネス差で成績が大きく変わる。</p>
+          <p class="rounded-lg border border-amber-300/30 bg-slate-900/70 p-4"><span class="font-bold">誤解：</span>AGENTS.mdを長くすれば賢くなる。<br><span class="text-amber-100">実際：</span>巨大単一ファイルは劣化しやすく、重要情報が埋もれる。</p>
+          <p class="rounded-lg border border-amber-300/30 bg-slate-900/70 p-4"><span class="font-bold">誤解：</span>一度作れば完成。<br><span class="text-amber-100">実際：</span>ハーネスはプロダクト同様に継続改善が必要。</p>
+        </div>
+      </section>
+
+      <section id="sources" class="mt-8 rounded-3xl border border-slate-600 bg-slate-900/80 p-6 sm:p-8">
+        <h2 class="text-2xl font-bold text-slate-100 sm:text-3xl">参考ソース（原典）</h2>
+        <ul class="mt-4 space-y-3 text-sm text-slate-300 sm:text-base">
+          <li><a class="text-cyan-300 underline" href="https://openai.com/index/harness-engineering/" target="_blank" rel="noopener noreferrer">OpenAI: Harness engineering: leveraging Codex in an agent-first world（2026-02-11）</a></li>
+          <li><a class="text-cyan-300 underline" href="https://martinfowler.com/articles/exploring-gen-ai/harness-engineering.html" target="_blank" rel="noopener noreferrer">Martin Fowler: Harness Engineering（2026-02-17）</a></li>
+          <li><a class="text-cyan-300 underline" href="https://blog.langchain.com/improving-deep-agents-with-harness-engineering/" target="_blank" rel="noopener noreferrer">LangChain: Improving Deep Agents with harness engineering（2026-02-17）</a></li>
+          <li><a class="text-cyan-300 underline" href="https://www.nxcode.io/resources/news/harness-engineering-complete-guide-ai-agent-codex-2026" target="_blank" rel="noopener noreferrer">nxcode.io: Complete Guide（2026-03-01）</a></li>
+          <li><a class="text-cyan-300 underline" href="https://cobusgreyling.medium.com/the-rise-of-ai-harness-engineering-5f5220de393e" target="_blank" rel="noopener noreferrer">Medium: The Rise of AI Harness Engineering（2026-03-13）</a></li>
+          <li><a class="text-cyan-300 underline" href="https://www.humanlayer.dev/blog/skill-issue-harness-engineering-for-coding-agents" target="_blank" rel="noopener noreferrer">HumanLayer: Skill Issue: Harness Engineering for Coding Agents</a></li>
+        </ul>
+      </section>
+    </main>
+  </div>
+</body>
+</html>
