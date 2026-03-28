@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Claude Codeメモリ設計 インフォグラフィック（公式ドキュメント検証版）</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --card: #121a33;
+      --card2: #1a2550;
+      --text: #e8ecff;
+      --sub: #b8c3ff;
+      --accent: #7dd3fc;
+      --ok: #86efac;
+      --warn: #fcd34d;
+      --line: #2b3a75;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif;
+      background: radial-gradient(circle at 15% 15%, #16224b 0%, var(--bg) 45%, #070b16 100%);
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .wrap { max-width: 1120px; margin: 0 auto; padding: 28px 20px 56px; }
+    .hero {
+      background: linear-gradient(135deg, #213b93, #2c5bbb 40%, #2a8cc3);
+      border-radius: 20px;
+      padding: 28px;
+      box-shadow: 0 18px 50px rgba(0,0,0,.35);
+      margin-bottom: 20px;
+    }
+    .tag { display: inline-block; background: rgba(255,255,255,.16); padding: 4px 12px; border-radius: 999px; font-size: 12px; }
+    h1 { margin: 10px 0 8px; font-size: clamp(24px, 4vw, 40px); line-height: 1.25; }
+    .lead { margin: 0; color: #f2f6ff; }
+
+    .grid { display: grid; gap: 16px; }
+    .grid-2 { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+    .card {
+      background: linear-gradient(180deg, var(--card), #0d1530);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 18px;
+    }
+    .card h2, .card h3 { margin-top: 0; line-height: 1.35; }
+    .kpi {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .pill { background: #0b1432; border: 1px solid #33407a; border-radius: 12px; padding: 10px; }
+    .pill b { display: block; font-size: 20px; color: var(--accent); }
+
+    .flow { display: grid; gap: 10px; }
+    .step { background: var(--card2); border-left: 5px solid var(--accent); border-radius: 10px; padding: 10px 12px; }
+    code, pre {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      background: #0a122b;
+      color: #dbeafe;
+    }
+    code { padding: 2px 6px; border-radius: 6px; }
+    pre {
+      border-radius: 12px;
+      border: 1px solid #33407a;
+      padding: 12px;
+      overflow-x: auto;
+      margin: 0;
+      white-space: pre-wrap;
+    }
+    ul { margin: 0; padding-left: 1.1em; }
+    .ok { color: var(--ok); }
+    .warn { color: var(--warn); }
+    .footer {
+      margin-top: 20px;
+      background: #0a1128;
+      border: 1px solid #2e3b72;
+      border-radius: 14px;
+      padding: 14px;
+      font-size: 14px;
+      color: var(--sub);
+    }
+    a { color: #93c5fd; }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="hero">
+      <span class="tag">X投稿内容を公式ドキュメントに照合して再構成</span>
+      <h1>Claude Code の「記憶と指示設計」<br>実務で迷わない1枚図</h1>
+      <p class="lead">ポイントは「どこに書くか」「どう分割するか」「どう衝突を防ぐか」。<br>以下は <b>Anthropic公式ドキュメント</b>に基づく、運用可能な最小構成です。</p>
+      <div class="kpi">
+        <div class="pill"><b>2系統</b> CLAUDE.md と Auto memory</div>
+        <div class="pill"><b>4スコープ</b> Managed / Project / User / Subdir</div>
+        <div class="pill"><b>~200行目安</b> 1ファイルを短く保つ</div>
+      </div>
+    </section>
+
+    <section class="grid grid-2">
+      <article class="card">
+        <h2>① まず全体像：Claudeの記憶は2本立て</h2>
+        <div class="flow">
+          <div class="step"><b>CLAUDE.md</b>：人間が書く恒久ルール（コーディング規約/作業手順/設計方針）</div>
+          <div class="step"><b>Auto memory</b>：Claudeが学習した補助メモ（修正履歴や好み）</div>
+        </div>
+        <p><span class="ok">実務メモ</span>：重要ルールは必ず CLAUDE.md 側へ。Auto memory任せにしない。</p>
+      </article>
+
+      <article class="card">
+        <h2>② どこに置く？優先順位の考え方</h2>
+        <ul>
+          <li><code>/etc/claude-code/CLAUDE.md</code> など Managed（組織共通）</li>
+          <li><code>./CLAUDE.md</code> or <code>./.claude/CLAUDE.md</code>（プロジェクト共通）</li>
+          <li><code>~/.claude/CLAUDE.md</code>（個人共通）</li>
+          <li>サブディレクトリ内 <code>CLAUDE.md</code>（該当ファイルを読む時に読み込み）</li>
+        </ul>
+        <p><span class="warn">注意</span>：広いルールほど抽象、狭いルールほど具体にして衝突を防ぐ。</p>
+      </article>
+
+      <article class="card">
+        <h2>③ 分割の正解：肥大化したら import / rules</h2>
+        <p>1ファイルが長くなったら、<code>@path/to/file</code> で分割。さらにテーマ別は <code>.claude/rules/</code> を使う。</p>
+<pre># CLAUDE.md 例
+@AGENTS.md
+@docs/git-instructions.md
+
+## Claude Code専用
+- 変更前に影響範囲を箇条書き
+- 生成後に必ずテストコマンドを実行</pre>
+        <p><span class="ok">公式準拠</span>：既存の AGENTS.md 文化があるリポジトリは、CLAUDE.md で import 連携できる。</p>
+      </article>
+
+      <article class="card">
+        <h2>④ 初期セットアップの最短ルート</h2>
+        <div class="flow">
+          <div class="step"><b>/init</b> でプロジェクト初期の CLAUDE.md を生成</div>
+          <div class="step">内容を200行以内目安で整理（冗長な精神論を削る）</div>
+          <div class="step">命令文は検証可能に書く（例: 「コミット前に <code>npm test</code>」）</div>
+        </div>
+        <p>曖昧ルールより、<b>検証できるルール</b>の方が遵守率が高い。</p>
+      </article>
+
+      <article class="card">
+        <h2>⑤ サブエージェント運用（必要な時だけ）</h2>
+        <ul>
+          <li><code>.claude/agents/</code>（プロジェクト）と <code>~/.claude/agents/</code>（個人）</li>
+          <li>YAML frontmatterで <code>name</code> / <code>description</code> / <code>tools</code> を定義</li>
+          <li>責務は小さく分ける（reviewer, debugger, docs-writer など）</li>
+        </ul>
+        <p><span class="ok">設計原則</span>：1エージェント1責務 + 最小権限ツール。</p>
+      </article>
+
+      <article class="card">
+        <h2>⑥ そのまま使える運用テンプレ</h2>
+<pre>CLAUDE.md
+1. プロジェクト概要（3行）
+2. 絶対ルール（5〜10項目）
+3. 開発フロー（編集→テスト→コミット）
+4. ディレクトリ規約
+5. import（詳細は別ファイルへ）
+
+.claude/rules/
+- code-style.md
+- testing.md
+- security.md</pre>
+        <p>この構成だと、チーム拡大時もルール追加が壊れにくい。</p>
+      </article>
+    </section>
+
+    <section class="footer">
+      <b>検証ソース（Anthropic公式）</b><br>
+      - How Claude remembers your project: <a href="https://code.claude.com/docs/en/memory" target="_blank" rel="noopener noreferrer">https://code.claude.com/docs/en/memory</a><br>
+      - Claude Code settings: <a href="https://code.claude.com/docs/en/settings" target="_blank" rel="noopener noreferrer">https://code.claude.com/docs/en/settings</a><br>
+      - Subagents: <a href="https://docs.anthropic.com/en/docs/claude-code/sub-agents" target="_blank" rel="noopener noreferrer">https://docs.anthropic.com/en/docs/claude-code/sub-agents</a><br><br>
+      ※ X投稿本文は環境上の制約で直接取得できなかったため、リンク文脈（Claude Code運用論点）を公式仕様で検証し、誤解が出やすい点を再構成しています。
+    </section>
+  </main>
+</body>
+</html>
