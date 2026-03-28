@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ハーネスエンジニアリング完全図解</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #131a2e;
+      --panel-soft: #1b2440;
+      --text: #ecf1ff;
+      --muted: #b8c2e8;
+      --accent: #67e8f9;
+      --accent2: #a78bfa;
+      --good: #34d399;
+      --warn: #fbbf24;
+      --danger: #fb7185;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Inter", "Noto Sans JP", system-ui, -apple-system, sans-serif;
+      color: var(--text);
+      background: radial-gradient(circle at 15% -10%, #1e2a56 0%, var(--bg) 45%), var(--bg);
+      line-height: 1.6;
+    }
+    .wrap {
+      max-width: 1140px;
+      margin: 0 auto;
+      padding: 28px 16px 56px;
+    }
+    .hero {
+      padding: 24px;
+      border: 1px solid #2a365f;
+      border-radius: 20px;
+      background: linear-gradient(140deg, #131d39 0%, #10172d 100%);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+    }
+    h1 { margin: 0 0 12px; font-size: clamp(1.6rem, 2.8vw, 2.4rem); }
+    h2 { margin: 0 0 12px; font-size: 1.25rem; color: var(--accent); }
+    p { margin: 0 0 12px; }
+    .sub { color: var(--muted); }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+    .card {
+      background: var(--panel-soft);
+      border: 1px solid #2b3762;
+      border-radius: 14px;
+      padding: 12px;
+    }
+    .kpi { font-size: 1.45rem; font-weight: 800; color: #e0e7ff; }
+    .section {
+      margin-top: 18px;
+      padding: 20px;
+      border-radius: 16px;
+      background: var(--panel);
+      border: 1px solid #2a355a;
+    }
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(150px, 1fr));
+      gap: 10px;
+      overflow-x: auto;
+    }
+    .step {
+      position: relative;
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid #374878;
+      background: #17203a;
+      min-height: 150px;
+    }
+    .step::after {
+      content: "→";
+      position: absolute;
+      right: -10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #93a4dd;
+      font-weight: 700;
+    }
+    .step:last-child::after { content: ""; }
+    .badge {
+      display: inline-block;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      padding: 2px 8px;
+      margin-bottom: 8px;
+      border: 1px solid;
+    }
+    .b1 { color: var(--accent); border-color: #2dd4bf; }
+    .b2 { color: var(--accent2); border-color: #a78bfa; }
+    .b3 { color: var(--good); border-color: var(--good); }
+    .risk {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    }
+    .risk li { margin-bottom: 6px; }
+    .ok { color: var(--good); font-weight: 700; }
+    .ng { color: var(--danger); font-weight: 700; }
+    .refs a { color: #93c5fd; }
+    footer { margin-top: 20px; color: var(--muted); font-size: .9rem; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <h1>🔧 ハーネスエンジニアリング完全図解</h1>
+      <p class="sub">設計（Electrical + Mechanical）から製造・検査・保守までを、品質基準と実装現場目線で再構成。</p>
+      <div class="grid">
+        <div class="card">
+          <div class="kpi">5フェーズ</div>
+          <div>要求定義 → 回路設計 → 3D配索 → 製造設計 → 検査/運用</div>
+        </div>
+        <div class="card">
+          <div class="kpi">3大品質軸</div>
+          <div>電気性能 / 機械信頼性 / 製造再現性</div>
+        </div>
+        <div class="card">
+          <div class="kpi">重要規格</div>
+          <div>IPC/WHMA-A-620（受入・外観・品質）と NASA-STD-8739.4（宇宙向け作業標準）</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>1) ハーネスエンジニアリングとは</h2>
+      <p>ワイヤ、端子、コネクタ、保護材（シース/チューブ/クランプ）をシステム要求に合わせて統合し、<strong>電気的に正しく、物理的に壊れず、現場で製造可能</strong>な形に落とし込む工学領域です。</p>
+      <p>特に近年は、EV・航空宇宙・産業機械の高密度化により、ECAD/MCAD連携とデジタル連続性（設計データ→製造設備）がボトルネック改善の中心になっています。</p>
+    </section>
+
+    <section class="section">
+      <h2>2) 設計〜製造の標準フロー（実務）</h2>
+      <div class="flow">
+        <div class="step">
+          <div class="badge b1">Phase 01</div>
+          <strong>要求定義</strong>
+          <ul>
+            <li>電圧・電流・温度・振動</li>
+            <li>安全要求/法規</li>
+            <li>搭載空間・重量制約</li>
+          </ul>
+        </div>
+        <div class="step">
+          <div class="badge b1">Phase 02</div>
+          <strong>回路・部品選定</strong>
+          <ul>
+            <li>導体サイズ選定</li>
+            <li>端子/コネクタ定格確認</li>
+            <li>シールド/接地設計</li>
+          </ul>
+        </div>
+        <div class="step">
+          <div class="badge b2">Phase 03</div>
+          <strong>3D配索・固定</strong>
+          <ul>
+            <li>最小曲げ半径</li>
+            <li>擦れ・熱源干渉回避</li>
+            <li>サービスループ設計</li>
+          </ul>
+        </div>
+        <div class="step">
+          <div class="badge b2">Phase 04</div>
+          <strong>製造設計（Formboard）</strong>
+          <ul>
+            <li>切断長/圧着仕様書</li>
+            <li>ラベル・色・識別規則</li>
+            <li>作業順序と治具</li>
+          </ul>
+        </div>
+        <div class="step">
+          <div class="badge b3">Phase 05</div>
+          <strong>検査・運用</strong>
+          <ul>
+            <li>導通・絶縁・耐圧</li>
+            <li>外観受入基準</li>
+            <li>故障解析→設計へFB</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>3) 失敗しやすいポイントと対策</h2>
+      <div class="risk">
+        <div class="card">
+          <strong class="ng">NG: 図面と3D実装の不一致</strong>
+          <ul>
+            <li>コネクタ位置ズレ、長さ不足、干渉。</li>
+            <li><span class="ok">対策:</span> ECAD/MCAD同期と変更管理（ECR/ECO）の一元化。</li>
+          </ul>
+        </div>
+        <div class="card">
+          <strong class="ng">NG: 現場依存の作業品質</strong>
+          <ul>
+            <li>圧着バラつき、識別ミス、配索再現性低下。</li>
+            <li><span class="ok">対策:</span> 作業標準 + 受入基準 + 教育認証（CIS/CIT等）をセット運用。</li>
+          </ul>
+        </div>
+        <div class="card">
+          <strong class="ng">NG: 試験設計が後付け</strong>
+          <ul>
+            <li>検査治具が間に合わず量産で不良流出。</li>
+            <li><span class="ok">対策:</span> DfT（Testability）を初期設計から組み込み、ピン表と試験仕様を同時確定。</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>4) 検査設計の最小セット（量産前に必須）</h2>
+      <div class="grid">
+        <div class="card"><strong>導通試験</strong><br>誤配線、断線、極性逆の検出。</div>
+        <div class="card"><strong>絶縁抵抗試験</strong><br>線間/線-シールド間リーク評価。</div>
+        <div class="card"><strong>耐圧試験（Hipot）</strong><br>絶縁破壊余裕の確認。</div>
+        <div class="card"><strong>外観・加工品質</strong><br>圧着状態、被覆損傷、端末処理、固定状態。</div>
+      </div>
+    </section>
+
+    <section class="section refs">
+      <h2>5) 参考にした主要資料（再構成元）</h2>
+      <ul>
+        <li><a href="https://whma.org/ipcwhma-a-620/" target="_blank" rel="noopener noreferrer">WHMA: IPC/WHMA-A-620（ケーブル/ワイヤハーネス受入基準の紹介）</a></li>
+        <li><a href="https://standards.nasa.gov/standard/NASA/NASA-STD-87394" target="_blank" rel="noopener noreferrer">NASA Workmanship Standard: NASA-STD-8739.4</a></li>
+        <li><a href="https://files.resources.altium.com/sites/default/files/2025-03/A%20Modern%20Approach%20to%20Wire%20Harness%20Engineering%20Whitepaper.pdf" target="_blank" rel="noopener noreferrer">A Modern Approach to Wire Harness Engineering（設計〜製造のデジタル連続性）</a></li>
+        <li><a href="https://www.ipc.org/sites/default/files/documents/Wire-Harness-Brochure-2026.pdf" target="_blank" rel="noopener noreferrer">IPC Wire Harness Brochure（標準と教育体系の概観）</a></li>
+      </ul>
+      <p class="sub">※上記資料を横断して、実装フローと失敗要因を日本語インフォグラフィックとして再構成しています。</p>
+    </section>
+
+    <footer>
+      Generated for infographicsPublic / topic: Harness Engineering (2026-03-28)
+    </footer>
+  </div>
+</body>
+</html>
