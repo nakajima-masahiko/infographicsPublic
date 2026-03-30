@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>デカルト「方法序説」— インフォグラフィック</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .hero {
+      background: linear-gradient(160deg, var(--navy) 0%, #2a1040 50%, var(--burgundy) 100%);
+      color: #fff;
+      padding: 80px 24px 60px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 600px 400px at 30% 70%, rgba(201,162,39,0.12) 0%, transparent 100%),
+        radial-gradient(ellipse 500px 300px at 75% 25%, rgba(45,106,159,0.1) 0%, transparent 100%);
+      pointer-events: none;
+    }
+
+    .hero .portrait {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--gold) 0%, #8b6914 100%);
+      margin: 0 auto 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 64px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+      position: relative;
+    }
+
+    .hero h1 {
+      font-size: clamp(32px, 6vw, 56px);
+      margin-bottom: 8px;
+      text-shadow: 0 3px 16px rgba(0,0,0,0.4);
+      position: relative;
+    }
+
+    .hero .latin {
+      font-size: clamp(14px, 2.5vw, 20px);
+      font-style: italic;
+      opacity: 0.7;
+      margin-bottom: 8px;
+      position: relative;
+    }
+
+    .hero .author {
+      font-size: clamp(16px, 3vw, 22px);
+      opacity: 0.85;
+      position: relative;
+    }
+
+    .hero .quote {
+      max-width: 600px;
+      margin: 32px auto 0;
+      font-size: clamp(15px, 2.5vw, 18px);
+      font-style: italic;
+      opacity: 0.8;
+      line-height: 1.7;
+      border-top: 1px solid rgba(201,162,39,0.3);
+      padding-top: 24px;
+      position: relative;
+    }
+
+    .page-cards {
+      max-width: 1000px;
+      margin: -40px auto 0;
+      padding: 0 24px 80px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+      position: relative;
+      z-index: 10;
+    }
+
+    .page-card {
+      background: #fff;
+      border-radius: 20px;
+      padding: 36px 28px;
+      box-shadow: 0 8px 32px var(--shadow);
+      text-decoration: none;
+      color: inherit;
+      border: 1px solid rgba(201,162,39,0.15);
+      transition: all 0.25s;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .page-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 16px 48px rgba(26,26,46,0.2);
+      border-color: var(--gold);
+    }
+
+    .page-card .card-num {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      font-weight: 700;
+      font-family: "Noto Sans JP", sans-serif;
+      color: #fff;
+      margin-bottom: 20px;
+    }
+
+    .page-card:nth-child(1) .card-num { background: linear-gradient(135deg, var(--burgundy), #a84868); }
+    .page-card:nth-child(2) .card-num { background: linear-gradient(135deg, var(--navy), var(--accent-blue)); }
+    .page-card:nth-child(3) .card-num { background: linear-gradient(135deg, var(--accent-teal), #2ab09e); }
+
+    .page-card h2 {
+      font-size: 20px;
+      color: var(--navy);
+      margin-bottom: 12px;
+      line-height: 1.4;
+    }
+
+    .page-card p {
+      font-size: 14px;
+      color: #666;
+      line-height: 1.7;
+      flex: 1;
+    }
+
+    .page-card .arrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 20px;
+      color: var(--burgundy);
+      font-size: 14px;
+      font-family: "Noto Sans JP", sans-serif;
+      font-weight: 600;
+    }
+
+    .overview-section {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 40px 24px 60px;
+    }
+
+    .overview-section h2 {
+      font-size: 26px;
+      color: var(--burgundy);
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .overview-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+    }
+
+    .overview-stat {
+      text-align: center;
+      background: #fff;
+      border-radius: var(--radius);
+      padding: 24px 16px;
+      box-shadow: 0 4px 16px var(--shadow);
+    }
+
+    .overview-stat .num {
+      font-size: 36px;
+      font-weight: 700;
+      color: var(--burgundy);
+      font-family: "Noto Sans JP", sans-serif;
+    }
+
+    .overview-stat .label {
+      font-size: 13px;
+      color: #888;
+      margin-top: 4px;
+      font-family: "Noto Sans JP", sans-serif;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="hero">
+    <div class="portrait">R</div>
+    <h1>方法序説</h1>
+    <p class="latin">Discours de la M&eacute;thode (1637)</p>
+    <p class="author">ルネ・デカルト &mdash; Ren&eacute; Descartes</p>
+    <div class="header-decoration">
+      <span></span><span></span><span></span>
+    </div>
+    <p class="quote">
+      「我思う、ゆえに我あり」&mdash; 近代哲学の出発点となった宣言。<br>
+      この一冊が西洋思想と科学の方法論を根底から変えた。
+    </p>
+  </div>
+
+  <div class="page-cards">
+    <a href="background.html" class="page-card">
+      <div class="card-num">1</div>
+      <h2>成立背景とデカルトの生涯</h2>
+      <p>方法序説が生まれた17世紀ヨーロッパの知的背景、デカルトの生い立ち・遍歴・思想形成・学問的業績をタイムラインで解説します。</p>
+      <span class="arrow">詳しく見る &rarr;</span>
+    </a>
+    <a href="system.html" class="page-card">
+      <div class="card-num">2</div>
+      <h2>方法序説のシステム的解説</h2>
+      <p>全6部の構成、「方法の四規則」、コギト命題、心身二元論など、方法序説の論理構造と哲学的骨格を体系的に図解します。</p>
+      <span class="arrow">詳しく見る &rarr;</span>
+    </a>
+    <a href="ai-application.html" class="page-card">
+      <div class="card-num">3</div>
+      <h2>生成AI・AIエージェントへの応用</h2>
+      <p>デカルトの方法論が現代の生成AI・AIエージェント設計にどう接続するか。懐疑・分析・総合・検証のサイクルをAI時代に読み替えます。</p>
+      <span class="arrow">詳しく見る &rarr;</span>
+    </a>
+  </div>
+
+  <div class="overview-section">
+    <h2>方法序説 &mdash; 数字で見る概要</h2>
+    <div class="overview-grid">
+      <div class="overview-stat">
+        <div class="num">1637</div>
+        <div class="label">初版刊行年</div>
+      </div>
+      <div class="overview-stat">
+        <div class="num">6</div>
+        <div class="label">全体の部数</div>
+      </div>
+      <div class="overview-stat">
+        <div class="num">4</div>
+        <div class="label">方法の規則</div>
+      </div>
+      <div class="overview-stat">
+        <div class="num">389</div>
+        <div class="label">年間の影響（年）</div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <a href="../../index.html">&larr; インフォグラフィック一覧に戻る</a>
+    <p style="margin-top:12px">&copy; 2026 Descartes Infographic</p>
+  </footer>
+
+</body>
+</html>
