@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>生成AI・AIエージェントへの応用 — 方法序説インフォグラフィック</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .mapping-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+    }
+
+    .mapping-card {
+      background: #fff;
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: 0 4px 20px var(--shadow);
+      transition: transform 0.2s;
+    }
+
+    .mapping-card:hover {
+      transform: translateY(-3px);
+    }
+
+    .mapping-card .map-header {
+      padding: 20px 24px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .mapping-card:nth-child(1) .map-header { background: linear-gradient(135deg, #6b1d3a, #a84868); }
+    .mapping-card:nth-child(2) .map-header { background: linear-gradient(135deg, #16213e, #2d6a9f); }
+    .mapping-card:nth-child(3) .map-header { background: linear-gradient(135deg, #1a8a7d, #2ab09e); }
+    .mapping-card:nth-child(4) .map-header { background: linear-gradient(135deg, #c9a227, #8b6914); }
+
+    .mapping-card .map-header .num {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 16px;
+      font-family: "Noto Sans JP", sans-serif;
+    }
+
+    .mapping-card .map-header h3 {
+      font-size: 17px;
+      margin: 0;
+    }
+
+    .mapping-card .map-body {
+      padding: 20px 24px;
+    }
+
+    .mapping-card .map-body .descartes-side,
+    .mapping-card .map-body .ai-side {
+      margin-bottom: 12px;
+    }
+
+    .mapping-card .map-body .label {
+      font-size: 11px;
+      font-weight: 700;
+      font-family: "Noto Sans JP", sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 4px;
+    }
+
+    .mapping-card .map-body .descartes-side .label { color: var(--burgundy); }
+    .mapping-card .map-body .ai-side .label { color: var(--accent-teal); }
+
+    .mapping-card .map-body p {
+      font-size: 14px;
+      color: #555;
+      line-height: 1.7;
+    }
+
+    .agent-architecture {
+      background: linear-gradient(160deg, var(--navy) 0%, #1a3a5c 100%);
+      border-radius: 20px;
+      padding: 40px 32px;
+      color: #fff;
+      margin: 48px 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .agent-architecture::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 80% 20%, rgba(201,162,39,0.1), transparent 60%);
+      pointer-events: none;
+    }
+
+    .agent-architecture h3 {
+      font-size: 22px;
+      color: var(--gold-light);
+      text-align: center;
+      margin-bottom: 32px;
+      position: relative;
+    }
+
+    .agent-loop {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      position: relative;
+    }
+
+    .agent-step {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(201,162,39,0.25);
+      border-radius: 14px;
+      padding: 20px;
+      text-align: center;
+      position: relative;
+    }
+
+    .agent-step .step-icon {
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+
+    .agent-step h4 {
+      font-size: 15px;
+      color: var(--gold-light);
+      margin-bottom: 6px;
+    }
+
+    .agent-step .descartes-ref {
+      font-size: 11px;
+      color: rgba(201,162,39,0.6);
+      font-family: "Noto Sans JP", sans-serif;
+      margin-bottom: 8px;
+    }
+
+    .agent-step p {
+      font-size: 13px;
+      opacity: 0.8;
+      line-height: 1.6;
+    }
+
+    .usecase-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+    }
+
+    .usecase-card {
+      background: #fff;
+      border-radius: var(--radius);
+      padding: 28px;
+      box-shadow: 0 4px 20px var(--shadow);
+      border-left: 5px solid var(--gold);
+    }
+
+    .usecase-card h3 {
+      font-size: 17px;
+      color: var(--navy);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .usecase-card h3 span {
+      font-size: 24px;
+    }
+
+    .usecase-card p {
+      font-size: 14px;
+      color: #555;
+      line-height: 1.7;
+      margin-bottom: 12px;
+    }
+
+    .usecase-card .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .usecase-card .tag {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-family: "Noto Sans JP", sans-serif;
+      background: #f0ede5;
+      color: #666;
+    }
+
+    .philosophy-table-wrap {
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <h1>生成AI・AIエージェントへの応用</h1>
+    <p class="subtitle">デカルトの方法論を現代のAI設計に読み替える</p>
+    <div class="header-decoration"><span></span><span></span><span></span></div>
+  </header>
+
+  <nav class="page-nav">
+    <a href="index.html">総合目次</a>
+    <a href="background.html">背景と生涯</a>
+    <a href="system.html">システム的解説</a>
+    <a href="ai-application.html" class="active">AI時代への応用</a>
+  </nav>
+
+  <div class="container">
+
+    <!-- ===== 導入 ===== -->
+    <section class="section">
+      <h2 class="section-title">なぜ今、デカルトなのか</h2>
+      <div class="highlight-box">
+        <blockquote>「良識はこの世で最も公平に配分されたものである」 &mdash; 方法序説 第1部</blockquote>
+        <p style="margin-top:16px">生成AIは「良識」を持たない。しかし、デカルトが設計した「正しく推論するための方法」は、AIシステムの設計原理として驚くほど有効に機能する。方法的懐疑は入力検証に、分析と総合はタスク分解とチェーン・オブ・ソートに、枚挙は自己評価に対応する。389年前の方法論が、AIエージェント設計の青写真となる。</p>
+      </div>
+    </section>
+
+    <!-- ===== 四規則のAIマッピング ===== -->
+    <section class="section">
+      <h2 class="section-title">方法の四規則 &times; AI設計原理</h2>
+      <p class="section-intro">デカルトの四規則を生成AIとAIエージェントの設計パターンに対応づける。</p>
+
+      <div class="mapping-grid">
+        <div class="mapping-card">
+          <div class="map-header">
+            <div class="num">1</div>
+            <h3>明証の規則 &rarr; 入力検証と幻覚抑制</h3>
+          </div>
+          <div class="map-body">
+            <div class="descartes-side">
+              <p class="label">デカルト</p>
+              <p>明晰かつ判明でないものは真として受け入れない。速断と偏見を排除する。</p>
+            </div>
+            <div class="ai-side">
+              <p class="label">AI設計</p>
+              <p>プロンプトの曖昧さを検出し、不確実な情報に基づく生成（ハルシネーション）を抑制する。出典の確認、信頼度スコアの付与、「分からない」と回答する能力の実装。RAG（検索拡張生成）による事実基盤の確保。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="mapping-card">
+          <div class="map-header">
+            <div class="num">2</div>
+            <h3>分析の規則 &rarr; タスク分解</h3>
+          </div>
+          <div class="map-body">
+            <div class="descartes-side">
+              <p class="label">デカルト</p>
+              <p>困難をできるだけ多くの小部分に分割する。</p>
+            </div>
+            <div class="ai-side">
+              <p class="label">AI設計</p>
+              <p>複雑なタスクをサブタスクに分解するChain-of-Thought推論。AIエージェントにおけるプランニング（計画立案）フェーズ。一つの巨大プロンプトではなく、ステップごとの逐次処理で精度を向上させる。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="mapping-card">
+          <div class="map-header">
+            <div class="num">3</div>
+            <h3>総合の規則 &rarr; コンテキスト統合</h3>
+          </div>
+          <div class="map-body">
+            <div class="descartes-side">
+              <p class="label">デカルト</p>
+              <p>最も単純なものから最も複雑なものへと秩序立てて上昇する。</p>
+            </div>
+            <div class="ai-side">
+              <p class="label">AI設計</p>
+              <p>サブタスクの結果を統合し、一貫性のある最終出力を構築する。マルチエージェント・オーケストレーションにおける結果の集約。ツール呼び出しの結果をコンテキストに組み込み、段階的に推論を深化させる。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="mapping-card">
+          <div class="map-header">
+            <div class="num">4</div>
+            <h3>枚挙の規則 &rarr; 自己評価と検証</h3>
+          </div>
+          <div class="map-body">
+            <div class="descartes-side">
+              <p class="label">デカルト</p>
+              <p>完全な枚挙と全般的な見直しを行い、見落としがないことを確認する。</p>
+            </div>
+            <div class="ai-side">
+              <p class="label">AI設計</p>
+              <p>Self-Reflection（自己反省）パターン。生成した回答を別のLLM呼び出しで検証するJudge/Critic機構。テストケースの自動生成と実行。Guardrailsによる出力の安全性チェック。人間によるフィードバックループ。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== AIエージェント・アーキテクチャ ===== -->
+    <div class="agent-architecture">
+      <h3>デカルト的AIエージェント &mdash; ループ・アーキテクチャ</h3>
+      <div class="agent-loop">
+        <div class="agent-step">
+          <div class="step-icon">&#128270;</div>
+          <h4>Perceive（知覚）</h4>
+          <p class="descartes-ref">&#8592; 明証の規則</p>
+          <p>入力を検証し、曖昧さを検出。信頼できる情報のみを処理パイプラインに通す。コンテキストウィンドウの情報を「明晰・判明」なものに絞る。</p>
+        </div>
+        <div class="agent-step">
+          <div class="step-icon">&#128300;</div>
+          <h4>Analyze（分析）</h4>
+          <p class="descartes-ref">&#8592; 分析の規則</p>
+          <p>タスクをサブゴールに分解。ツール選択を決定。各ステップの依存関係を明確化。Plan-and-Solveパターンの実装。</p>
+        </div>
+        <div class="agent-step">
+          <div class="step-icon">&#9881;</div>
+          <h4>Execute（実行・総合）</h4>
+          <p class="descartes-ref">&#8592; 総合の規則</p>
+          <p>ツール呼び出しを順序立てて実行。中間結果を統合。単純なサブタスクから複雑な最終出力へ段階的に構築する。</p>
+        </div>
+        <div class="agent-step">
+          <div class="step-icon">&#9989;</div>
+          <h4>Reflect（検証・反省）</h4>
+          <p class="descartes-ref">&#8592; 枚挙の規則</p>
+          <p>出力の網羅性と正確性を自己評価。不足があればAnalyzeに戻る。ガードレールによるsafety check。ユーザーフィードバックの反映。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== 方法的懐疑とAI ===== -->
+    <section class="section">
+      <h2 class="section-title">方法的懐疑の現代的展開</h2>
+
+      <div class="philosophy-table-wrap">
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th style="width:25%">デカルトの懐疑</th>
+              <th style="width:25%">生成AI時代の問題</th>
+              <th style="width:25%">AIエージェントへの応用</th>
+              <th>実装パターン</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>感覚は欺きうる</td>
+              <td>LLMの学習データにはバイアス・誤情報が含まれる</td>
+              <td>入力の信頼性評価を必須ステップとする</td>
+              <td>RAG + ソース検証、Confidence Score</td>
+            </tr>
+            <tr>
+              <td>夢と現実の区別がつかない</td>
+              <td>AIの出力と事実の区別がつかない（ハルシネーション）</td>
+              <td>生成と検証を分離する二段階パイプライン</td>
+              <td>Generator-Verifier パターン</td>
+            </tr>
+            <tr>
+              <td>悪しき霊による欺瞞</td>
+              <td>プロンプトインジェクション攻撃</td>
+              <td>システムプロンプトの防御と入力サニタイズ</td>
+              <td>Guardrails、入力フィルタリング</td>
+            </tr>
+            <tr>
+              <td>疑えないもの = コギト</td>
+              <td>AIの「確実な基盤」とは何か</td>
+              <td>不変のシステムプロンプトとツール定義を「第一原理」とする</td>
+              <td>Constitutional AI、ロール固定</td>
+            </tr>
+            <tr>
+              <td>神の誠実性による真理保証</td>
+              <td>人間のフィードバックによる品質保証</td>
+              <td>RLHF / Human-in-the-Loop による信頼性の確保</td>
+              <td>RLHF、Approval Workflow</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===== 心身二元論とAI ===== -->
+    <section class="section">
+      <h2 class="section-title">心身二元論 &times; AIアーキテクチャ</h2>
+
+      <div class="card-grid cols-2">
+        <div class="card">
+          <div class="card-icon" style="background:linear-gradient(135deg,#6b1d3a,#a84868)">&#129504;</div>
+          <h3>Res Cogitans &rarr; LLM（推論エンジン）</h3>
+          <p>デカルトの「精神」がLLMの推論機能に対応する。テキストの理解、計画、判断、創造的生成は、延長を持たない「思考する実体」のデジタルな類似物。</p>
+          <ul>
+            <li>言語理解と生成</li>
+            <li>推論・計画立案</li>
+            <li>コンテキスト保持と参照</li>
+            <li>判断と意思決定</li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="card-icon" style="background:linear-gradient(135deg,#2d6a9f,#1a8a7d)">&#9881;</div>
+          <h3>Res Extensa &rarr; ツール・環境（実行層）</h3>
+          <p>デカルトの「物質」が外部ツールと物理的/デジタル環境に対応する。ファイル操作、API呼び出し、コード実行など、「延長を持つ」世界への作用。</p>
+          <ul>
+            <li>ファイルシステム操作</li>
+            <li>外部API呼び出し</li>
+            <li>コード実行環境</li>
+            <li>データベース・検索エンジン</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="highlight-box" style="margin-top:24px">
+        <h3>「松果体」としてのハーネス</h3>
+        <p>デカルトが心身の相互作用点として松果体を想定したように、AIエージェントではハーネス（オーケストレーション層）がLLMとツール群を接続する。ハーネスはLLMの「思考」をツールの「行動」に変換し、ツールの結果をLLMの「知覚」にフィードバックする。この中間層の設計がエージェントの性能を決定する。</p>
+      </div>
+    </section>
+
+    <!-- ===== 暫定的道徳とAIアラインメント ===== -->
+    <section class="section">
+      <h2 class="section-title">暫定的道徳 &times; AIアラインメント</h2>
+      <p class="section-intro">デカルトの暫定的道徳は、「完全な知識がない状態での行動指針」という点で、AIアラインメント問題と本質的に同じ課題に答えている。</p>
+
+      <div class="card-grid cols-3">
+        <div class="card">
+          <h3>第一格率 &rarr; 社会規範の遵守</h3>
+          <p>AIは社会の法律・倫理規範・利用規約に従う。Constitutional AIのように、明示的な行動原則をシステムに組み込む。完全な倫理理論がなくても、既存の合意された規範を守ることで安全に行動できる。</p>
+        </div>
+        <div class="card">
+          <h3>第二格率 &rarr; 一貫性の維持</h3>
+          <p>AIエージェントは一度計画を立てたら、十分な理由なく方針を変更しない。タスク遂行中の目標ドリフトを防ぎ、ユーザーの意図に一貫して沿い続ける。プロンプトインジェクションへの耐性にも通じる。</p>
+        </div>
+        <div class="card">
+          <h3>第三格率 &rarr; 能力の限界認識</h3>
+          <p>AIは自分の能力の限界を認識し、できないことを無理に実行しようとしない。「分からない」「できない」と適切に回答する能力。世界を変えるのではなく、自らの応答を最適化するという謙虚さ。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 具体的ユースケース ===== -->
+    <section class="section">
+      <h2 class="section-title">具体的ユースケース</h2>
+
+      <div class="usecase-grid">
+        <div class="usecase-card">
+          <h3><span>&#128187;</span> コーディングエージェント</h3>
+          <p><strong>明証:</strong> 要件の曖昧さを検出し、ユーザーに確認。<strong>分析:</strong> タスクをファイル単位・関数単位に分解。<strong>総合:</strong> コードを段階的に構築し、テストで確認。<strong>枚挙:</strong> 全テストケースの実行とコードレビュー。</p>
+          <div class="tag-row">
+            <span class="tag">Claude Code</span>
+            <span class="tag">GitHub Copilot</span>
+            <span class="tag">Cursor</span>
+          </div>
+        </div>
+        <div class="usecase-card">
+          <h3><span>&#128218;</span> リサーチエージェント</h3>
+          <p><strong>明証:</strong> 情報源の信頼性を評価。<strong>分析:</strong> 研究テーマを下位問題に分解。<strong>総合:</strong> 複数ソースからの知見を統合レポートに。<strong>枚挙:</strong> 引用元の網羅性チェックとクロスバリデーション。</p>
+          <div class="tag-row">
+            <span class="tag">Deep Research</span>
+            <span class="tag">Perplexity</span>
+            <span class="tag">RAG</span>
+          </div>
+        </div>
+        <div class="usecase-card">
+          <h3><span>&#128640;</span> ワークフロー自動化</h3>
+          <p><strong>明証:</strong> トリガー条件の明確な定義。<strong>分析:</strong> ワークフローをアトミックなステップに分解。<strong>総合:</strong> ステップ結果を次段に渡すパイプライン。<strong>枚挙:</strong> 全パスのエラーハンドリングとログ監査。</p>
+          <div class="tag-row">
+            <span class="tag">MCP</span>
+            <span class="tag">LangChain</span>
+            <span class="tag">n8n</span>
+          </div>
+        </div>
+        <div class="usecase-card">
+          <h3><span>&#128101;</span> マルチエージェント協調</h3>
+          <p><strong>明証:</strong> 各エージェントの役割と責任の明確な定義。<strong>分析:</strong> タスクの専門領域ごとの分担。<strong>総合:</strong> オーケストレーターによる結果統合。<strong>枚挙:</strong> エージェント間の整合性チェック。</p>
+          <div class="tag-row">
+            <span class="tag">Agent SDK</span>
+            <span class="tag">AutoGen</span>
+            <span class="tag">CrewAI</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 未来への展望 ===== -->
+    <section class="section">
+      <h2 class="section-title">デカルト的思考がAIの未来に示すもの</h2>
+
+      <div class="flow">
+        <div class="flow-step">
+          <span class="step-num">&#10033;</span>
+          <h4>第一原理思考の復権</h4>
+          <p>デカルトは権威を退け、「第一原理」から推論を積み上げた。AIシステムも、学習データの統計的パターンに依存するだけでなく、論理的推論・因果推論の能力を獲得する方向へ進化している。LLMの「System 2思考」がこれにあたる。</p>
+        </div>
+        <div class="flow-arrow"></div>
+        <div class="flow-step">
+          <span class="step-num">&#10033;</span>
+          <h4>自己認識するAI</h4>
+          <p>コギト命題の核心は「自分自身を知る主体」の発見にある。AIにおけるメタ認知（自らの出力の不確実性を評価する能力）は、まさにデカルト的自己認識のAI版。Calibrated Confidence（較正された確信度）がその実装形態。</p>
+        </div>
+        <div class="flow-arrow"></div>
+        <div class="flow-step">
+          <span class="step-num">&#10033;</span>
+          <h4>方法の普遍性</h4>
+          <p>デカルトはすべての学問に適用可能な「普遍的方法」を構想した。AIエージェントのPerceive-Analyze-Execute-Reflectループは、ドメインを問わず適用可能な普遍的アーキテクチャパターンとなりつつある。389年の時を超えた方法論の実現。</p>
+        </div>
+      </div>
+
+      <div class="highlight-box" style="margin-top:32px">
+        <h3>結語：デカルトからAIへの手紙</h3>
+        <blockquote>「我思う、ゆえに我あり」が近代の人間の出発点であったように、<br>「我検証する、ゆえに我信頼される」が AI時代の出発点となる。</blockquote>
+        <p style="margin-top:16px">デカルトの方法論は、「何を信じるべきか分からない」混沌の時代に、理性による秩序を打ち立てようとした試みだった。情報過多とAI生成コンテンツが氾濫する現代もまた、「何を信じるべきか」が問われる時代である。方法序説の四規則は、AIを設計する側にとっても、AIを使う側にとっても、真理に到達するための不朽の指針であり続ける。</p>
+      </div>
+    </section>
+
+    <div style="text-align:center">
+      <a href="index.html" class="back-to-top">&larr; 目次に戻る</a>
+    </div>
+
+  </div>
+
+  <footer class="site-footer">
+    <a href="index.html">&larr; 目次に戻る</a> &nbsp;|&nbsp; <a href="../../index.html">インフォグラフィック一覧</a>
+    <p style="margin-top:12px">&copy; 2026 Descartes Infographic</p>
+  </footer>
+
+</body>
+</html>
