@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>マルチエージェントAIの基本概念 — GitHub × 複数AIエージェント協調 完全ガイド</title>
+  <style>
+    :root { color-scheme: light; font-family: "Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: linear-gradient(135deg, #0d1117 0%, #1a1f2e 50%, #0f2027 100%); color: #e6edf3; min-height: 100vh; }
+    .wrap { max-width: 1040px; margin: 0 auto; padding: 40px 20px 60px; }
+    .nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; flex-wrap: wrap; gap: 12px; }
+    .back-link { display: inline-flex; align-items: center; gap: 6px; color: rgba(255,255,255,0.6); text-decoration: none; font-size: 14px; transition: color .2s; }
+    .back-link:hover { color: #fff; }
+    .page-nav { display: flex; gap: 8px; }
+    .page-nav a { display: inline-block; padding: 6px 14px; border-radius: 8px; font-size: 13px; text-decoration: none; background: #161b22; border: 1px solid #30363d; color: rgba(255,255,255,0.6); transition: all .2s; }
+    .page-nav a:hover, .page-nav a.active { background: #58a6ff; border-color: #58a6ff; color: #fff; }
+    header { margin-bottom: 40px; }
+    .hero-badge { display: inline-block; background: rgba(88,166,255,0.15); border: 1px solid rgba(88,166,255,0.35); border-radius: 100px; padding: 5px 16px; font-size: 12px; color: #79c0ff; margin-bottom: 14px; }
+    header h1 { font-size: 32px; font-weight: 800; margin: 0 0 12px; line-height: 1.3; }
+    .g { background: linear-gradient(90deg, #58a6ff, #79c0ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    header p { margin: 0; color: rgba(255,255,255,0.65); font-size: 15px; line-height: 1.8; }
+    .section { margin-bottom: 40px; }
+    .section-title { font-size: 20px; font-weight: 700; color: #e6edf3; margin: 0 0 20px; padding-left: 14px; border-left: 3px solid #58a6ff; }
+    .card { background: #161b22; border: 1px solid #30363d; border-radius: 14px; padding: 24px; margin-bottom: 16px; }
+    .card h3 { font-size: 16px; font-weight: 700; color: #58a6ff; margin: 0 0 10px; }
+    .card p { font-size: 14px; color: rgba(255,255,255,0.7); line-height: 1.8; margin: 0; }
+    .grid2 { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+    .grid3 { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
+    .concept-card { background: #161b22; border: 1px solid #30363d; border-radius: 14px; padding: 22px; }
+    .concept-icon { font-size: 28px; margin-bottom: 10px; }
+    .concept-card h3 { font-size: 15px; font-weight: 700; color: #e6edf3; margin: 0 0 8px; }
+    .concept-card p { font-size: 13px; color: rgba(255,255,255,0.6); line-height: 1.7; margin: 0; }
+    .pattern-table { width: 100%; border-collapse: collapse; }
+    .pattern-table th { background: #21262d; padding: 12px 16px; text-align: left; font-size: 13px; color: rgba(255,255,255,0.7); font-weight: 600; border-bottom: 1px solid #30363d; }
+    .pattern-table td { padding: 14px 16px; font-size: 13px; color: rgba(255,255,255,0.75); border-bottom: 1px solid #21262d; vertical-align: top; line-height: 1.6; }
+    .pattern-table tr:last-child td { border-bottom: none; }
+    .badge { display: inline-block; border-radius: 100px; padding: 3px 10px; font-size: 11px; font-weight: 600; }
+    .badge-blue { background: rgba(88,166,255,0.15); color: #79c0ff; }
+    .badge-green { background: rgba(63,185,80,0.15); color: #3fb950; }
+    .badge-purple { background: rgba(188,140,255,0.15); color: #bc8cff; }
+    .badge-orange { background: rgba(255,166,0,0.15); color: #ffa600; }
+    .insight-box { background: linear-gradient(135deg, rgba(88,166,255,0.08), rgba(188,140,255,0.08)); border: 1px solid rgba(88,166,255,0.25); border-radius: 14px; padding: 24px; margin-bottom: 16px; }
+    .insight-box h3 { font-size: 15px; font-weight: 700; color: #79c0ff; margin: 0 0 10px; }
+    .insight-box p { font-size: 14px; color: rgba(255,255,255,0.7); line-height: 1.8; margin: 0; }
+    .vs-box { display: grid; grid-template-columns: 1fr auto 1fr; gap: 16px; align-items: center; }
+    .vs-col { background: #161b22; border: 1px solid #30363d; border-radius: 14px; padding: 20px; }
+    .vs-col h3 { font-size: 15px; font-weight: 700; margin: 0 0 12px; }
+    .vs-col ul { margin: 0; padding-left: 18px; }
+    .vs-col ul li { font-size: 13px; color: rgba(255,255,255,0.65); line-height: 1.8; }
+    .vs-divider { font-size: 24px; font-weight: 800; color: rgba(255,255,255,0.3); text-align: center; }
+    .pager { display: flex; justify-content: space-between; margin-top: 48px; }
+    .pager a { display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px; background: #161b22; border: 1px solid #30363d; border-radius: 10px; text-decoration: none; color: rgba(255,255,255,0.7); font-size: 14px; transition: all .2s; }
+    .pager a:hover { border-color: #58a6ff; color: #58a6ff; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="nav">
+      <a href="index.html" class="back-link">← 目次へ戻る</a>
+      <div class="page-nav">
+        <a href="page1-concepts.html" class="active">1</a>
+        <a href="page2-github-copilot.html">2</a>
+        <a href="page3-claude-agents.html">3</a>
+        <a href="page4-roles.html">4</a>
+        <a href="page5-workflow.html">5</a>
+        <a href="page6-efficiency.html">6</a>
+        <a href="page7-tips.html">7</a>
+      </div>
+    </div>
+
+    <header>
+      <div class="hero-badge">PAGE 01 / 07</div>
+      <h1><span class="g">マルチエージェントAI</span> の基本概念</h1>
+      <p>なぜ複数のAIエージェントを協力させると強いのか。<br>オーケストレーター・サブエージェントの仕組みと主要な協調パターンを理解する。</p>
+    </header>
+
+    <!-- Section 1: What is Multi-Agent? -->
+    <div class="section">
+      <div class="section-title">マルチエージェントAIとは？</div>
+      <div class="insight-box">
+        <h3>定義</h3>
+        <p>マルチエージェントシステムとは、<strong>それぞれ異なる役割・指示・ツールアクセスを持つ複数のAIエージェントが連携して、単一エージェントでは困難な複雑タスクを達成するシステム</strong>です。GitHub を共通のプラットフォームとして使うことで、Issue → コード生成 → テスト → レビュー → PR マージまでを自動化できます。</p>
+      </div>
+
+      <div class="vs-box">
+        <div class="vs-col">
+          <h3 style="color:#6b7280;">単一エージェント</h3>
+          <ul>
+            <li>コンテキストウィンドウが1つに限定</li>
+            <li>長大タスクで精度が低下</li>
+            <li>並列処理ができない</li>
+            <li>失敗時に全体がブロック</li>
+            <li>役割の切り替えでミス発生</li>
+          </ul>
+        </div>
+        <div class="vs-divider">VS</div>
+        <div class="vs-col">
+          <h3 style="color:#3fb950;">複数エージェント</h3>
+          <ul>
+            <li>各エージェントが独立したコンテキスト</li>
+            <li>並列実行で大幅な高速化</li>
+            <li>役割特化でハルシネーション減少</li>
+            <li>障害が他エージェントに波及しない</li>
+            <li>専門性を最大活用できる</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 2: Core Concepts -->
+    <div class="section">
+      <div class="section-title">コアコンセプト</div>
+      <div class="grid3">
+        <div class="concept-card">
+          <div class="concept-icon">🎯</div>
+          <h3>オーケストレーター</h3>
+          <p>全体を俯瞰しタスクを分解・割り当て・結果を統合する司令塔エージェント。他エージェントの出力を評価し次のアクションを決定する。</p>
+        </div>
+        <div class="concept-card">
+          <div class="concept-icon">⚙️</div>
+          <h3>サブエージェント</h3>
+          <p>特定の専門タスクを実行する実行者エージェント。固有のシステムプロンプト・ツールアクセスを持ち、独立したコンテキストで動作する。</p>
+        </div>
+        <div class="concept-card">
+          <div class="concept-icon">🔧</div>
+          <h3>ツール (Tool Use)</h3>
+          <p>エージェントが呼び出せる外部機能。ファイル読み書き・コード実行・Web検索・GitHub API・外部サービスなど。MCPで拡張可能。</p>
+        </div>
+        <div class="concept-card">
+          <div class="concept-icon">📋</div>
+          <h3>コンテキスト管理</h3>
+          <p>各エージェントは独立したコンテキストウィンドウを持つ。共有メモリ・アーティファクト（spec.md等）を介して情報を受け渡す。</p>
+        </div>
+        <div class="concept-card">
+          <div class="concept-icon">🛡️</div>
+          <h3>ガードレール</h3>
+          <p>エージェントの行動を制御する制約・検証ルール。スコープ逸脱・破壊的操作・セキュリティリスクを防ぐ安全機構。</p>
+        </div>
+        <div class="concept-card">
+          <div class="concept-icon">🔗</div>
+          <h3>MCP (Model Context Protocol)</h3>
+          <p>AIエージェントが外部ツール・データソースと接続する標準プロトコル。GitHub・Slack・DB等と簡単に連携できる。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 3: Patterns -->
+    <div class="section">
+      <div class="section-title">主要な協調パターン</div>
+      <div class="card" style="padding: 0; overflow: hidden;">
+        <table class="pattern-table">
+          <thead>
+            <tr>
+              <th>パターン名</th>
+              <th>構造</th>
+              <th>説明</th>
+              <th>適したユースケース</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>パイプライン</strong><br><span class="badge badge-blue">順次処理</span></td>
+              <td>A → B → C → D</td>
+              <td>エージェントが直列で実行。各エージェントの出力が次の入力になる。</td>
+              <td>仕様→コード→テスト→レビューの線形フロー</td>
+            </tr>
+            <tr>
+              <td><strong>スウォーム</strong><br><span class="badge badge-green">並列処理</span></td>
+              <td>A ↔ B ↔ C（分散）</td>
+              <td>エージェントが並列で作業し共有メモリで情報交換。非中央集権的。</td>
+              <td>探索的タスク・並行フィーチャー開発</td>
+            </tr>
+            <tr>
+              <td><strong>オーケストレーター<br>＋スペシャリスト</strong><br><span class="badge badge-purple">階層型</span></td>
+              <td>中央 → 専門A・専門B・専門C</td>
+              <td>中央エージェントが役割特化した専門エージェントにタスクを委託。</td>
+              <td>明確な役割分担が必要な複雑プロジェクト</td>
+            </tr>
+            <tr>
+              <td><strong>エージェントグラフ (DAG)</strong><br><span class="badge badge-orange">構造化</span></td>
+              <td>有向非循環グラフ</td>
+              <td>エッジが通信・ハンドオフ経路を定義。依存関係が明確。</td>
+              <td>複雑な依存関係を持つワークフロー</td>
+            </tr>
+            <tr>
+              <td><strong>Squad（リポジトリネイティブ）</strong><br><span class="badge badge-blue">GitHub統合</span></td>
+              <td>コーディネーター → 専門エージェント群</td>
+              <td>GitHub リポジトリ内でコーディネーターが専門エージェントを起動。外部インフラ不要。</td>
+              <td>GitHub ネイティブなチーム自動化</td>
+            </tr>
+            <tr>
+              <td><strong>Spec-Driven（仕様駆動）</strong><br><span class="badge badge-green">品質重視</span></td>
+              <td>spec.md → plan.md → tasks.md</td>
+              <td>共有仕様ドキュメントを真実の源とし、全エージェントがここから作業。スコープ逸脱を防止。</td>
+              <td>品質・一貫性が重要なプロダクト開発</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Section 4: GitHub as platform -->
+    <div class="section">
+      <div class="section-title">GitHub をエージェント協調の基盤にする理由</div>
+      <div class="grid2">
+        <div class="card">
+          <h3>Issue がタスクキュー</h3>
+          <p>GitHub Issues をエージェントへのタスク割り当てに使用。Issueを作るだけでエージェントが自律的に作業を開始できる。ラベルで優先度・エージェント種別を制御。</p>
+        </div>
+        <div class="card">
+          <h3>PR が成果物レビューの場</h3>
+          <p>エージェントが作成した PR をレビューエージェント・人間が確認。インラインコメントへの対応もエージェントが自動実行。68.6%の自動マージ成功率。</p>
+        </div>
+        <div class="card">
+          <h3>Actions が実行環境</h3>
+          <p>GitHub Actions がエージェントの安全な実行環境を提供。CI/CD パイプラインにエージェントを組み込み、テスト・ビルド・デプロイを自動化。</p>
+        </div>
+        <div class="card">
+          <h3>MCP でツール拡張</h3>
+          <p>GitHub の MCP サーバーでリポジトリ検索・Issue管理・PR作成をエージェントが直接実行。外部サービスとの連携も MCP プロトコルで標準化。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Key insight -->
+    <div class="insight-box">
+      <h3>重要な設計原則</h3>
+      <p>マルチエージェントシステムの失敗の多くは、モデルの能力ではなく<strong>「構造の欠如」</strong>が原因です。成功の鍵は3つ：<strong>明確なタスク境界</strong>・<strong>構造化されたハンドオフアーティファクト</strong>・<strong>明示的なガードレール</strong>。技術よりも設計と役割定義に注力することが最重要です。</p>
+    </div>
+
+    <div class="pager">
+      <a href="index.html">← 目次へ</a>
+      <a href="page2-github-copilot.html">次へ: GitHub Copilot →</a>
+    </div>
+  </div>
+</body>
+</html>

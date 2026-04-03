@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>コミュニティ Tips 厳選集 — GitHub × 複数AIエージェント協調 完全ガイド</title>
+  <style>
+    :root { color-scheme: light; font-family: "Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: linear-gradient(135deg, #0d1117 0%, #1a1f2e 50%, #0f2027 100%); color: #e6edf3; min-height: 100vh; }
+    .wrap { max-width: 1040px; margin: 0 auto; padding: 40px 20px 60px; }
+    .nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; flex-wrap: wrap; gap: 12px; }
+    .back-link { display: inline-flex; align-items: center; gap: 6px; color: rgba(255,255,255,0.6); text-decoration: none; font-size: 14px; transition: color .2s; }
+    .back-link:hover { color: #fff; }
+    .page-nav { display: flex; gap: 8px; }
+    .page-nav a { display: inline-block; padding: 6px 14px; border-radius: 8px; font-size: 13px; text-decoration: none; background: #161b22; border: 1px solid #30363d; color: rgba(255,255,255,0.6); transition: all .2s; }
+    .page-nav a:hover, .page-nav a.active { background: #ffa600; border-color: #ffa600; color: #fff; }
+    header { margin-bottom: 40px; }
+    .hero-badge { display: inline-block; background: rgba(255,166,0,0.15); border: 1px solid rgba(255,166,0,0.35); border-radius: 100px; padding: 5px 16px; font-size: 12px; color: #ffa600; margin-bottom: 14px; }
+    header h1 { font-size: 32px; font-weight: 800; margin: 0 0 12px; line-height: 1.3; }
+    .g { background: linear-gradient(90deg, #ffa600, #ffc040, #ffe080); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    header p { margin: 0; color: rgba(255,255,255,0.65); font-size: 15px; line-height: 1.8; }
+    .section { margin-bottom: 40px; }
+    .section-title { font-size: 20px; font-weight: 700; color: #e6edf3; margin: 0 0 20px; padding-left: 14px; border-left: 3px solid #ffa600; }
+    .tips-top { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+    .tip-star { background: #161b22; border: 2px solid #ffa600; border-radius: 16px; padding: 24px; position: relative; }
+    .tip-star::before { content: '★ 最重要'; position: absolute; top: -12px; left: 20px; background: #ffa600; color: #0d1117; font-size: 11px; font-weight: 800; padding: 3px 10px; border-radius: 100px; }
+    .tip-star h3 { font-size: 16px; font-weight: 700; color: #ffa600; margin: 0 0 10px; }
+    .tip-star p { font-size: 13px; color: rgba(255,255,255,0.7); line-height: 1.8; margin: 0 0 10px; }
+    .tip-star ul { margin: 0; padding-left: 0; list-style: none; }
+    .tip-star ul li { font-size: 13px; color: rgba(255,255,255,0.65); line-height: 1.7; padding-left: 16px; position: relative; }
+    .tip-star ul li::before { content: '→'; position: absolute; left: 0; color: #ffa600; }
+    .tips-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+    .tip-card { background: #161b22; border: 1px solid #30363d; border-radius: 14px; padding: 20px; }
+    .tip-num { font-size: 28px; font-weight: 800; color: rgba(255,166,0,0.3); line-height: 1; margin-bottom: 8px; }
+    .tip-card h3 { font-size: 14px; font-weight: 700; color: #e6edf3; margin: 0 0 8px; }
+    .tip-card p { font-size: 13px; color: rgba(255,255,255,0.6); line-height: 1.7; margin: 0; }
+    .tip-tag { display: inline-block; background: rgba(255,166,0,0.1); border: 1px solid rgba(255,166,0,0.25); border-radius: 6px; padding: 2px 8px; font-size: 11px; color: #ffa600; margin-top: 8px; }
+    .failure-table { width: 100%; border-collapse: collapse; }
+    .failure-table th { background: #21262d; padding: 12px 16px; text-align: left; font-size: 13px; color: rgba(255,255,255,0.6); font-weight: 600; border-bottom: 1px solid #30363d; }
+    .failure-table td { padding: 14px 16px; font-size: 13px; color: rgba(255,255,255,0.7); border-bottom: 1px solid #21262d; vertical-align: top; line-height: 1.6; }
+    .failure-table tr:last-child td { border-bottom: none; }
+    .failure-table td:first-child { font-weight: 600; color: #f85149; }
+    .failure-table td:nth-child(3) { color: #3fb950; }
+    .table-wrap { background: #161b22; border: 1px solid #30363d; border-radius: 14px; overflow: hidden; }
+    .code-block { background: #0d1117; border: 1px solid #30363d; border-radius: 10px; padding: 18px 20px; font-family: 'Fira Code','Courier New',monospace; font-size: 12px; color: #e6edf3; line-height: 1.8; overflow-x: auto; }
+    .cc { color: #6a9955; }
+    .ck { color: #79c0ff; }
+    .cv { color: #a8d8a8; }
+    .template-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .template-card { background: #161b22; border: 1px solid #30363d; border-radius: 14px; padding: 20px; }
+    .template-card h3 { font-size: 14px; font-weight: 700; color: #ffa600; margin: 0 0 12px; }
+    .scale-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; }
+    .scale-card { background: #161b22; border: 1px solid #30363d; border-radius: 12px; padding: 16px; }
+    .scale-phase { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.35); margin-bottom: 8px; }
+    .scale-title { font-size: 14px; font-weight: 700; color: #e6edf3; margin-bottom: 6px; }
+    .scale-desc { font-size: 12px; color: rgba(255,255,255,0.55); line-height: 1.6; }
+    .scale-num { font-size: 24px; font-weight: 800; color: #ffa600; }
+    .copilot-tips { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .ct-card { background: #161b22; border: 1px solid #30363d; border-radius: 14px; padding: 20px; border-left: 3px solid #58a6ff; }
+    .ct-card h3 { font-size: 14px; font-weight: 700; color: #79c0ff; margin: 0 0 8px; }
+    .ct-card p { font-size: 13px; color: rgba(255,255,255,0.65); line-height: 1.7; margin: 0; }
+    .insight-box { background: linear-gradient(135deg, rgba(255,166,0,0.08), rgba(255,80,0,0.06)); border: 1px solid rgba(255,166,0,0.25); border-radius: 14px; padding: 24px; margin-bottom: 24px; }
+    .insight-box h3 { font-size: 15px; font-weight: 700; color: #ffa600; margin: 0 0 10px; }
+    .insight-box p { font-size: 14px; color: rgba(255,255,255,0.7); line-height: 1.8; margin: 0; }
+    .pager { display: flex; justify-content: space-between; margin-top: 48px; }
+    .pager a { display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px; background: #161b22; border: 1px solid #30363d; border-radius: 10px; text-decoration: none; color: rgba(255,255,255,0.7); font-size: 14px; transition: all .2s; }
+    .pager a:hover { border-color: #ffa600; color: #ffa600; }
+    @media (max-width: 600px) { .template-grid, .copilot-tips { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="nav">
+      <a href="index.html" class="back-link">← 目次へ戻る</a>
+      <div class="page-nav">
+        <a href="page1-concepts.html">1</a>
+        <a href="page2-github-copilot.html">2</a>
+        <a href="page3-claude-agents.html">3</a>
+        <a href="page4-roles.html">4</a>
+        <a href="page5-workflow.html">5</a>
+        <a href="page6-efficiency.html">6</a>
+        <a href="page7-tips.html" class="active">7</a>
+      </div>
+    </div>
+
+    <header>
+      <div class="hero-badge">PAGE 07 / 07 — FINAL</div>
+      <h1><span class="g">コミュニティ Tips</span> 厳選集</h1>
+      <p>Qiita・note・X (Twitter) で高評価を得ている実践ノウハウを集約。<br>失敗パターンと回避策、すぐ使える設定テンプレートも収録。</p>
+    </header>
+
+    <!-- Priority Tips -->
+    <div class="section">
+      <div class="section-title">最重要 Tips：まず最初にやること</div>
+      <div class="tips-top">
+
+        <div class="tip-star">
+          <h3>1. 指示ファイルを書く</h3>
+          <p>CLAUDE.md / AGENTS.md / .github/copilot-instructions.md をリポジトリルートに作成する。<strong>これが単独で最大のROIをもたらす</strong>。</p>
+          <ul>
+            <li>役割・技術スタック・コーディング規約を明記</li>
+            <li>禁止事項（main 直プッシュ禁止など）を書く</li>
+            <li>アーキテクチャの決定を記録し続ける</li>
+            <li>git commit してエージェントが git blame で参照できるようにする</li>
+          </ul>
+        </div>
+
+        <div class="tip-star">
+          <h3>2. Spec-Driven パイプラインを使う</h3>
+          <p>spec.md → plan.md → tasks.md の3ファイルを真実の源として使う。<strong>曖昧なプロンプトが失敗の最大原因</strong>。</p>
+          <ul>
+            <li>入力・出力・制約を具体的に記述</li>
+            <li>仕様が変わったら spec.md を先に更新</li>
+            <li>タスクには「完了条件」を必ず書く</li>
+            <li>Spec Kit v0.1.4 などの OSS テンプレートを活用</li>
+          </ul>
+        </div>
+
+        <div class="tip-star">
+          <h3>3. git worktree でエージェントを分離</h3>
+          <p>複数エージェントが同じリポジトリで並列作業する場合、git worktree でブランチ競合を防ぐ。<strong>ファイル競合の 90% が解決</strong>する。</p>
+          <ul>
+            <li>エージェントごとに独立したワーキングディレクトリ</li>
+            <li>コミット前に他エージェントの変更を取り込む必要がない</li>
+            <li>ccswarm などの OSS フレームワークが自動化</li>
+            <li>最終マージはオーケストレーターが担当</li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Best practices grid -->
+    <div class="section">
+      <div class="section-title">エージェント設計のベストプラクティス（コミュニティ厳選）</div>
+      <div class="tips-grid">
+
+        <div class="tip-card">
+          <div class="tip-num">04</div>
+          <h3>オーケストレーターのコンテキストを守る</h3>
+          <p>親エージェントが直接話しかける子エージェントは最大 2〜3 体まで。全スペシャリストと直接通信すると精度が急落する。中間層（Feature Lead）を置く。</p>
+          <div class="tip-tag">Qiita人気 #1</div>
+        </div>
+
+        <div class="tip-card">
+          <div class="tip-num">05</div>
+          <h3>役割の専門化 &gt; 汎用エージェント</h3>
+          <p>「Developer + Reviewer」を兼任させるより、専用の Reviewer エージェントの方が問題を 2〜3 倍多く検出する。役割分離は品質に直結する。</p>
+          <div class="tip-tag">note 高評価</div>
+        </div>
+
+        <div class="tip-card">
+          <div class="tip-num">06</div>
+          <h3>ドラフト PR を作業面として使う</h3>
+          <p>エージェントには「完成してから PR」ではなく「作業開始時にドラフト PR を作成」させる。進捗を可視化し、人間が途中で介入できる。</p>
+          <div class="tip-tag">X で RT 多数</div>
+        </div>
+
+        <div class="tip-card">
+          <div class="tip-num">07</div>
+          <h3>コスト管理を忘れない</h3>
+          <p>エージェントごとに最大トークン数・実行時間を設定する。無限ループや大量トークン消費は現実に起きる。AWS Cost Explorer 的な監視を早めに導入。</p>
+          <div class="tip-tag">Qiita 注意点</div>
+        </div>
+
+        <div class="tip-card">
+          <div class="tip-num">08</div>
+          <h3>小さく始めて測定してから拡大</h3>
+          <p>いきなり全ワークフローを自動化しない。まず「テスト生成」など単一タスクで効果測定し、ROI が確認できたら次のタスクへ。段階的展開が成功率を上げる。</p>
+          <div class="tip-tag">note ベストプラクティス</div>
+        </div>
+
+        <div class="tip-card">
+          <div class="tip-num">09</div>
+          <h3>人間のチェックポイントを設計に組み込む</h3>
+          <p>「全自動」を目指さない。仕様承認・セキュリティレビュー・本番デプロイには必ず人間のステップを設ける。エージェントは「アシスタント」として設計する。</p>
+          <div class="tip-tag">X 共感多数</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Copilot specific -->
+    <div class="section">
+      <div class="section-title">GitHub Copilot 特有の Tips</div>
+      <div class="copilot-tips">
+        <div class="ct-card">
+          <h3>スコープを絞った Issue を書く</h3>
+          <p>Copilot Coding Agent が最も得意とするのは「バグ修正（再現手順あり）」「既存パターンに従う機能追加」「依存関係のアップデート」。曖昧な Issue はエージェントのスコープ逸脱を招く。</p>
+        </div>
+        <div class="ct-card">
+          <h3>Agentic Code Review でループを閉じる</h3>
+          <p>レビューコメント → Coding Agent が修正 PR を自動生成、の自動ループを設定する。人間はレビューコメントを書くだけで修正まで自動化できる。VS Code / JetBrains で利用可能。</p>
+        </div>
+        <div class="ct-card">
+          <h3>MCP でコンテキストを拡張する</h3>
+          <p>リポジトリ設定で Jira・Slack・社内ドキュメントなどの MCP サーバーを設定すると、Copilot が外部コンテキストを参照して精度が上がる。セキュアなデータは読み取り専用 MCP で。</p>
+        </div>
+        <div class="ct-card">
+          <h3>ブランチ保護ルールを必ず設定</h3>
+          <p>main / production ブランチへの直接プッシュをブランチ保護ルールで禁止する。エージェントが生成した PR は必ず CI を通してからマージ。Copilot の PR マージ成功率 68.6% は適切な保護設定が前提。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Failure patterns -->
+    <div class="section">
+      <div class="section-title">失敗パターンと回避策</div>
+      <div class="table-wrap">
+        <table class="failure-table">
+          <thead>
+            <tr>
+              <th>失敗パターン</th>
+              <th>典型的な症状</th>
+              <th>回避策</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>タスク境界の曖昧さ</td>
+              <td>2体のエージェントが同じファイルを同時に編集してコンフリクト発生</td>
+              <td>git worktree でエージェントごとに作業空間を分離。タスクに「担当ファイル範囲」を明記</td>
+            </tr>
+            <tr>
+              <td>スコープ逸脱</td>
+              <td>指示されていない変更を「改善」として勝手に追加。リグレッションが発生</td>
+              <td>spec.md の「変更してはいけないもの」を明示。CLAUDE.md に「指示範囲外は変更しない」と記述</td>
+            </tr>
+            <tr>
+              <td>コンテキスト汚染</td>
+              <td>長大タスクの後半でエージェントの精度が急落。前の作業の残滓が影響</td>
+              <td>タスクを小さく分割（1タスク = 1コンテキスト）。オーケストレーターは子エージェントの結果サマリーのみを受け取る</td>
+            </tr>
+            <tr>
+              <td>無限ループ</td>
+              <td>同じエラーで何度も失敗し続け、大量のトークンを消費</td>
+              <td>最大試行回数（例: 3回）とタイムアウト（例: 10分）を設定。失敗時は人間にエスカレーション</td>
+            </tr>
+            <tr>
+              <td>ハルシネーション</td>
+              <td>実在しない API・関数を呼び出すコードを生成</td>
+              <td>Spec-Driven 開発で仕様を事前に確定。コードレビューエージェントが実在チェックを実施</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Scaling tips -->
+    <div class="section">
+      <div class="section-title">スケールアップのロードマップ</div>
+      <div class="scale-grid">
+        <div class="scale-card">
+          <div class="scale-phase">Phase 1 (Week 1-2)</div>
+          <div class="scale-num">1体</div>
+          <div class="scale-title">単一タスク PoC</div>
+          <div class="scale-desc">テスト生成またはドキュメント作成だけを自動化。効果を測定してから次へ進む。</div>
+        </div>
+        <div class="scale-card">
+          <div class="scale-phase">Phase 2 (Week 3-4)</div>
+          <div class="scale-num">2〜3体</div>
+          <div class="scale-title">パイプライン構築</div>
+          <div class="scale-desc">Dev + Test のペアエージェントを構築。Issue → PR の半自動フローを完成させる。</div>
+        </div>
+        <div class="scale-card">
+          <div class="scale-phase">Phase 3 (Month 2)</div>
+          <div class="scale-num">4〜6体</div>
+          <div class="scale-title">フルパイプライン</div>
+          <div class="scale-desc">PM / Dev / Test / Review / Docs / Security エージェントを揃える。人間の承認ポイントを整備。</div>
+        </div>
+        <div class="scale-card">
+          <div class="scale-phase">Phase 4 (Month 3+)</div>
+          <div class="scale-num">N体</div>
+          <div class="scale-title">並列スケール</div>
+          <div class="scale-desc">複数フィーチャーを並列開発。Squad / Agent HQ で管理。Stripe Minions モデルを目指す。</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Templates -->
+    <div class="section">
+      <div class="section-title">すぐ使える設定テンプレート</div>
+      <div class="template-grid">
+
+        <div class="template-card">
+          <h3>CLAUDE.md テンプレート</h3>
+          <div class="code-block"><span class="cc"># CLAUDE.md — プロジェクト指示</span>
+
+<span class="ck">## あなたの役割</span>
+<span class="cv">シニアバックエンドエンジニア。</span>
+<span class="cv">Node.js / TypeScript を使用。</span>
+
+<span class="ck">## 技術スタック</span>
+<span class="cv">- Runtime: Node.js 20 LTS</span>
+<span class="cv">- DB: PostgreSQL (Prisma ORM)</span>
+<span class="cv">- Test: Vitest</span>
+
+<span class="ck">## コーディング規約</span>
+<span class="cv">- 関数は単一責任原則に従う</span>
+<span class="cv">- テストカバレッジ 80% 以上</span>
+<span class="cv">- conventional commits 形式</span>
+
+<span class="ck">## 禁止事項</span>
+<span class="cv">- main ブランチへの直接プッシュ禁止</span>
+<span class="cv">- 未テストコードのコミット禁止</span>
+<span class="cv">- 指示範囲外のファイルを変更しない</span>
+
+<span class="ck">## アーキテクチャ決定</span>
+<span class="cv">- ドメイン層はインフラ層に依存しない</span>
+<span class="cv">- 外部 API は Adapter 経由で呼び出す</span></div>
+        </div>
+
+        <div class="template-card">
+          <h3>.github/copilot-instructions.md テンプレート</h3>
+          <div class="code-block"><span class="cc"># GitHub Copilot Instructions</span>
+
+<span class="ck">## Role</span>
+<span class="cv">You are a senior full-stack engineer</span>
+<span class="cv">working on a Next.js 14 application.</span>
+
+<span class="ck">## Tech Stack</span>
+<span class="cv">- Frontend: Next.js 14 (App Router)</span>
+<span class="cv">- Styling: Tailwind CSS</span>
+<span class="cv">- DB: Supabase</span>
+
+<span class="ck">## Constraints</span>
+<span class="cv">- Always write tests for new features</span>
+<span class="cv">- Never commit secrets or API keys</span>
+<span class="cv">- Follow existing file structure</span>
+<span class="cv">- Use TypeScript strict mode</span>
+
+<span class="ck">## Issue Handling</span>
+<span class="cv">- Read linked issues before coding</span>
+<span class="cv">- Create draft PR early</span>
+<span class="cv">- Tag reviewer when ready</span></div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="insight-box">
+      <h3>まとめ：成功する複数AIエージェント導入の本質</h3>
+      <p>マルチエージェント AI の成功は、<strong>モデルの能力より「設計」にかかっています</strong>。明確な役割定義・Spec-Driven な作業管理・適切なガードレール・段階的な展開。これらを地道に整備したチームが、週 1,300+ PR を自動マージする Stripe のような成果を達成しています。まずは指示ファイルを書き、小さなタスクで測定してから拡大しましょう。</p>
+    </div>
+
+    <div class="pager">
+      <a href="page6-efficiency.html">← 効率化試算</a>
+      <a href="index.html">目次へ →</a>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AIエージェントの役割分担設計 — GitHub × 複数AIエージェント協調 完全ガイド</title>
+  <style>
+    :root { color-scheme: light; font-family: "Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: linear-gradient(135deg, #0d1117 0%, #1a1f2e 50%, #0f2027 100%); color: #e6edf3; min-height: 100vh; }
+    .wrap { max-width: 1040px; margin: 0 auto; padding: 40px 20px 60px; }
+    .nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; flex-wrap: wrap; gap: 12px; }
+    .back-link { display: inline-flex; align-items: center; gap: 6px; color: rgba(255,255,255,0.6); text-decoration: none; font-size: 14px; transition: color .2s; }
+    .back-link:hover { color: #fff; }
+    .page-nav { display: flex; gap: 8px; }
+    .page-nav a { display: inline-block; padding: 6px 14px; border-radius: 8px; font-size: 13px; text-decoration: none; background: #161b22; border: 1px solid #30363d; color: rgba(255,255,255,0.6); transition: all .2s; }
+    .page-nav a:hover, .page-nav a.active { background: #58a6ff; border-color: #58a6ff; color: #fff; }
+    header { margin-bottom: 40px; }
+    .hero-badge { display: inline-block; background: rgba(88,166,255,0.15); border: 1px solid rgba(88,166,255,0.35); border-radius: 100px; padding: 5px 16px; font-size: 12px; color: #79c0ff; margin-bottom: 14px; }
+    header h1 { font-size: 32px; font-weight: 800; margin: 0 0 12px; line-height: 1.3; }
+    .g { background: linear-gradient(90deg, #58a6ff, #79c0ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    header p { margin: 0; color: rgba(255,255,255,0.65); font-size: 15px; line-height: 1.8; }
+    .section { margin-bottom: 40px; }
+    .section-title { font-size: 20px; font-weight: 700; color: #e6edf3; margin: 0 0 20px; padding-left: 14px; border-left: 3px solid #58a6ff; }
+    .roles-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+    .role-card { background: #161b22; border: 1px solid #30363d; border-radius: 16px; padding: 24px; position: relative; overflow: hidden; }
+    .role-header { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+    .role-icon-wrap { width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; }
+    .role-title-group h3 { font-size: 16px; font-weight: 700; color: #e6edf3; margin: 0 0 4px; }
+    .role-subtitle { font-size: 12px; color: rgba(255,255,255,0.45); }
+    .role-desc { font-size: 13px; color: rgba(255,255,255,0.65); line-height: 1.7; margin: 0 0 14px; }
+    .role-tasks { background: rgba(255,255,255,0.04); border-radius: 8px; padding: 12px 14px; }
+    .role-tasks h4 { font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 1px; margin: 0 0 8px; }
+    .role-tasks ul { margin: 0; padding-left: 0; list-style: none; }
+    .role-tasks ul li { font-size: 12px; color: rgba(255,255,255,0.6); line-height: 1.7; padding-left: 14px; position: relative; }
+    .role-tasks ul li::before { content: '›'; position: absolute; left: 0; color: #58a6ff; font-weight: 700; }
+    .tools-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+    .tool-tag { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12); border-radius: 6px; padding: 3px 8px; font-size: 11px; color: rgba(255,255,255,0.55); }
+    .collab-section { background: #161b22; border: 1px solid #30363d; border-radius: 16px; padding: 28px; }
+    .collab-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+    .collab-item { text-align: center; padding: 16px 12px; background: rgba(255,255,255,0.03); border-radius: 10px; }
+    .collab-item .ci { font-size: 26px; margin-bottom: 6px; }
+    .collab-item .cn { font-size: 13px; font-weight: 600; color: #e6edf3; margin-bottom: 4px; }
+    .collab-item .cd { font-size: 11px; color: rgba(255,255,255,0.45); line-height: 1.5; }
+    .principle-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+    .principle-card { background: #161b22; border: 1px solid #30363d; border-radius: 12px; padding: 18px; }
+    .principle-num { font-size: 28px; font-weight: 800; color: rgba(88,166,255,0.4); line-height: 1; margin-bottom: 8px; }
+    .principle-title { font-size: 14px; font-weight: 700; color: #e6edf3; margin-bottom: 6px; }
+    .principle-desc { font-size: 12px; color: rgba(255,255,255,0.55); line-height: 1.6; }
+    .insight-box { background: linear-gradient(135deg, rgba(88,166,255,0.08), rgba(188,140,255,0.08)); border: 1px solid rgba(88,166,255,0.25); border-radius: 14px; padding: 24px; margin-bottom: 24px; }
+    .insight-box h3 { font-size: 15px; font-weight: 700; color: #79c0ff; margin: 0 0 10px; }
+    .insight-box p { font-size: 14px; color: rgba(255,255,255,0.7); line-height: 1.8; margin: 0; }
+    .pager { display: flex; justify-content: space-between; margin-top: 48px; }
+    .pager a { display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px; background: #161b22; border: 1px solid #30363d; border-radius: 10px; text-decoration: none; color: rgba(255,255,255,0.7); font-size: 14px; transition: all .2s; }
+    .pager a:hover { border-color: #58a6ff; color: #58a6ff; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="nav">
+      <a href="index.html" class="back-link">← 目次へ戻る</a>
+      <div class="page-nav">
+        <a href="page1-concepts.html">1</a>
+        <a href="page2-github-copilot.html">2</a>
+        <a href="page3-claude-agents.html">3</a>
+        <a href="page4-roles.html" class="active">4</a>
+        <a href="page5-workflow.html">5</a>
+        <a href="page6-efficiency.html">6</a>
+        <a href="page7-tips.html">7</a>
+      </div>
+    </div>
+
+    <header>
+      <div class="hero-badge">PAGE 04 / 07</div>
+      <h1><span class="g">AIエージェントの役割分担</span> 設計</h1>
+      <p>PM・開発・レビュー・テスト・セキュリティ・ドキュメント・アーキテクチャ・DevOps。<br>8つの役割と責務、使用ツール、連携方法を完全解説。</p>
+    </header>
+
+    <!-- Roles grid -->
+    <div class="section">
+      <div class="section-title">8つのエージェント役割</div>
+      <div class="roles-grid">
+
+        <!-- PM Agent -->
+        <div class="role-card">
+          <div class="role-header">
+            <div class="role-icon-wrap" style="background:linear-gradient(135deg,rgba(88,166,255,0.2),rgba(88,166,255,0.05));">📋</div>
+            <div class="role-title-group">
+              <h3>PM / Spec エージェント</h3>
+              <div class="role-subtitle">プロジェクト管理・仕様策定</div>
+            </div>
+          </div>
+          <p class="role-desc">要件を仕様ドキュメントに変換し、タスクに分解してチームに割り当てる。spec.md → plan.md → tasks.md のパイプラインを管理し、仕様が進化するにつれて更新する。</p>
+          <div class="role-tasks">
+            <h4>主な責務</h4>
+            <ul>
+              <li>要件をspec.md に構造化</li>
+              <li>タスクを tasks.md に分解・優先度付け</li>
+              <li>Issue 作成・ラベル付け・アサイン</li>
+              <li>仕様変更の影響範囲を特定</li>
+              <li>進捗の追跡とレポート作成</li>
+            </ul>
+          </div>
+          <div class="tools-row">
+            <span class="tool-tag">GitHub Issues API</span>
+            <span class="tool-tag">Projects</span>
+            <span class="tool-tag">spec.md</span>
+          </div>
+        </div>
+
+        <!-- Developer Agent -->
+        <div class="role-card">
+          <div class="role-header">
+            <div class="role-icon-wrap" style="background:linear-gradient(135deg,rgba(63,185,80,0.2),rgba(63,185,80,0.05));">💻</div>
+            <div class="role-title-group">
+              <h3>Developer / Feature Author エージェント</h3>
+              <div class="role-subtitle">コーディング・実装</div>
+            </div>
+          </div>
+          <p class="role-desc">タスク仕様から実際の実装コードを作成する。ファイルの作成・編集・ビルドコマンドの実行・デバッグを行い、完成したらドラフトPRを作成する。</p>
+          <div class="role-tasks">
+            <h4>主な責務</h4>
+            <ul>
+              <li>tasks.md のタスクを実装コードに変換</li>
+              <li>複数ファイルにわたる変更を管理</li>
+              <li>ビルド・リント・単体テストの実行</li>
+              <li>エラーの自己修正・デバッグ</li>
+              <li>ドラフトPRの作成とコメント</li>
+            </ul>
+          </div>
+          <div class="tools-row">
+            <span class="tool-tag">ファイル読み書き</span>
+            <span class="tool-tag">シェル実行</span>
+            <span class="tool-tag">Git</span>
+          </div>
+        </div>
+
+        <!-- Reviewer Agent -->
+        <div class="role-card">
+          <div class="role-header">
+            <div class="role-icon-wrap" style="background:linear-gradient(135deg,rgba(188,140,255,0.2),rgba(188,140,255,0.05));">👁️</div>
+            <div class="role-title-group">
+              <h3>Code Reviewer エージェント</h3>
+              <div class="role-subtitle">コードレビュー・品質管理</div>
+            </div>
+          </div>
+          <p class="role-desc">PR の差分全体をプロジェクトコンテキストと共に確認し、スタイル・ロジック・アーキテクチャ適合性をレビュー。インラインコメントを投稿し、修正PRを自動生成することもできる。</p>
+          <div class="role-tasks">
+            <h4>主な責務</h4>
+            <ul>
+              <li>コーディング規約への適合確認</li>
+              <li>ロジックのバグ・エッジケース検出</li>
+              <li>アーキテクチャ原則の違反を指摘</li>
+              <li>PR インラインコメント投稿</li>
+              <li>修正提案を Developer に委託</li>
+            </ul>
+          </div>
+          <div class="tools-row">
+            <span class="tool-tag">GitHub PR API</span>
+            <span class="tool-tag">Diff 解析</span>
+            <span class="tool-tag">コード検索</span>
+          </div>
+        </div>
+
+        <!-- Tester Agent -->
+        <div class="role-card">
+          <div class="role-header">
+            <div class="role-icon-wrap" style="background:linear-gradient(135deg,rgba(255,166,0,0.2),rgba(255,166,0,0.05));">🧪</div>
+            <div class="role-title-group">
+              <h3>Tester / QA エージェント</h3>
+              <div class="role-subtitle">テスト作成・品質保証</div>
+            </div>
+          </div>
+          <p class="role-desc">ユニットテスト・統合テストを生成し、テストスイートを実行する。失敗を分析し、カバレッジギャップをレポートする。TDD 強制にも対応。</p>
+          <div class="role-tasks">
+            <h4>主な責務</h4>
+            <ul>
+              <li>ユニット・統合テストの自動生成</li>
+              <li>テストスイートの実行・分析</li>
+              <li>テストカバレッジのレポート</li>
+              <li>失敗したテストの原因分析</li>
+              <li>エッジケース・境界値テストの設計</li>
+            </ul>
+          </div>
+          <div class="tools-row">
+            <span class="tool-tag">テストフレームワーク</span>
+            <span class="tool-tag">カバレッジツール</span>
+            <span class="tool-tag">CI</span>
+          </div>
+        </div>
+
+        <!-- Security Agent -->
+        <div class="role-card">
+          <div class="role-header">
+            <div class="role-icon-wrap" style="background:linear-gradient(135deg,rgba(255,80,80,0.2),rgba(255,80,80,0.05));">🛡️</div>
+            <div class="role-title-group">
+              <h3>Security エージェント</h3>
+              <div class="role-subtitle">セキュリティ・コンプライアンス</div>
+            </div>
+          </div>
+          <p class="role-desc">コードの脆弱性をスキャンし、異常なアクセスパターンを監視する。OWASP Top 10・依存関係の CVE・コンプライアンスポリシーを PR ごとにチェック。</p>
+          <div class="role-tasks">
+            <h4>主な責務</h4>
+            <ul>
+              <li>OWASP Top 10 脆弱性スキャン</li>
+              <li>依存関係の CVE チェック</li>
+              <li>シークレット・認証情報の漏洩検出</li>
+              <li>コンプライアンスポリシーの強制</li>
+              <li>セキュリティレポートの作成</li>
+            </ul>
+          </div>
+          <div class="tools-row">
+            <span class="tool-tag">SAST ツール</span>
+            <span class="tool-tag">Dependabot</span>
+            <span class="tool-tag">Secret scan</span>
+          </div>
+        </div>
+
+        <!-- Architecture Guardian -->
+        <div class="role-card">
+          <div class="role-header">
+            <div class="role-icon-wrap" style="background:linear-gradient(135deg,rgba(88,166,255,0.2),rgba(188,140,255,0.1));">🏛️</div>
+            <div class="role-title-group">
+              <h3>Architecture Guardian エージェント</h3>
+              <div class="role-subtitle">アーキテクチャ整合性管理</div>
+            </div>
+          </div>
+          <p class="role-desc">新しいコードがアーキテクチャパターンと設計決定に準拠しているかを確認。設計原則から逸脱したコードをブロックし、技術的負債の蓄積を防ぐ。</p>
+          <div class="role-tasks">
+            <h4>主な責務</h4>
+            <ul>
+              <li>設計パターンへの準拠確認</li>
+              <li>レイヤー境界違反の検出</li>
+              <li>API 設計の一貫性チェック</li>
+              <li>技術的負債のスコアリング</li>
+              <li>ADR（アーキテクチャ決定記録）の更新</li>
+            </ul>
+          </div>
+          <div class="tools-row">
+            <span class="tool-tag">ADR ドキュメント</span>
+            <span class="tool-tag">コード解析</span>
+            <span class="tool-tag">依存グラフ</span>
+          </div>
+        </div>
+
+        <!-- Documentation Agent -->
+        <div class="role-card">
+          <div class="role-header">
+            <div class="role-icon-wrap" style="background:linear-gradient(135deg,rgba(255,200,0,0.2),rgba(255,200,0,0.05));">📚</div>
+            <div class="role-title-group">
+              <h3>Documentation エージェント</h3>
+              <div class="role-subtitle">ドキュメント作成・維持管理</div>
+            </div>
+          </div>
+          <p class="role-desc">API ドキュメント・インラインコメント・ナレッジベースを自律的に作成・更新する。コード変更に追従してドキュメントが常に最新状態を維持するよう管理する。</p>
+          <div class="role-tasks">
+            <h4>主な責務</h4>
+            <ul>
+              <li>API 仕様書（OpenAPI等）の自動生成</li>
+              <li>コードコメント・JSDoc の追加</li>
+              <li>README・Wiki の更新</li>
+              <li>変更履歴・リリースノートの作成</li>
+              <li>ドキュメントとコードの乖離検出</li>
+            </ul>
+          </div>
+          <div class="tools-row">
+            <span class="tool-tag">OpenAPI</span>
+            <span class="tool-tag">Wiki API</span>
+            <span class="tool-tag">Markdown</span>
+          </div>
+        </div>
+
+        <!-- DevOps Agent -->
+        <div class="role-card">
+          <div class="role-header">
+            <div class="role-icon-wrap" style="background:linear-gradient(135deg,rgba(63,185,80,0.2),rgba(88,166,255,0.1));">🚀</div>
+            <div class="role-title-group">
+              <h3>DevOps / SRE エージェント</h3>
+              <div class="role-subtitle">CI/CD・インフラ・信頼性</div>
+            </div>
+          </div>
+          <p class="role-desc">CI/CD パイプライン設定・Infrastructure as Code・デプロイメント・信頼性チェックを管理する。ビルド失敗の自動診断とパイプライン最適化を行う。</p>
+          <div class="role-tasks">
+            <h4>主な責務</h4>
+            <ul>
+              <li>GitHub Actions ワークフロー管理</li>
+              <li>Terraform/Helm 等の IaC 更新</li>
+              <li>デプロイメントパイプラインの実行</li>
+              <li>ビルド失敗の自動診断・修正</li>
+              <li>SLO/SLA 監視レポートの作成</li>
+            </ul>
+          </div>
+          <div class="tools-row">
+            <span class="tool-tag">GitHub Actions</span>
+            <span class="tool-tag">Terraform</span>
+            <span class="tool-tag">クラウドAPI</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Design principles -->
+    <div class="section">
+      <div class="section-title">役割設計の原則</div>
+      <div class="principle-grid">
+        <div class="principle-card">
+          <div class="principle-num">01</div>
+          <div class="principle-title">単一責任原則</div>
+          <div class="principle-desc">1つのエージェントは1つの役割のみ。複数の役割を持たせると精度が下がり、障害の特定が困難になる。</div>
+        </div>
+        <div class="principle-card">
+          <div class="principle-num">02</div>
+          <div class="principle-title">最小権限アクセス</div>
+          <div class="principle-desc">各エージェントは業務に必要なツール・ファイルのみにアクセス可能にする。セキュリティと予期せぬ副作用を防ぐ。</div>
+        </div>
+        <div class="principle-card">
+          <div class="principle-num">03</div>
+          <div class="principle-title">明確なハンドオフ</div>
+          <div class="principle-desc">エージェント間の引き継ぎには構造化されたアーティファクト（PR・ドキュメント・ラベル）を使用する。暗黙の前提を排除。</div>
+        </div>
+        <div class="principle-card">
+          <div class="principle-num">04</div>
+          <div class="principle-title">人間のチェックポイント</div>
+          <div class="principle-desc">重要な決定（仕様承認・本番デプロイ・セキュリティ修正）には必ず人間の承認ステップを設ける。完全自動化は慎重に。</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="insight-box">
+      <h3>Stripe Minions からの示唆</h3>
+      <p>Stripe は隔離された VM 上で動く自律エージェント群「Minions」を使い、<strong>人間が1行もコードを書かずに週 1,000〜1,300 PR 以上</strong>をマージしています。成功の鍵は「エージェントに単一のエンド・ツー・エンドタスクを割り当てること」と「隔離された実行環境」です。大きすぎる責務を1エージェントに持たせると失敗率が急上昇します。</p>
+    </div>
+
+    <div class="pager">
+      <a href="page3-claude-agents.html">← Claude エージェント</a>
+      <a href="page5-workflow.html">次へ: ワークフロー →</a>
+    </div>
+  </div>
+</body>
+</html>

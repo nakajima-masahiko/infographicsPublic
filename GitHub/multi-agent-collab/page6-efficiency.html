@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>業務効率化の試算とROI — GitHub × 複数AIエージェント協調 完全ガイド</title>
+  <style>
+    :root { color-scheme: light; font-family: "Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: linear-gradient(135deg, #0d1117 0%, #1a1f2e 50%, #0f2027 100%); color: #e6edf3; min-height: 100vh; }
+    .wrap { max-width: 1040px; margin: 0 auto; padding: 40px 20px 60px; }
+    .nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; flex-wrap: wrap; gap: 12px; }
+    .back-link { display: inline-flex; align-items: center; gap: 6px; color: rgba(255,255,255,0.6); text-decoration: none; font-size: 14px; transition: color .2s; }
+    .back-link:hover { color: #fff; }
+    .page-nav { display: flex; gap: 8px; }
+    .page-nav a { display: inline-block; padding: 6px 14px; border-radius: 8px; font-size: 13px; text-decoration: none; background: #161b22; border: 1px solid #30363d; color: rgba(255,255,255,0.6); transition: all .2s; }
+    .page-nav a:hover, .page-nav a.active { background: #3fb950; border-color: #3fb950; color: #fff; }
+    header { margin-bottom: 40px; }
+    .hero-badge { display: inline-block; background: rgba(63,185,80,0.15); border: 1px solid rgba(63,185,80,0.35); border-radius: 100px; padding: 5px 16px; font-size: 12px; color: #3fb950; margin-bottom: 14px; }
+    header h1 { font-size: 32px; font-weight: 800; margin: 0 0 12px; line-height: 1.3; }
+    .g { background: linear-gradient(90deg, #3fb950, #56d364, #85e89d); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    header p { margin: 0; color: rgba(255,255,255,0.65); font-size: 15px; line-height: 1.8; }
+    .section { margin-bottom: 40px; }
+    .section-title { font-size: 20px; font-weight: 700; color: #e6edf3; margin: 0 0 20px; padding-left: 14px; border-left: 3px solid #3fb950; }
+    .stats-hero { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; margin-bottom: 32px; }
+    .sh-card { background: #161b22; border: 1px solid #30363d; border-radius: 14px; padding: 22px; text-align: center; }
+    .sh-num { font-size: 40px; font-weight: 800; color: #3fb950; line-height: 1; }
+    .sh-unit { font-size: 18px; font-weight: 700; color: #56d364; }
+    .sh-label { font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 8px; line-height: 1.5; }
+    .sh-source { font-size: 10px; color: rgba(255,255,255,0.3); margin-top: 6px; }
+    .data-table { width: 100%; border-collapse: collapse; }
+    .data-table th { background: #21262d; padding: 12px 16px; text-align: left; font-size: 13px; color: rgba(255,255,255,0.6); font-weight: 600; border-bottom: 1px solid #30363d; }
+    .data-table td { padding: 14px 16px; font-size: 13px; color: rgba(255,255,255,0.75); border-bottom: 1px solid #21262d; vertical-align: middle; }
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table td:nth-child(2) { font-size: 18px; font-weight: 800; color: #3fb950; white-space: nowrap; }
+    .badge { display: inline-block; border-radius: 6px; padding: 2px 8px; font-size: 11px; font-weight: 600; }
+    .badge-high { background: rgba(63,185,80,0.15); color: #3fb950; }
+    .badge-med { background: rgba(255,166,0,0.15); color: #ffa600; }
+    .badge-low { background: rgba(248,81,73,0.15); color: #f85149; }
+    .task-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .task-card { background: #161b22; border: 1px solid #30363d; border-radius: 14px; padding: 22px; }
+    .task-title { font-size: 15px; font-weight: 700; color: #e6edf3; margin: 0 0 16px; }
+    .task-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .task-row:last-child { margin-bottom: 0; }
+    .task-name { font-size: 13px; color: rgba(255,255,255,0.65); flex: 1; }
+    .task-bar-wrap { flex: 1; height: 8px; background: #21262d; border-radius: 4px; margin: 0 12px; }
+    .task-bar { height: 100%; border-radius: 4px; }
+    .task-val { font-size: 13px; font-weight: 700; color: #3fb950; min-width: 40px; text-align: right; }
+    .roi-box { background: #161b22; border: 1px solid #30363d; border-radius: 16px; padding: 28px; }
+    .roi-scenario { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+    .roi-col h3 { font-size: 15px; font-weight: 700; margin: 0 0 16px; padding-bottom: 12px; border-bottom: 1px solid #30363d; }
+    .roi-col.before h3 { color: #6b7280; }
+    .roi-col.after h3 { color: #3fb950; }
+    .roi-col.saving h3 { color: #58a6ff; }
+    .roi-item { margin-bottom: 12px; }
+    .roi-item .ri-label { font-size: 12px; color: rgba(255,255,255,0.45); margin-bottom: 3px; }
+    .roi-item .ri-val { font-size: 16px; font-weight: 700; }
+    .roi-col.before .ri-val { color: #f85149; }
+    .roi-col.after .ri-val { color: #3fb950; }
+    .roi-col.saving .ri-val { color: #58a6ff; }
+    .caveat-box { background: rgba(255,166,0,0.08); border: 1px solid rgba(255,166,0,0.25); border-radius: 14px; padding: 24px; }
+    .caveat-box h3 { font-size: 15px; font-weight: 700; color: #ffa600; margin: 0 0 10px; }
+    .caveat-box p { font-size: 14px; color: rgba(255,255,255,0.7); line-height: 1.8; margin: 0; }
+    .insight-box { background: linear-gradient(135deg, rgba(63,185,80,0.08), rgba(88,166,255,0.08)); border: 1px solid rgba(63,185,80,0.25); border-radius: 14px; padding: 24px; margin-bottom: 24px; }
+    .insight-box h3 { font-size: 15px; font-weight: 700; color: #3fb950; margin: 0 0 10px; }
+    .insight-box p { font-size: 14px; color: rgba(255,255,255,0.7); line-height: 1.8; margin: 0; }
+    .table-wrap { background: #161b22; border: 1px solid #30363d; border-radius: 14px; overflow: hidden; }
+    .adoption-bar { display: flex; height: 32px; border-radius: 8px; overflow: hidden; margin-top: 12px; }
+    .ab-seg { display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #fff; }
+    .pager { display: flex; justify-content: space-between; margin-top: 48px; }
+    .pager a { display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px; background: #161b22; border: 1px solid #30363d; border-radius: 10px; text-decoration: none; color: rgba(255,255,255,0.7); font-size: 14px; transition: all .2s; }
+    .pager a:hover { border-color: #3fb950; color: #3fb950; }
+    @media (max-width: 600px) { .task-grid { grid-template-columns: 1fr; } .roi-scenario { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="nav">
+      <a href="index.html" class="back-link">← 目次へ戻る</a>
+      <div class="page-nav">
+        <a href="page1-concepts.html">1</a>
+        <a href="page2-github-copilot.html">2</a>
+        <a href="page3-claude-agents.html">3</a>
+        <a href="page4-roles.html">4</a>
+        <a href="page5-workflow.html">5</a>
+        <a href="page6-efficiency.html" class="active">6</a>
+        <a href="page7-tips.html">7</a>
+      </div>
+    </div>
+
+    <header>
+      <div class="hero-badge">PAGE 06 / 07</div>
+      <h1><span class="g">業務効率化の試算</span> と ROI</h1>
+      <p>GitHub・McKinsey・Stack Overflow 等の調査データをもとに<br>AIエージェント導入による時間節約・コスト削減・投資対効果を定量化。</p>
+    </header>
+
+    <!-- Hero stats -->
+    <div class="stats-hero">
+      <div class="sh-card">
+        <div class="sh-num">56<span class="sh-unit">%</span></div>
+        <div class="sh-label">タスク完了速度の向上</div>
+        <div class="sh-source">GitHub Copilot 調査</div>
+      </div>
+      <div class="sh-card">
+        <div class="sh-num">60<span class="sh-unit">%</span></div>
+        <div class="sh-label">コーディング・テスト・<br>ドキュメント時間の短縮</div>
+        <div class="sh-source">McKinsey Digital</div>
+      </div>
+      <div class="sh-card">
+        <div class="sh-num">3.7<span class="sh-unit">h</span></div>
+        <div class="sh-label">週あたりの平均節約時間<br>（開発者1人）</div>
+        <div class="sh-source">各種調査の平均値</div>
+      </div>
+      <div class="sh-card">
+        <div class="sh-num">39<span class="sh-unit">%</span></div>
+        <div class="sh-label">エージェントをデフォルト化後の<br>ソフトウェア出力増加</div>
+        <div class="sh-source">プラットフォーム調査</div>
+      </div>
+    </div>
+
+    <!-- Data table -->
+    <div class="section">
+      <div class="section-title">主要調査データ一覧</div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>出典</th>
+              <th>測定値</th>
+              <th>指標</th>
+              <th>信頼度</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>GitHub (Copilot 調査, 2024)</td>
+              <td>56%</td>
+              <td>タスク完了速度の向上</td>
+              <td><span class="badge badge-high">高</span></td>
+            </tr>
+            <tr>
+              <td>McKinsey Digital</td>
+              <td>30〜60%</td>
+              <td>コーディング・テスト・ドキュメント時間の短縮</td>
+              <td><span class="badge badge-high">高</span></td>
+            </tr>
+            <tr>
+              <td>McKinsey Digital</td>
+              <td>最大 2x</td>
+              <td>単純・慣れ親しんだタスクでの速度向上</td>
+              <td><span class="badge badge-high">高</span></td>
+            </tr>
+            <tr>
+              <td>McKinsey Digital</td>
+              <td>&lt; 10%</td>
+              <td>複雑・不慣れなタスクでの速度向上</td>
+              <td><span class="badge badge-high">高</span></td>
+            </tr>
+            <tr>
+              <td>Stack Overflow 調査 2025</td>
+              <td>99%</td>
+              <td>AIで何らかの時間節約を報告した開発者</td>
+              <td><span class="badge badge-med">中</span></td>
+            </tr>
+            <tr>
+              <td>Stack Overflow 調査 2025</td>
+              <td>68%</td>
+              <td>週10時間以上節約している開発者の割合</td>
+              <td><span class="badge badge-med">中</span></td>
+            </tr>
+            <tr>
+              <td>エージェントユーザー調査</td>
+              <td>70%</td>
+              <td>特定タスクの時間短縮に同意するユーザー</td>
+              <td><span class="badge badge-med">中</span></td>
+            </tr>
+            <tr>
+              <td>GitHub Copilot 開発者調査</td>
+              <td>2x 以上</td>
+              <td>幸福感・充実感を報告する可能性</td>
+              <td><span class="badge badge-med">中</span></td>
+            </tr>
+            <tr>
+              <td>プラットフォーム調査</td>
+              <td>+39%</td>
+              <td>エージェントをデフォルト化後のソフトウェア出力増加</td>
+              <td><span class="badge badge-med">中</span></td>
+            </tr>
+            <tr>
+              <td>TELUS (企業事例)</td>
+              <td>500,000h+</td>
+              <td>13,000 AI ソリューション導入による節約時間</td>
+              <td><span class="badge badge-med">中</span></td>
+            </tr>
+            <tr>
+              <td>GitHub CCA (.NET repos)</td>
+              <td>68.6%</td>
+              <td>Copilot Coding Agent の PR マージ成功率</td>
+              <td><span class="badge badge-high">高</span></td>
+            </tr>
+            <tr>
+              <td>Stripe Minions (実績)</td>
+              <td>1,300+/週</td>
+              <td>自律的にマージされた PR 数</td>
+              <td><span class="badge badge-high">高</span></td>
+            </tr>
+            <tr>
+              <td>METR 制御実験 (2025年7月)</td>
+              <td>−19%</td>
+              <td>複雑タスクで経験豊富な開発者が遅くなった割合</td>
+              <td><span class="badge badge-high">高 ⚠️</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- By task type -->
+    <div class="section">
+      <div class="section-title">タスク種別の効率化効果</div>
+      <div class="task-grid">
+        <div class="task-card">
+          <div class="task-title">効果が高いタスク</div>
+          <div class="task-row">
+            <span class="task-name">定型コード生成</span>
+            <div class="task-bar-wrap"><div class="task-bar" style="width:85%;background:#3fb950;"></div></div>
+            <span class="task-val">-80%</span>
+          </div>
+          <div class="task-row">
+            <span class="task-name">ドキュメント作成</span>
+            <div class="task-bar-wrap"><div class="task-bar" style="width:80%;background:#56d364;"></div></div>
+            <span class="task-val">-75%</span>
+          </div>
+          <div class="task-row">
+            <span class="task-name">テストコード生成</span>
+            <div class="task-bar-wrap"><div class="task-bar" style="width:70%;background:#56d364;"></div></div>
+            <span class="task-val">-65%</span>
+          </div>
+          <div class="task-row">
+            <span class="task-name">コードレビュー（基本）</span>
+            <div class="task-bar-wrap"><div class="task-bar" style="width:60%;background:#85e89d;"></div></div>
+            <span class="task-val">-55%</span>
+          </div>
+          <div class="task-row">
+            <span class="task-name">バグ修正（明確なもの）</span>
+            <div class="task-bar-wrap"><div class="task-bar" style="width:55%;background:#85e89d;"></div></div>
+            <span class="task-val">-50%</span>
+          </div>
+          <div class="task-row">
+            <span class="task-name">リファクタリング</span>
+            <div class="task-bar-wrap"><div class="task-bar" style="width:50%;background:#85e89d;"></div></div>
+            <span class="task-val">-45%</span>
+          </div>
+        </div>
+        <div class="task-card">
+          <div class="task-title">効果が限定的なタスク</div>
+          <div class="task-row">
+            <span class="task-name">新規アーキテクチャ設計</span>
+            <div class="task-bar-wrap"><div class="task-bar" style="width:15%;background:#ffa600;"></div></div>
+            <span class="task-val">-10%</span>
+          </div>
+          <div class="task-row">
+            <span class="task-name">複雑なバグ調査</span>
+            <div class="task-bar-wrap"><div class="task-bar" style="width:15%;background:#ffa600;"></div></div>
+            <span class="task-val">-10%</span>
+          </div>
+          <div class="task-row">
+            <span class="task-name">ビジネス要件の整理</span>
+            <div class="task-bar-wrap"><div class="task-bar" style="width:10%;background:#f85149;"></div></div>
+            <span class="task-val">-5%</span>
+          </div>
+          <div class="task-row">
+            <span class="task-name">セキュリティ設計</span>
+            <div class="task-bar-wrap"><div class="task-bar" style="width:10%;background:#f85149;"></div></div>
+            <span class="task-val">-5%</span>
+          </div>
+          <div class="task-row">
+            <span class="task-name">性能最適化（深い理解が必要）</span>
+            <div class="task-bar-wrap"><div class="task-bar" style="width:8%;background:#f85149;"></div></div>
+            <span class="task-val">-3%</span>
+          </div>
+          <div class="task-row">
+            <span class="task-name">ステークホルダー調整</span>
+            <div class="task-bar-wrap"><div class="task-bar" style="width:5%;background:#f85149;"></div></div>
+            <span class="task-val">0%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ROI Scenario -->
+    <div class="section">
+      <div class="section-title">チーム導入時の ROI 試算（10人チーム / 月）</div>
+      <div class="roi-box">
+        <div class="roi-scenario">
+          <div class="roi-col before">
+            <h3>導入前 (現状)</h3>
+            <div class="roi-item">
+              <div class="ri-label">コーディング時間/月</div>
+              <div class="ri-val">800h</div>
+            </div>
+            <div class="roi-item">
+              <div class="ri-label">コードレビュー時間/月</div>
+              <div class="ri-val">200h</div>
+            </div>
+            <div class="roi-item">
+              <div class="ri-label">テスト作成時間/月</div>
+              <div class="ri-val">160h</div>
+            </div>
+            <div class="roi-item">
+              <div class="ri-label">ドキュメント作成時間/月</div>
+              <div class="ri-val">80h</div>
+            </div>
+            <div class="roi-item">
+              <div class="ri-label">合計工数/月</div>
+              <div class="ri-val">1,240h</div>
+            </div>
+            <div class="roi-item">
+              <div class="ri-label">人件費換算 (¥5,000/h)</div>
+              <div class="ri-val">¥620万</div>
+            </div>
+          </div>
+          <div class="roi-col after">
+            <h3>導入後 (試算)</h3>
+            <div class="roi-item">
+              <div class="ri-label">コーディング時間/月</div>
+              <div class="ri-val">400h (−50%)</div>
+            </div>
+            <div class="roi-item">
+              <div class="ri-label">コードレビュー時間/月</div>
+              <div class="ri-val">100h (−50%)</div>
+            </div>
+            <div class="roi-item">
+              <div class="ri-label">テスト作成時間/月</div>
+              <div class="ri-val">56h (−65%)</div>
+            </div>
+            <div class="roi-item">
+              <div class="ri-label">ドキュメント作成時間/月</div>
+              <div class="ri-val">20h (−75%)</div>
+            </div>
+            <div class="roi-item">
+              <div class="ri-label">合計工数/月</div>
+              <div class="ri-val">576h</div>
+            </div>
+            <div class="roi-item">
+              <div class="ri-label">人件費換算 (¥5,000/h)</div>
+              <div class="ri-val">¥288万</div>
+            </div>
+          </div>
+          <div class="roi-col saving">
+            <h3>削減効果</h3>
+            <div class="roi-item">
+              <div class="ri-label">月間節約工数</div>
+              <div class="ri-val">664h</div>
+            </div>
+            <div class="roi-item">
+              <div class="ri-label">月間コスト削減</div>
+              <div class="ri-val">¥332万</div>
+            </div>
+            <div class="roi-item">
+              <div class="ri-label">年間コスト削減</div>
+              <div class="ri-val">¥3,984万</div>
+            </div>
+            <div class="roi-item">
+              <div class="ri-label">Copilot Enterprise コスト<br>(10人×¥6,000/月)</div>
+              <div class="ri-val" style="color:#ffa600;">¥72万/年</div>
+            </div>
+            <div class="roi-item">
+              <div class="ri-label">ROI (1年)</div>
+              <div class="ri-val">5,433%</div>
+            </div>
+            <div class="roi-item">
+              <div class="ri-label">投資回収期間</div>
+              <div class="ri-val">約 7日</div>
+            </div>
+          </div>
+        </div>
+        <p style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:16px;line-height:1.6;">※ 試算値。実際の効果はタスクの性質・チームのスキル・導入方法によって大きく異なります。McKinsey 調査に基づく保守的な推定（30-60% の中間値を採用）。</p>
+      </div>
+    </div>
+
+    <!-- Important caveat -->
+    <div class="caveat-box">
+      <h3>重要な注意事項 — 過度な期待を避けるために</h3>
+      <p>METR が 2025年7月に行った制御実験では、<strong>経験豊富なオープンソース開発者が複雑なタスクで AI ツールを使うと 19% 遅くなった</strong>という結果も出ています。効果はタスクの性質・開発者のスキルレベル・導入方法によって大きく異なります。「定型的・反復的なタスク」では大きな効果が見込めますが、「深い専門知識・創造性が必要な複雑なタスク」では期待を下げることが重要です。小規模な PoC から始めて効果を測定してから展開することを強く推奨します。</p>
+    </div>
+
+    <div class="pager">
+      <a href="page5-workflow.html">← ワークフロー</a>
+      <a href="page7-tips.html">次へ: コミュニティTips →</a>
+    </div>
+  </div>
+</body>
+</html>
