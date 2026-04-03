@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>協調ワークフロー実践 — GitHub × 複数AIエージェント協調 完全ガイド</title>
+  <style>
+    :root { color-scheme: light; font-family: "Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: linear-gradient(135deg, #0d1117 0%, #1a1f2e 50%, #0f2027 100%); color: #e6edf3; min-height: 100vh; }
+    .wrap { max-width: 1040px; margin: 0 auto; padding: 40px 20px 60px; }
+    .nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; flex-wrap: wrap; gap: 12px; }
+    .back-link { display: inline-flex; align-items: center; gap: 6px; color: rgba(255,255,255,0.6); text-decoration: none; font-size: 14px; transition: color .2s; }
+    .back-link:hover { color: #fff; }
+    .page-nav { display: flex; gap: 8px; }
+    .page-nav a { display: inline-block; padding: 6px 14px; border-radius: 8px; font-size: 13px; text-decoration: none; background: #161b22; border: 1px solid #30363d; color: rgba(255,255,255,0.6); transition: all .2s; }
+    .page-nav a:hover, .page-nav a.active { background: #58a6ff; border-color: #58a6ff; color: #fff; }
+    header { margin-bottom: 40px; }
+    .hero-badge { display: inline-block; background: rgba(88,166,255,0.15); border: 1px solid rgba(88,166,255,0.35); border-radius: 100px; padding: 5px 16px; font-size: 12px; color: #79c0ff; margin-bottom: 14px; }
+    header h1 { font-size: 32px; font-weight: 800; margin: 0 0 12px; line-height: 1.3; }
+    .g { background: linear-gradient(90deg, #58a6ff, #79c0ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    header p { margin: 0; color: rgba(255,255,255,0.65); font-size: 15px; line-height: 1.8; }
+    .section { margin-bottom: 40px; }
+    .section-title { font-size: 20px; font-weight: 700; color: #e6edf3; margin: 0 0 20px; padding-left: 14px; border-left: 3px solid #58a6ff; }
+    .workflow { background: #161b22; border: 1px solid #30363d; border-radius: 16px; padding: 28px; }
+    .wf-step { display: flex; gap: 20px; margin-bottom: 0; }
+    .wf-left { display: flex; flex-direction: column; align-items: center; }
+    .wf-num { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700; flex-shrink: 0; }
+    .wf-line { width: 2px; flex: 1; background: #30363d; margin: 6px 0; min-height: 24px; }
+    .wf-content { flex: 1; padding-bottom: 28px; }
+    .wf-step:last-child .wf-content { padding-bottom: 0; }
+    .wf-step:last-child .wf-line { display: none; }
+    .wf-title { font-size: 16px; font-weight: 700; color: #e6edf3; margin: 4px 0 6px; }
+    .wf-agents { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+    .wf-agent { background: rgba(88,166,255,0.1); border: 1px solid rgba(88,166,255,0.25); border-radius: 6px; padding: 3px 10px; font-size: 12px; color: #79c0ff; }
+    .wf-desc { font-size: 13px; color: rgba(255,255,255,0.6); line-height: 1.7; margin: 0; }
+    .wf-artifact { display: inline-flex; align-items: center; gap: 4px; background: rgba(63,185,80,0.1); border: 1px solid rgba(63,185,80,0.25); border-radius: 6px; padding: 4px 10px; font-size: 12px; color: #3fb950; margin-top: 8px; }
+    .spec-flow { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 0; }
+    .spec-item { background: #161b22; border: 1px solid #30363d; border-radius: 12px; padding: 18px; text-align: center; }
+    .spec-item + .spec-item { margin-left: -1px; border-radius: 0; }
+    .spec-item:first-child { border-radius: 12px 0 0 12px; }
+    .spec-item:last-child { border-radius: 0 12px 12px 0; }
+    .spec-icon { font-size: 24px; margin-bottom: 8px; }
+    .spec-name { font-size: 14px; font-weight: 700; color: #e6edf3; margin-bottom: 4px; }
+    .spec-desc { font-size: 12px; color: rgba(255,255,255,0.5); line-height: 1.5; }
+    .spec-arrow { display: flex; align-items: center; justify-content: center; color: #58a6ff; font-size: 20px; padding: 0 4px; }
+    .spec-flow-wrap { display: flex; align-items: stretch; overflow-x: auto; gap: 0; background: #161b22; border: 1px solid #30363d; border-radius: 14px; padding: 20px; }
+    .spec-flow-item { flex: 1; min-width: 120px; text-align: center; padding: 8px; }
+    .spec-flow-item .si { font-size: 22px; margin-bottom: 6px; }
+    .spec-flow-item .sn { font-size: 13px; font-weight: 700; color: #e6edf3; margin-bottom: 2px; }
+    .spec-flow-item .sd { font-size: 11px; color: rgba(255,255,255,0.5); line-height: 1.4; }
+    .sfa { color: #58a6ff; font-size: 18px; padding: 24px 6px 0; flex-shrink: 0; }
+    .guardrail-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+    .gr-card { background: #161b22; border: 1px solid #30363d; border-radius: 12px; padding: 18px; border-top: 3px solid; }
+    .gr-card.red { border-top-color: #f85149; }
+    .gr-card.yellow { border-top-color: #ffa600; }
+    .gr-card.green { border-top-color: #3fb950; }
+    .gr-card h3 { font-size: 14px; font-weight: 700; color: #e6edf3; margin: 0 0 8px; }
+    .gr-card p { font-size: 12px; color: rgba(255,255,255,0.6); line-height: 1.6; margin: 0; }
+    .parallel-box { background: #161b22; border: 1px solid #30363d; border-radius: 16px; padding: 24px; }
+    .parallel-center { text-align: center; background: rgba(88,166,255,0.1); border: 1px solid rgba(88,166,255,0.25); border-radius: 10px; padding: 14px; margin-bottom: 16px; font-size: 14px; font-weight: 700; color: #79c0ff; }
+    .parallel-agents { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+    .pa-item { background: rgba(255,255,255,0.04); border: 1px solid #30363d; border-radius: 10px; padding: 14px; text-align: center; }
+    .pa-icon { font-size: 20px; margin-bottom: 6px; }
+    .pa-name { font-size: 13px; font-weight: 600; color: #e6edf3; margin-bottom: 4px; }
+    .pa-task { font-size: 11px; color: rgba(255,255,255,0.5); line-height: 1.4; }
+    .insight-box { background: linear-gradient(135deg, rgba(88,166,255,0.08), rgba(188,140,255,0.08)); border: 1px solid rgba(88,166,255,0.25); border-radius: 14px; padding: 24px; margin-bottom: 24px; }
+    .insight-box h3 { font-size: 15px; font-weight: 700; color: #79c0ff; margin: 0 0 10px; }
+    .insight-box p { font-size: 14px; color: rgba(255,255,255,0.7); line-height: 1.8; margin: 0; }
+    .pager { display: flex; justify-content: space-between; margin-top: 48px; }
+    .pager a { display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px; background: #161b22; border: 1px solid #30363d; border-radius: 10px; text-decoration: none; color: rgba(255,255,255,0.7); font-size: 14px; transition: all .2s; }
+    .pager a:hover { border-color: #58a6ff; color: #58a6ff; }
+    .human-badge { background: rgba(255,166,0,0.15); border: 1px solid rgba(255,166,0,0.3); color: #ffa600; border-radius: 6px; padding: 2px 8px; font-size: 11px; font-weight: 700; margin-left: 6px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="nav">
+      <a href="index.html" class="back-link">← 目次へ戻る</a>
+      <div class="page-nav">
+        <a href="page1-concepts.html">1</a>
+        <a href="page2-github-copilot.html">2</a>
+        <a href="page3-claude-agents.html">3</a>
+        <a href="page4-roles.html">4</a>
+        <a href="page5-workflow.html" class="active">5</a>
+        <a href="page6-efficiency.html">6</a>
+        <a href="page7-tips.html">7</a>
+      </div>
+    </div>
+
+    <header>
+      <div class="hero-badge">PAGE 05 / 07</div>
+      <h1><span class="g">協調ワークフロー</span> 実践</h1>
+      <p>Issue から PR まで全自動のマルチエージェントワークフロー。<br>Spec-Driven 開発・ガードレール設計・ハンドオフのベストプラクティス。</p>
+    </header>
+
+    <!-- Main workflow -->
+    <div class="section">
+      <div class="section-title">標準マルチエージェント開発フロー</div>
+      <div class="workflow">
+
+        <div class="wf-step">
+          <div class="wf-left">
+            <div class="wf-num" style="background:rgba(88,166,255,0.2);color:#79c0ff;">1</div>
+            <div class="wf-line"></div>
+          </div>
+          <div class="wf-content">
+            <div class="wf-title">要件定義・Issue 作成 <span class="human-badge">人間</span></div>
+            <div class="wf-desc">プロダクトオーナーまたは開発者が GitHub Issue に要件を記述する。ユーザーストーリー・受け入れ条件・関連 Issue リンクを含める。</div>
+            <div class="wf-artifact">📋 GitHub Issue (要件)</div>
+          </div>
+        </div>
+
+        <div class="wf-step">
+          <div class="wf-left">
+            <div class="wf-num" style="background:rgba(188,140,255,0.2);color:#bc8cff;">2</div>
+            <div class="wf-line"></div>
+          </div>
+          <div class="wf-content">
+            <div class="wf-title">仕様策定・タスク分解</div>
+            <div class="wf-agents"><span class="wf-agent">PM / Spec Agent</span></div>
+            <div class="wf-desc">PM エージェントが Issue を読み込み、spec.md に詳細仕様を作成。タスクを tasks.md に分解し、各エージェントへのアサインを準備する。</div>
+            <div class="wf-artifact">📄 spec.md → plan.md → tasks.md</div>
+          </div>
+        </div>
+
+        <div class="wf-step">
+          <div class="wf-left">
+            <div class="wf-num" style="background:rgba(63,185,80,0.2);color:#3fb950;">3</div>
+            <div class="wf-line"></div>
+          </div>
+          <div class="wf-content">
+            <div class="wf-title">仕様レビュー・承認 <span class="human-badge">人間承認</span></div>
+            <div class="wf-agents"><span class="wf-agent">Tech Lead (人間)</span></div>
+            <div class="wf-desc">技術リードが spec.md をレビューし承認。スコープ・アーキテクチャ方針・リスクを確認。重要なチェックポイントで人間の判断を挟む。</div>
+            <div class="wf-artifact">✅ 承認済み spec.md</div>
+          </div>
+        </div>
+
+        <div class="wf-step">
+          <div class="wf-left">
+            <div class="wf-num" style="background:rgba(255,166,0,0.2);color:#ffa600;">4</div>
+            <div class="wf-line"></div>
+          </div>
+          <div class="wf-content">
+            <div class="wf-title">並列実装・テスト作成</div>
+            <div class="wf-agents"><span class="wf-agent">Developer Agent × N</span><span class="wf-agent">Tester Agent</span><span class="wf-agent">Documentation Agent</span></div>
+            <div class="wf-desc">複数の Developer エージェントが git worktree で並列実装。Tester エージェントが同時にテストを作成。Documentation エージェントがドキュメントを更新。</div>
+            <div class="wf-artifact">🌿 Feature branches × N</div>
+          </div>
+        </div>
+
+        <div class="wf-step">
+          <div class="wf-left">
+            <div class="wf-num" style="background:rgba(88,166,255,0.2);color:#79c0ff;">5</div>
+            <div class="wf-line"></div>
+          </div>
+          <div class="wf-content">
+            <div class="wf-title">セキュリティ・アーキテクチャチェック</div>
+            <div class="wf-agents"><span class="wf-agent">Security Agent</span><span class="wf-agent">Architecture Guardian</span></div>
+            <div class="wf-desc">Security エージェントが脆弱性・シークレット漏洩・依存 CVE をスキャン。Architecture Guardian が設計原則への適合を確認。問題があれば Developer に差し戻し。</div>
+            <div class="wf-artifact">🔒 セキュリティレポート</div>
+          </div>
+        </div>
+
+        <div class="wf-step">
+          <div class="wf-left">
+            <div class="wf-num" style="background:rgba(188,140,255,0.2);color:#bc8cff;">6</div>
+            <div class="wf-line"></div>
+          </div>
+          <div class="wf-content">
+            <div class="wf-title">コードレビュー・PR 作成</div>
+            <div class="wf-agents"><span class="wf-agent">Code Reviewer Agent</span></div>
+            <div class="wf-desc">Reviewer エージェントが diff をプロジェクトコンテキストと共にレビュー。インラインコメントを投稿し、問題があれば Developer エージェントに修正を委託。クリアなら PR をマージ準備状態に。</div>
+            <div class="wf-artifact">📬 Draft PR → Ready for Review</div>
+          </div>
+        </div>
+
+        <div class="wf-step">
+          <div class="wf-left">
+            <div class="wf-num" style="background:rgba(63,185,80,0.2);color:#3fb950;">7</div>
+            <div class="wf-line"></div>
+          </div>
+          <div class="wf-content">
+            <div class="wf-title">最終承認・マージ・デプロイ</div>
+            <div class="wf-agents"><span class="wf-agent">DevOps Agent</span><span class="wf-agent">Tech Lead (人間) <span class="human-badge">承認</span></span></div>
+            <div class="wf-desc">人間が最終 PR をレビューし承認。DevOps エージェントがCI/CD を実行し本番へデプロイ。リリースノートも自動生成。</div>
+            <div class="wf-artifact">🚀 本番デプロイ完了</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Spec-Driven -->
+    <div class="section">
+      <div class="section-title">Spec-Driven（仕様駆動）開発の流れ</div>
+      <div class="spec-flow-wrap">
+        <div class="spec-flow-item">
+          <div class="si">📋</div>
+          <div class="sn">spec.md</div>
+          <div class="sd">要件・制約・完了条件の定義。全エージェントの真実の源</div>
+        </div>
+        <div class="sfa">→</div>
+        <div class="spec-flow-item">
+          <div class="si">🗺️</div>
+          <div class="sn">plan.md</div>
+          <div class="sd">技術設計・アーキテクチャ決定・依存関係の整理</div>
+        </div>
+        <div class="sfa">→</div>
+        <div class="spec-flow-item">
+          <div class="si">✅</div>
+          <div class="sn">tasks.md</div>
+          <div class="sd">エージェントへの具体的タスク割り当て・ステータス管理</div>
+        </div>
+        <div class="sfa">→</div>
+        <div class="spec-flow-item">
+          <div class="si">⚙️</div>
+          <div class="sn">並列実行</div>
+          <div class="sd">各エージェントがタスクを引き取り独立して実行</div>
+        </div>
+        <div class="sfa">→</div>
+        <div class="spec-flow-item">
+          <div class="si">🔀</div>
+          <div class="sn">マージ・検証</div>
+          <div class="sd">成果物を統合しspec.mdの完了条件と照合</div>
+        </div>
+      </div>
+      <div class="insight-box" style="margin-top:20px;margin-bottom:0;">
+        <h3>Spec-Driven の利点</h3>
+        <p>全エージェントが同じ spec.md を参照することで、スコープ逸脱・ハルシネーション・矛盾した実装を防ぎます。仕様が変わった場合も spec.md を更新するだけで全エージェントが追従できます。「仕様を書く時間」が最大の投資対効果をもたらします。</p>
+      </div>
+    </div>
+
+    <!-- Parallel execution -->
+    <div class="section">
+      <div class="section-title">並列実行パターン — 複数エージェントの同時稼働</div>
+      <div class="parallel-box">
+        <div class="parallel-center">オーケストレーター（タスク分配・結果統合）</div>
+        <div class="parallel-agents">
+          <div class="pa-item">
+            <div class="pa-icon">💻</div>
+            <div class="pa-name">Dev Agent A</div>
+            <div class="pa-task">認証機能実装<br>worktree/feature-auth</div>
+          </div>
+          <div class="pa-item">
+            <div class="pa-icon">💻</div>
+            <div class="pa-name">Dev Agent B</div>
+            <div class="pa-task">API エンドポイント実装<br>worktree/feature-api</div>
+          </div>
+          <div class="pa-item">
+            <div class="pa-icon">🧪</div>
+            <div class="pa-name">Test Agent</div>
+            <div class="pa-task">テストスイート生成<br>worktree/tests</div>
+          </div>
+          <div class="pa-item">
+            <div class="pa-icon">📚</div>
+            <div class="pa-name">Docs Agent</div>
+            <div class="pa-task">API ドキュメント更新<br>worktree/docs</div>
+          </div>
+          <div class="pa-item">
+            <div class="pa-icon">🛡️</div>
+            <div class="pa-name">Security Agent</div>
+            <div class="pa-task">脆弱性スキャン<br>読み取り専用アクセス</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Guardrails -->
+    <div class="section">
+      <div class="section-title">ガードレール設計 — 安全な自律実行のために</div>
+      <div class="guardrail-grid">
+        <div class="gr-card red">
+          <h3>絶対禁止（ハードガードレール）</h3>
+          <p>main ブランチへの直接プッシュ禁止 / 本番 DB への直接書き込み禁止 / 認証情報のコミット禁止 / 他エージェントのワークツリーへの書き込み禁止</p>
+        </div>
+        <div class="gr-card yellow">
+          <h3>人間承認必須（ソフトガードレール）</h3>
+          <p>本番デプロイ / 外部 API への書き込み / セキュリティポリシー変更 / 依存関係のメジャーバージョンアップ / コスト100ドル以上の操作</p>
+        </div>
+        <div class="gr-card green">
+          <h3>自律実行 OK（許可済みアクション）</h3>
+          <p>feature ブランチへのコミット / テストの実行・修正 / ドキュメントの更新 / ドラフト PR の作成 / セキュリティスキャンの実行・レポート</p>
+        </div>
+        <div class="gr-card" style="border-top-color:#79c0ff;">
+          <h3>コスト管理（トークン制限）</h3>
+          <p>エージェントごとの最大トークン数設定 / タスクの最大実行時間制限 / 無限ループ検出・中断機構 / 定期的な進捗確認ポイント設定</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="insight-box">
+      <h3>失敗パターンと対策</h3>
+      <p>最も多い失敗は「<strong>タスク境界の曖昧さ</strong>」です。2つのエージェントが同じファイルを同時に編集しようとする競合、スコープを超えた変更、引き継ぎ情報の欠落が主な原因です。対策は「<strong>git worktree で作業空間を分離</strong>」「<strong>アーティファクト（ファイル）を介したハンドオフ</strong>」「<strong>明示的なタスク所有権の宣言</strong>」の3点です。</p>
+    </div>
+
+    <div class="pager">
+      <a href="page4-roles.html">← 役割分担</a>
+      <a href="page6-efficiency.html">次へ: 効率化試算 →</a>
+    </div>
+  </div>
+</body>
+</html>

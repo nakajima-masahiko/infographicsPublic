@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Claude AI エージェントの活用 — GitHub × 複数AIエージェント協調 完全ガイド</title>
+  <style>
+    :root { color-scheme: light; font-family: "Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: linear-gradient(135deg, #0d1117 0%, #1a1f2e 50%, #0f2027 100%); color: #e6edf3; min-height: 100vh; }
+    .wrap { max-width: 1040px; margin: 0 auto; padding: 40px 20px 60px; }
+    .nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; flex-wrap: wrap; gap: 12px; }
+    .back-link { display: inline-flex; align-items: center; gap: 6px; color: rgba(255,255,255,0.6); text-decoration: none; font-size: 14px; transition: color .2s; }
+    .back-link:hover { color: #fff; }
+    .page-nav { display: flex; gap: 8px; }
+    .page-nav a { display: inline-block; padding: 6px 14px; border-radius: 8px; font-size: 13px; text-decoration: none; background: #161b22; border: 1px solid #30363d; color: rgba(255,255,255,0.6); transition: all .2s; }
+    .page-nav a:hover, .page-nav a.active { background: #da7756; border-color: #da7756; color: #fff; }
+    header { margin-bottom: 40px; }
+    .hero-badge { display: inline-block; background: rgba(218,119,86,0.2); border: 1px solid rgba(218,119,86,0.4); border-radius: 100px; padding: 5px 16px; font-size: 12px; color: #f0a080; margin-bottom: 14px; }
+    header h1 { font-size: 32px; font-weight: 800; margin: 0 0 12px; line-height: 1.3; }
+    .g { background: linear-gradient(90deg, #da7756, #f0a080, #ffc080); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    header p { margin: 0; color: rgba(255,255,255,0.65); font-size: 15px; line-height: 1.8; }
+    .section { margin-bottom: 40px; }
+    .section-title { font-size: 20px; font-weight: 700; color: #e6edf3; margin: 0 0 20px; padding-left: 14px; border-left: 3px solid #da7756; }
+    .card { background: #161b22; border: 1px solid #30363d; border-radius: 14px; padding: 24px; margin-bottom: 16px; }
+    .card h3 { font-size: 16px; font-weight: 700; color: #f0a080; margin: 0 0 10px; }
+    .card p { font-size: 14px; color: rgba(255,255,255,0.7); line-height: 1.8; margin: 0 0 12px; }
+    .card p:last-child { margin: 0; }
+    .card ul { margin: 8px 0 0; padding-left: 0; list-style: none; }
+    .card ul li { font-size: 13px; color: rgba(255,255,255,0.65); line-height: 1.7; padding-left: 18px; position: relative; }
+    .card ul li::before { content: '✦'; position: absolute; left: 0; color: #da7756; font-size: 10px; top: 3px; }
+    .grid2 { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+    .tool-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; margin-top: 8px; }
+    .tool-item { background: #21262d; border: 1px solid #30363d; border-radius: 10px; padding: 14px; }
+    .tool-item .ti { font-size: 20px; margin-bottom: 6px; }
+    .tool-item .tn { font-size: 13px; font-weight: 600; color: #e6edf3; }
+    .tool-item .td { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 3px; }
+    .arch-box { background: #161b22; border: 1px solid #30363d; border-radius: 16px; padding: 28px; }
+    .arch-layers { display: flex; flex-direction: column; gap: 12px; }
+    .arch-layer { border-radius: 10px; padding: 14px 20px; display: flex; align-items: center; gap: 16px; }
+    .arch-layer-icon { font-size: 24px; flex-shrink: 0; }
+    .arch-layer-content h4 { font-size: 15px; font-weight: 700; margin: 0 0 4px; }
+    .arch-layer-content p { font-size: 13px; margin: 0; line-height: 1.6; }
+    .arch-arrows { text-align: center; font-size: 20px; color: rgba(255,255,255,0.3); margin: 4px 0; }
+    .layer-orchestrator { background: rgba(218,119,86,0.15); border: 1px solid rgba(218,119,86,0.3); }
+    .layer-orchestrator h4 { color: #f0a080; }
+    .layer-orchestrator p { color: rgba(255,255,255,0.65); }
+    .layer-feature { background: rgba(88,166,255,0.1); border: 1px solid rgba(88,166,255,0.25); }
+    .layer-feature h4 { color: #79c0ff; }
+    .layer-feature p { color: rgba(255,255,255,0.65); }
+    .layer-specialist { background: rgba(63,185,80,0.1); border: 1px solid rgba(63,185,80,0.25); }
+    .layer-specialist h4 { color: #3fb950; }
+    .layer-specialist p { color: rgba(255,255,255,0.65); }
+    .insight-box { background: linear-gradient(135deg, rgba(218,119,86,0.08), rgba(188,140,255,0.08)); border: 1px solid rgba(218,119,86,0.25); border-radius: 14px; padding: 24px; margin-bottom: 24px; }
+    .insight-box h3 { font-size: 15px; font-weight: 700; color: #f0a080; margin: 0 0 10px; }
+    .insight-box p { font-size: 14px; color: rgba(255,255,255,0.7); line-height: 1.8; margin: 0; }
+    .code-block { background: #0d1117; border: 1px solid #30363d; border-radius: 10px; padding: 16px 20px; font-family: 'Fira Code', 'Courier New', monospace; font-size: 13px; color: #e6edf3; line-height: 1.7; overflow-x: auto; margin-top: 12px; }
+    .code-comment { color: #6a9955; }
+    .code-key { color: #79c0ff; }
+    .code-val { color: #3fb950; }
+    .framework-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+    .fw-card { background: #161b22; border: 1px solid #30363d; border-radius: 12px; padding: 20px; }
+    .fw-card h3 { font-size: 15px; font-weight: 700; color: #da7756; margin: 0 0 8px; }
+    .fw-card p { font-size: 13px; color: rgba(255,255,255,0.6); line-height: 1.7; margin: 0; }
+    .fw-tag { display: inline-block; background: rgba(218,119,86,0.1); border: 1px solid rgba(218,119,86,0.25); border-radius: 6px; padding: 2px 8px; font-size: 11px; color: #f0a080; margin-top: 8px; }
+    .pager { display: flex; justify-content: space-between; margin-top: 48px; }
+    .pager a { display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px; background: #161b22; border: 1px solid #30363d; border-radius: 10px; text-decoration: none; color: rgba(255,255,255,0.7); font-size: 14px; transition: all .2s; }
+    .pager a:hover { border-color: #da7756; color: #f0a080; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="nav">
+      <a href="index.html" class="back-link">← 目次へ戻る</a>
+      <div class="page-nav">
+        <a href="page1-concepts.html">1</a>
+        <a href="page2-github-copilot.html">2</a>
+        <a href="page3-claude-agents.html" class="active">3</a>
+        <a href="page4-roles.html">4</a>
+        <a href="page5-workflow.html">5</a>
+        <a href="page6-efficiency.html">6</a>
+        <a href="page7-tips.html">7</a>
+      </div>
+    </div>
+
+    <header>
+      <div class="hero-badge">PAGE 03 / 07</div>
+      <h1><span class="g">Claude AI エージェント</span> の活用</h1>
+      <p>Claude Code・Agent SDK・CLAUDE.md でマルチエージェントシステムを構築する。<br>オーケストレーター/サブエージェントパターンの実装方法。</p>
+    </header>
+
+    <!-- Claude Code -->
+    <div class="section">
+      <div class="section-title">Claude Code — ターミナルネイティブのエージェント</div>
+      <div class="card">
+        <h3>Claude Code とは</h3>
+        <p>Claude Code は開発環境内で直接動作するターミナルファーストのエージェント型コーディングツールです。コードを書くだけでなく、ファイル操作・シェル実行・Web検索・MCP連携まで行う自律エージェントとして動作します。</p>
+        <ul>
+          <li>ファイルの読み書き・ディレクトリ操作</li>
+          <li>シェルコマンドの実行（テスト・ビルド・デプロイ）</li>
+          <li>Web 検索でリアルタイム情報を取得</li>
+          <li>MCP サーバーで外部ツールと連携</li>
+          <li>Computer Use でデスクトップを自律操作（クリック・入力・スクリーンショット）</li>
+          <li>Remote Control (2026/02): モバイルから HTTPS 経由でローカルセッションを操作</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3>CLAUDE.md — プロジェクトレベルの指示ファイル</h3>
+        <p>CLAUDE.md はリポジトリに配置するエージェントへの永続的な指示ファイルです。コーディング標準・アーキテクチャ原則・役割定義・禁止事項を記述することで、すべてのセッションで一貫した動作を実現します。</p>
+        <div class="code-block">
+<span class="code-comment"># CLAUDE.md — プロジェクト指示例</span>
+
+<span class="code-key">## あなたの役割</span>
+<span class="code-val">あなたはシニアバックエンドエンジニアです。</span>
+<span class="code-val">TypeScript / Node.js を使用します。</span>
+
+<span class="code-key">## コーディング規約</span>
+<span class="code-val">- 関数は単一責任原則に従う</span>
+<span class="code-val">- テストは必ず書く（カバレッジ 80% 以上）</span>
+<span class="code-val">- コミットメッセージは conventional commits 形式</span>
+
+<span class="code-key">## 禁止事項</span>
+<span class="code-val">- main ブランチへの直接プッシュ禁止</span>
+<span class="code-val">- 未テストのコードをコミットしない</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Agent SDK -->
+    <div class="section">
+      <div class="section-title">Claude Agent SDK — エージェントシステムの構築基盤</div>
+      <div class="card">
+        <h3>Agent SDK とは</h3>
+        <p>Claude Agent SDK (旧 Claude Code SDK) は、Claude Code を動かしているエージェントループ・ツール・コンテキスト管理を汎用ライブラリとして提供します。Python / TypeScript 対応で、カスタムのマルチエージェントシステムを構築できます。</p>
+        <ul>
+          <li>Python v0.1.48 / TypeScript v0.2.71 (2026年初頭時点)</li>
+          <li>ツール・フック・MCP・サブエージェント・オーケストレーションパターンを内包</li>
+          <li>Semantic Kernel (Microsoft) との統合に対応</li>
+        </ul>
+      </div>
+
+      <div class="tool-grid">
+        <div class="tool-item"><div class="ti">🔧</div><div class="tn">Tools</div><div class="td">カスタムツール定義</div></div>
+        <div class="tool-item"><div class="ti">🪝</div><div class="tn">Hooks</div><div class="td">ライフサイクルフック</div></div>
+        <div class="tool-item"><div class="ti">🔗</div><div class="tn">MCP Servers</div><div class="td">外部ツール接続</div></div>
+        <div class="tool-item"><div class="ti">🤖</div><div class="tn">Subagents</div><div class="td">サブエージェント起動</div></div>
+        <div class="tool-item"><div class="ti">🎯</div><div class="tn">Orchestration</div><div class="td">タスク割り当て管理</div></div>
+        <div class="tool-item"><div class="ti">📋</div><div class="tn">Context</div><div class="td">コンテキスト管理</div></div>
+      </div>
+    </div>
+
+    <!-- Orchestrator/Subagent Pattern -->
+    <div class="section">
+      <div class="section-title">オーケストレーター / サブエージェント パターン</div>
+      <div class="arch-box">
+        <div class="arch-layers">
+          <div class="arch-layer layer-orchestrator">
+            <div class="arch-layer-icon">🎯</div>
+            <div class="arch-layer-content">
+              <h4>オーケストレーター（プロジェクトリード）</h4>
+              <p>全体を俯瞰しタスクを分解。フィーチャーリードエージェントに委託。全体の品質と一貫性を管理。独立したコンテキストウィンドウを持つ。</p>
+            </div>
+          </div>
+          <div class="arch-arrows">↓ 委託</div>
+          <div class="arch-layer layer-feature">
+            <div class="arch-layer-icon">📋</div>
+            <div class="arch-layer-content">
+              <h4>フィーチャーリードエージェント（中間層）</h4>
+              <p>機能単位のタスクを管理。専門エージェントへ具体的な作業を委託。上位層からは結果のみを返す（コンテキストを汚染しない）。</p>
+            </div>
+          </div>
+          <div class="arch-arrows">↓ 委託</div>
+          <div class="arch-layer layer-specialist">
+            <div class="arch-layer-icon">⚙️</div>
+            <div class="arch-layer-content">
+              <h4>スペシャリストエージェント（実行層）</h4>
+              <p>Data・Logic・API・Test の各専門エージェントが独立した環境で実行。各エージェントは専門ツールのみにアクセス。並列実行で高速化。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Agent Teams -->
+    <div class="section">
+      <div class="section-title">Agent Teams — 並列協調（実験的機能）</div>
+      <div class="grid2">
+        <div class="card">
+          <h3>チームリードとチームメイト</h3>
+          <p>1つのセッションがチームリードとして共有タスクリストを管理。チームメイトが並列コンテキストウィンドウで同時作業。</p>
+          <ul>
+            <li>複数の Claude インスタンスが同時に異なるサブタスクを実行</li>
+            <li>コミュニケーションはダイレクト</li>
+            <li>コンフリクトを自動的に解決</li>
+            <li>変更を継続的にマージ</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>実装フレームワーク例</h3>
+          <p>コミュニティで人気のマルチエージェントフレームワーク:</p>
+          <ul>
+            <li><strong>Metaswarm</strong>: 18エージェント・13スキル・15コマンド・TDD強制・品質ゲート搭載</li>
+            <li><strong>ccswarm</strong>: Git ワークツリーでエージェントを分離し安全な並列開発</li>
+            <li><strong>Claude Agent SDK</strong>: 公式 SDK でカスタムシステムを構築</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Multi-agent frameworks -->
+    <div class="section">
+      <div class="section-title">実際の採用事例</div>
+      <div class="framework-grid">
+        <div class="fw-card">
+          <h3>Stripe Minions</h3>
+          <p>隔離されたVM上で動く自律エージェント群。エンド・ツー・エンドのタスクをワンショットで処理。人間がコードを書かずに週 1,000〜1,300 PR 以上を自動マージ。</p>
+          <div class="fw-tag">週1,300+ PR 自動マージ</div>
+        </div>
+        <div class="fw-card">
+          <h3>Feature Lead パターン</h3>
+          <p>オーケストレーター → Feature Lead → スペシャリスト (Data/Logic/API) の3層構造。各層がコンテキストをクリーンに保ちながら大規模プロジェクトを処理。</p>
+          <div class="fw-tag">エンタープライズ採用</div>
+        </div>
+        <div class="fw-card">
+          <h3>ccswarm (OSS)</h3>
+          <p>Git ワークツリーでエージェントごとに隔離された環境を用意。複数エージェントが同じリポジトリで安全に並列開発。コンフリクトを最小化。</p>
+          <div class="fw-tag">OSS / GitHub Stars急増</div>
+        </div>
+        <div class="fw-card">
+          <h3>Metaswarm (OSS)</h3>
+          <p>18エージェント・13スキル・15コマンドを持つ包括的フレームワーク。TDD強制・品質ゲート・仕様駆動開発を統合。大規模チームの代替として注目。</p>
+          <div class="fw-tag">仕様駆動 / 品質重視</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="insight-box">
+      <h3>Claude Code と GitHub Copilot の使い分け</h3>
+      <p>GitHub Copilot はGitHubのエコシステム内でネイティブに動作し、Issue/PR/Actionsとの統合が深い。Claude Code は開発環境のターミナルやMCPで高度なカスタマイズが可能。<strong>両者を組み合わせる</strong>ことで、GitHub上の自動化（Copilot）と複雑なコーディング・設計タスク（Claude Code）を使い分ける構成が最も効果的です。</p>
+    </div>
+
+    <div class="pager">
+      <a href="page2-github-copilot.html">← GitHub Copilot</a>
+      <a href="page4-roles.html">次へ: 役割分担 →</a>
+    </div>
+  </div>
+</body>
+</html>
