@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GitHubはAI組織の制度OSになる — GitHub × 複数AIエージェント協調 完全ガイド</title>
+  <style>
+    :root { color-scheme: light; font-family: "Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: linear-gradient(135deg, #0d1117 0%, #1a1f2e 50%, #0f2027 100%); color: #e6edf3; min-height: 100vh; }
+    .wrap { max-width: 1040px; margin: 0 auto; padding: 40px 20px 60px; }
+    .nav { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:32px; }
+    .back-link { color: rgba(255,255,255,0.6); text-decoration:none; font-size:14px; }
+    .page-nav { display:flex; gap:8px; flex-wrap:wrap; }
+    .page-nav a { display:inline-block; padding:6px 12px; background:#161b22; border:1px solid #30363d; border-radius:8px; font-size:13px; color:rgba(255,255,255,0.6); text-decoration:none; }
+    .page-nav a.active,.page-nav a:hover { background:#58a6ff; border-color:#58a6ff; color:#fff; }
+    .hero-badge { display:inline-block; background:rgba(88,166,255,0.15); border:1px solid rgba(88,166,255,0.35); border-radius:999px; padding:5px 16px; color:#79c0ff; font-size:12px; margin-bottom:14px; }
+    h1 { margin:0 0 12px; font-size:32px; line-height:1.3; }
+    .g { background: linear-gradient(90deg, #58a6ff, #79c0ff); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+    header p { margin:0; color: rgba(255,255,255,0.67); line-height:1.8; font-size:15px; }
+    .section { margin-top:40px; }
+    .section-title { margin:0 0 18px; font-size:20px; border-left:3px solid #58a6ff; padding-left:14px; }
+    .card { background:#161b22; border:1px solid #30363d; border-radius:16px; padding:24px; }
+    .inst-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:14px; }
+    .inst { border:1px solid #30363d; background:rgba(255,255,255,0.03); border-radius:12px; padding:14px; }
+    .inst h3 { margin:0 0 6px; font-size:14px; }
+    .inst p { margin:0; font-size:12px; line-height:1.6; color: rgba(255,255,255,0.56); }
+    table { width:100%; border-collapse:collapse; }
+    th,td { border-bottom:1px solid #21262d; padding:12px; text-align:left; font-size:13px; }
+    th { background:#21262d; color:rgba(255,255,255,0.66); }
+    .pill-list { display:flex; flex-wrap:wrap; gap:8px; }
+    .pill { background:rgba(88,166,255,0.1); border:1px solid rgba(88,166,255,0.25); color:#79c0ff; border-radius:999px; padding:6px 12px; font-size:12px; }
+    .insight-box { background: linear-gradient(135deg, rgba(88,166,255,0.08), rgba(188,140,255,0.08)); border:1px solid rgba(88,166,255,0.25); border-radius:14px; padding:24px; margin-top:24px; }
+    .insight-box h3 { margin:0 0 8px; color:#79c0ff; font-size:15px; }
+    .insight-box p { margin:0; line-height:1.8; color:rgba(255,255,255,0.72); }
+    .pager { display:flex; justify-content:space-between; margin-top:48px; }
+    .pager a { display:inline-flex; padding:10px 20px; border:1px solid #30363d; border-radius:10px; color:rgba(255,255,255,0.72); text-decoration:none; background:#161b22; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="nav">
+      <a href="index.html" class="back-link">← 目次へ戻る</a>
+      <div class="page-nav">
+        <a href="page1-concepts.html">1</a><a href="page2-github-copilot.html">2</a><a href="page3-claude-agents.html">3</a><a href="page4-roles.html">4</a><a href="page5-workflow.html">5</a><a href="page6-efficiency.html">6</a><a href="page7-tips.html">7</a><a href="page8-future-team.html">8</a><a href="page9-intent-driven.html">9</a><a href="page10-github-os.html" class="active">10</a>
+      </div>
+    </div>
+
+    <header>
+      <div class="hero-badge">PAGE 10 / 10 — FINAL</div>
+      <h1><span class="g">GitHubはAI組織の制度OSになる</span></h1>
+      <p>GitHubをコード管理ツールとしてだけでなく、AIと人間が協働する制度空間として再解釈する。<br>Issue・PR・Review・Merge・Actions・Branch は、開発作業と統治をつなぐ制度部品になっていく。</p>
+    </header>
+
+    <div class="section">
+      <div class="section-title">GitHubの再解釈：制度として読む</div>
+      <div class="inst-grid">
+        <div class="inst"><h3>Issue</h3><p>課題/提案の起点。問いを制度に載せる入口。</p></div>
+        <div class="inst"><h3>Pull Request</h3><p>変更提案。仮説を公開し、審議可能にする単位。</p></div>
+        <div class="inst"><h3>Review</h3><p>批評と審議。技術品質と制度整合のチェック。</p></div>
+        <div class="inst"><h3>Merge</h3><p>制度的承認。開発操作であり統治行為でもある。</p></div>
+        <div class="inst"><h3>Actions</h3><p>執行機構。承認されたルールを自動的に実施する。</p></div>
+        <div class="inst"><h3>Branch</h3><p>仮説の並行試行。失敗を隔離し学習を蓄積する。</p></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">従来との比較</div>
+      <div class="card">
+        <table>
+          <thead><tr><th>視点</th><th>従来</th><th>未来仮説</th></tr></thead>
+          <tbody>
+            <tr><td>GitHubの位置づけ</td><td>ソースコード管理ツール</td><td>AIと人間の協働制度プラットフォーム</td></tr>
+            <tr><td>主な価値</td><td>履歴管理・差分共有</td><td>権限・承認・監査・執行の統合</td></tr>
+            <tr><td>競争優位</td><td>実装速度</td><td>制度運用の精度と継続性</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">制度として必要な機能</div>
+      <div class="pill-list">
+        <span class="pill">権限</span><span class="pill">監査</span><span class="pill">履歴</span><span class="pill">承認</span><span class="pill">ロールバック</span><span class="pill">例外処理</span>
+      </div>
+      <div class="card" style="margin-top:14px;">
+        <p style="margin:0;line-height:1.8;color:rgba(255,255,255,0.72);font-size:14px;">AIが増えるほど、自由度だけでは運用が不安定になる。制度が弱い組織では、出力が増えても品質と責任の所在が曖昧になる。逆に制度が明確な組織は、AIの速度を安全に競争力へ変換できる。</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">創造的提案：repoごとに AI運用憲章を置く</div>
+      <div class="card">
+        <ul style="margin:0;padding-left:18px;line-height:1.8;color:rgba(255,255,255,0.72);font-size:14px;">
+          <li><strong>constitution.md</strong>：意図・原則・優先順位を定義する。</li>
+          <li><strong>governance.md</strong>：権限・承認ルール・レビュー責務を規定する。</li>
+          <li><strong>escalation.md</strong>：例外時のエスカレーション経路を固定する。</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="insight-box">
+      <h3>まとめ</h3>
+      <p>AI活用の本質は自動化だけではなく、制度設計である。AI開発の本質は、コード生成の自動化ではなく、AIたちが協働する制度と問いの設計へ移りつつある。</p>
+    </div>
+
+    <div class="pager">
+      <a href="page9-intent-driven.html">← 前へ: Intent-Driven 開発</a>
+      <a href="index.html">目次へ戻る →</a>
+    </div>
+  </div>
+</body>
+</html>

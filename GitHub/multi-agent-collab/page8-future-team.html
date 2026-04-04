@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>2030年の開発チーム予想図 — GitHub × 複数AIエージェント協調 完全ガイド</title>
+  <style>
+    :root { color-scheme: light; font-family: "Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: linear-gradient(135deg, #0d1117 0%, #1a1f2e 50%, #0f2027 100%); color: #e6edf3; min-height: 100vh; }
+    .wrap { max-width: 1040px; margin: 0 auto; padding: 40px 20px 60px; }
+    .nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; flex-wrap: wrap; gap: 12px; }
+    .back-link { display: inline-flex; align-items: center; gap: 6px; color: rgba(255,255,255,0.6); text-decoration: none; font-size: 14px; transition: color .2s; }
+    .back-link:hover { color: #fff; }
+    .page-nav { display: flex; gap: 8px; flex-wrap: wrap; }
+    .page-nav a { display: inline-block; padding: 6px 12px; border-radius: 8px; font-size: 13px; text-decoration: none; background: #161b22; border: 1px solid #30363d; color: rgba(255,255,255,0.6); transition: all .2s; }
+    .page-nav a:hover, .page-nav a.active { background: #58a6ff; border-color: #58a6ff; color: #fff; }
+    header { margin-bottom: 40px; }
+    .hero-badge { display: inline-block; background: rgba(88,166,255,0.15); border: 1px solid rgba(88,166,255,0.35); border-radius: 100px; padding: 5px 16px; font-size: 12px; color: #79c0ff; margin-bottom: 14px; }
+    header h1 { font-size: 32px; font-weight: 800; margin: 0 0 12px; line-height: 1.3; }
+    .g { background: linear-gradient(90deg, #58a6ff, #79c0ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    header p { margin: 0; color: rgba(255,255,255,0.65); font-size: 15px; line-height: 1.8; }
+    .section { margin-bottom: 40px; }
+    .section-title { font-size: 20px; font-weight: 700; color: #e6edf3; margin: 0 0 20px; padding-left: 14px; border-left: 3px solid #58a6ff; }
+    .card { background: #161b22; border: 1px solid #30363d; border-radius: 16px; padding: 24px; }
+    .points { margin: 0; padding-left: 18px; }
+    .points li { margin-bottom: 10px; color: rgba(255,255,255,0.72); line-height: 1.7; font-size: 14px; }
+    .future-map { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+    .node { background: rgba(255,255,255,0.03); border: 1px solid #30363d; border-radius: 12px; padding: 14px; }
+    .node h3 { margin: 0 0 6px; font-size: 14px; }
+    .node p { margin: 0; font-size: 12px; line-height: 1.6; color: rgba(255,255,255,0.56); }
+    .lead-node { grid-column: 1 / -1; text-align: center; background: rgba(88,166,255,0.1); border: 1px solid rgba(88,166,255,0.35); }
+    .lead-node h3 { font-size: 18px; color: #79c0ff; }
+    .compare-table { width: 100%; border-collapse: collapse; }
+    .compare-table th,.compare-table td { border-bottom: 1px solid #21262d; padding: 13px; text-align: left; font-size: 13px; vertical-align: top; }
+    .compare-table th { background:#21262d; color: rgba(255,255,255,0.68); }
+    .asset-shift { display: grid; grid-template-columns: 1fr auto 1fr; gap: 14px; align-items: center; }
+    .shift-card { background: rgba(255,255,255,0.03); border: 1px solid #30363d; border-radius: 12px; padding: 16px; }
+    .shift-card h3 { margin: 0 0 8px; font-size: 14px; }
+    .shift-card ul { margin: 0; padding-left: 16px; }
+    .shift-card li { font-size: 12px; color: rgba(255,255,255,0.62); line-height: 1.6; }
+    .arrow { font-size: 24px; color: #79c0ff; }
+    .insight-box { background: linear-gradient(135deg, rgba(88,166,255,0.08), rgba(188,140,255,0.08)); border: 1px solid rgba(88,166,255,0.25); border-radius: 14px; padding: 24px; }
+    .insight-box h3 { font-size: 15px; margin: 0 0 10px; color:#79c0ff; }
+    .insight-box p { margin: 0; line-height: 1.8; color: rgba(255,255,255,0.72); }
+    .pager { display: flex; justify-content: space-between; margin-top: 48px; }
+    .pager a { display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px; background: #161b22; border: 1px solid #30363d; border-radius: 10px; text-decoration: none; color: rgba(255,255,255,0.7); font-size: 14px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="nav">
+      <a href="index.html" class="back-link">← 目次へ戻る</a>
+      <div class="page-nav">
+        <a href="page1-concepts.html">1</a><a href="page2-github-copilot.html">2</a><a href="page3-claude-agents.html">3</a><a href="page4-roles.html">4</a><a href="page5-workflow.html">5</a><a href="page6-efficiency.html">6</a><a href="page7-tips.html">7</a><a href="page8-future-team.html" class="active">8</a><a href="page9-intent-driven.html">9</a><a href="page10-github-os.html">10</a>
+      </div>
+    </div>
+
+    <header>
+      <div class="hero-badge">PAGE 08 / 10</div>
+      <h1><span class="g">2030年の開発チーム予想図</span></h1>
+      <p>予兆ベースで見ると、開発の単位は「個人開発者」から「人間 + 専門AIチーム」へ移る可能性がある。<br>未来の競争優位は、コード量よりも制度設計と役割設計に宿る。</p>
+    </header>
+
+    <div class="section">
+      <div class="section-title">未来チームの全体像：Human Lead を中心にした少人数・高密度構成</div>
+      <div class="card">
+        <div class="future-map">
+          <div class="node lead-node"><h3>🧑‍💼 Human Lead</h3><p>意図定義・承認判断・例外対応・優先順位の最終責任を持つ。</p></div>
+          <div class="node"><h3>AI PM</h3><p>intent と spec の更新、優先順位管理、進捗の可視化。</p></div>
+          <div class="node"><h3>AI Developer Swarm</h3><p>機能単位で並列実装し、短サイクルで成果物を提出。</p></div>
+          <div class="node"><h3>AI Reviewer</h3><p>差分批評、リスク検知、設計逸脱の指摘を継続実行。</p></div>
+          <div class="node"><h3>AI Security / Compliance</h3><p>制度・規約・法務観点のチェックを常時走査。</p></div>
+          <div class="node"><h3>AI Historian / Memory Agent</h3><p>過去意思決定とプロジェクト記憶を保持し再利用する。</p></div>
+          <div class="node"><h3>AI Cost / Complexity Critic</h3><p>過剰実装やコスト肥大化を抑制し、複雑性を管理。</p></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">現在との比較：なぜ「役割設計」が主戦場になるのか</div>
+      <div class="card">
+        <table class="compare-table">
+          <thead><tr><th>観点</th><th>2025年型チーム</th><th>2030年仮説チーム</th></tr></thead>
+          <tbody>
+            <tr><td>基本単位</td><td>人数中心の分業</td><td>人間1人 + AI役割分化</td></tr>
+            <tr><td>ボトルネック</td><td>会議・同期・認識合わせ</td><td>ハンドオフ品質・承認設計</td></tr>
+            <tr><td>競争優位</td><td>採用力・実装速度</td><td>制度・ガードレール・運用設計</td></tr>
+            <tr><td>構造変化</td><td>実装プロセス中心</td><td>意図と制度を起点にした実装</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">新しい資産：コード資産から組織設計資産へ</div>
+      <div class="asset-shift">
+        <div class="shift-card">
+          <h3>従来の主要資産</h3>
+          <ul><li>コードベース</li><li>ライブラリ再利用</li><li>属人的ノウハウ</li></ul>
+        </div>
+        <div class="arrow">→</div>
+        <div class="shift-card">
+          <h3>次の3年で重くなる資産</h3>
+          <ul><li>role definitions</li><li>handoff artifacts</li><li>approval rules</li><li>guardrails</li><li>shared memory / project memory</li></ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="insight-box">
+      <h3>重要な示唆</h3>
+      <p>開発力の差はモデル性能の差だけでは説明しにくくなり、AIチーム設計力の差として現れる可能性が高い。未来のリポジトリ価値は「コード + 役割定義 + 承認制度 + 記憶基盤」の総体で測られる。</p>
+    </div>
+
+    <div class="pager">
+      <a href="page7-tips.html">← 前へ: コミュニティ Tips</a>
+      <a href="page9-intent-driven.html">次へ: Intent-Driven 開発 →</a>
+    </div>
+  </div>
+</body>
+</html>
