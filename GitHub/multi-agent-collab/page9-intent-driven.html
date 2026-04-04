@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Spec-Driven の次に来る Intent-Driven 開発 — GitHub × 複数AIエージェント協調 完全ガイド</title>
+  <style>
+    :root { color-scheme: light; font-family: "Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: linear-gradient(135deg, #0d1117 0%, #1a1f2e 50%, #0f2027 100%); color: #e6edf3; min-height: 100vh; }
+    .wrap { max-width: 1040px; margin: 0 auto; padding: 40px 20px 60px; }
+    .nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; flex-wrap: wrap; gap: 12px; }
+    .back-link { display: inline-flex; align-items: center; gap: 6px; color: rgba(255,255,255,0.6); text-decoration: none; font-size: 14px; }
+    .page-nav { display: flex; gap: 8px; flex-wrap: wrap; }
+    .page-nav a { display: inline-block; padding: 6px 12px; border-radius: 8px; font-size: 13px; text-decoration: none; background: #161b22; border: 1px solid #30363d; color: rgba(255,255,255,0.6); }
+    .page-nav a.active, .page-nav a:hover { background: #58a6ff; border-color: #58a6ff; color: #fff; }
+    .hero-badge { display: inline-block; background: rgba(88,166,255,0.15); border: 1px solid rgba(88,166,255,0.35); border-radius: 100px; padding: 5px 16px; font-size: 12px; color: #79c0ff; margin-bottom: 14px; }
+    header h1 { font-size: 32px; margin: 0 0 12px; line-height: 1.3; }
+    .g { background: linear-gradient(90deg, #58a6ff, #79c0ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    header p { margin: 0; color: rgba(255,255,255,0.66); line-height: 1.8; font-size: 15px; }
+    .section { margin-top: 40px; }
+    .section-title { font-size: 20px; margin: 0 0 18px; border-left: 3px solid #58a6ff; padding-left: 14px; }
+    .card { background: #161b22; border: 1px solid #30363d; border-radius: 16px; padding: 24px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+    .mini { background: rgba(255,255,255,0.03); border: 1px solid #30363d; border-radius: 12px; padding: 14px; }
+    .mini h3 { margin: 0 0 6px; font-size: 14px; }
+    .mini p { margin: 0; font-size: 12px; line-height: 1.6; color: rgba(255,255,255,0.58); }
+    .flow-wrap { display:flex; align-items:stretch; overflow-x:auto; border: 1px solid #30363d; border-radius: 14px; background:#161b22; padding: 14px; }
+    .flow-item { min-width: 130px; text-align:center; padding: 8px; }
+    .flow-item .f1 { font-size: 11px; color: rgba(255,255,255,0.45); }
+    .flow-item .f2 { font-size: 14px; font-weight: 700; margin-top: 4px; }
+    .flow-arrow { color:#79c0ff; font-size:18px; padding-top: 16px; }
+    table { width: 100%; border-collapse: collapse; }
+    th,td { border-bottom: 1px solid #21262d; padding: 12px; text-align:left; font-size:13px; vertical-align: top; }
+    th { background:#21262d; color: rgba(255,255,255,0.66); }
+    .insight-box { background: linear-gradient(135deg, rgba(88,166,255,0.08), rgba(188,140,255,0.08)); border: 1px solid rgba(88,166,255,0.25); border-radius: 14px; padding: 24px; margin-top: 24px; }
+    .insight-box h3 { margin: 0 0 8px; color: #79c0ff; font-size: 15px; }
+    .insight-box p { margin: 0; line-height: 1.8; color: rgba(255,255,255,0.72); }
+    .pager { display: flex; justify-content: space-between; margin-top: 48px; }
+    .pager a { display:inline-flex; align-items:center; padding:10px 20px; border:1px solid #30363d; border-radius:10px; background:#161b22; color: rgba(255,255,255,0.72); text-decoration:none; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="nav">
+      <a href="index.html" class="back-link">← 目次へ戻る</a>
+      <div class="page-nav">
+        <a href="page1-concepts.html">1</a><a href="page2-github-copilot.html">2</a><a href="page3-claude-agents.html">3</a><a href="page4-roles.html">4</a><a href="page5-workflow.html">5</a><a href="page6-efficiency.html">6</a><a href="page7-tips.html">7</a><a href="page8-future-team.html">8</a><a href="page9-intent-driven.html" class="active">9</a><a href="page10-github-os.html">10</a>
+      </div>
+    </div>
+
+    <header>
+      <div class="hero-badge">PAGE 09 / 10</div>
+      <h1><span class="g">Spec-Driven の次に来る Intent-Driven 開発</span></h1>
+      <p>仕様は正しさを作るが、意図は方向を作る。AIが強くなるほど、上流の曖昧さは実装リスクへ直結する。<br>そのため spec.md の前に intent.md を置く設計が、次の3年の実務で重要になる可能性がある。</p>
+    </header>
+
+    <div class="section">
+      <div class="section-title">spec-driven の限界</div>
+      <div class="card">
+        <ul style="margin:0;padding-left:18px;line-height:1.8;color:rgba(255,255,255,0.72);font-size:14px;">
+          <li>仕様通りに実装できても、なぜ作るかが弱いと成果は分散する。</li>
+          <li>優先順位が曖昧なままだと、AIは局所最適を量産しやすい。</li>
+          <li>禁止事項や美意識が未定義だと、品質が「正しいが違和感がある」状態になる。</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">intent.md の役割：方向性を固定する文書</div>
+      <div class="grid">
+        <div class="mini"><h3>なぜ作るのか</h3><p>課題背景と制度上の目的を定義する。</p></div>
+        <div class="mini"><h3>誰の痛みを解くか</h3><p>対象ユーザーと痛みの優先順位を明確化。</p></div>
+        <div class="mini"><h3>何をやらないか</h3><p>意図的に捨てる要素を明文化して暴走を防ぐ。</p></div>
+        <div class="mini"><h3>価値の優先順位</h3><p>速度・信頼性・体験・コストなどの序列を明示。</p></div>
+        <div class="mini"><h3>守る体験や思想</h3><p>プロダクトの一貫性を維持する設計原則を固定。</p></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">フロー図：Intent から Validation まで</div>
+      <div class="flow-wrap">
+        <div class="flow-item"><div class="f1">01</div><div class="f2">intent.md</div></div><div class="flow-arrow">→</div>
+        <div class="flow-item"><div class="f1">02</div><div class="f2">spec.md</div></div><div class="flow-arrow">→</div>
+        <div class="flow-item"><div class="f1">03</div><div class="f2">plan.md</div></div><div class="flow-arrow">→</div>
+        <div class="flow-item"><div class="f1">04</div><div class="f2">tasks.md</div></div><div class="flow-arrow">→</div>
+        <div class="flow-item"><div class="f1">05</div><div class="f2">implementation</div></div><div class="flow-arrow">→</div>
+        <div class="flow-item"><div class="f1">06</div><div class="f2">validation</div></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">比較：Issue-Driven / Spec-Driven / Intent-Driven</div>
+      <div class="card">
+        <table>
+          <thead><tr><th>方式</th><th>強み</th><th>弱み</th><th>適した局面</th></tr></thead>
+          <tbody>
+            <tr><td>Issue-Driven</td><td>着手が速い</td><td>方向性の統制が弱い</td><td>小修正・短期対応</td></tr>
+            <tr><td>Spec-Driven</td><td>正確性と再現性</td><td>意図の濃度が不足しがち</td><td>中規模以上の実装</td></tr>
+            <tr><td>Intent-Driven</td><td>構造変化に強い意思決定</td><td>上流設計の負荷が高い</td><td>AI協働・長期プロダクト戦略</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="insight-box">
+      <h3>結論</h3>
+      <p>AI時代の上流工程は削減されるのではなく、むしろ濃くなる。人間の役割は仕様を書く人から、意図を定義し続ける人へシフトする。意図が弱い組織ほど、実装速度が上がっても方向を見失うリスクが上がる。</p>
+    </div>
+
+    <div class="pager">
+      <a href="page8-future-team.html">← 前へ: 2030年の開発チーム予想図</a>
+      <a href="page10-github-os.html">次へ: GitHubはAI組織の制度OSになる →</a>
+    </div>
+  </div>
+</body>
+</html>
