@@ -43,6 +43,13 @@ GitHub Pages を有効化している場合、以下で公開されます。
 - 保存先: `GitHub/playwright-mcp-copilot/index.html`
 - MCPの接続・設定、画面操作、認証、障害調査、回帰テストを全16章で解説。
 
+## パスキー 徹底解説・技術ガイド
+
+- [ガイドを開く](https://nakajima-masahiko.github.io/infographicsPublic/passkey/technical-guide/)
+- 保存先: `passkey/technical-guide/index.html`
+- WebAuthnの仕組み、同期型と端末固定型、RP ID / Origin、登録・認証、公開鍵保存、実装例、既存Java / BFF連携、復旧、試験、段階展開を全18章で解説。
+- 目次、通信フロー切替、コードコピー、障害表の絞り込み、設計チェック保存・出力、印刷レイアウトを用意。コードは学習・設計用の例です。
+
 ## ローカル確認
 
 ビルド不要で、静的サーバーで確認できます。
