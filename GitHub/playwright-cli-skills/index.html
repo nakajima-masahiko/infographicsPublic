@@ -53,9 +53,7 @@ mkdir tests</code></pre></div><div class="code"><div class="code-head"><span>tes
 
 test('追加したタスクを完了にできる', async ({ page }) =&gt; {
   await page.goto('https://demo.playwright.dev/todomvc/');
-  const input = page.getByRole('textbox', {
-    name: 'What needs to be done?'
-  });
+  const input = page.getByPlaceholder('What needs to be done?');
   await input.fill('ガイドを読む');
   await input.press('Enter');
 
@@ -89,9 +87,7 @@ npx playwright test --project=mobile-webkit</code></pre></div><p>WebKitによる
 
 test('初期表示のレイアウト', async ({ page }) =&gt; {
   await page.goto('https://demo.playwright.dev/todomvc/');
-  await expect(page.getByRole('textbox', {
-    name: 'What needs to be done?'
-  })).toBeVisible();
+  await expect(page.getByPlaceholder('What needs to be done?')).toBeVisible();
   await expect(page).toHaveScreenshot('todo-start.png', {
     animations: 'disabled'
   });
