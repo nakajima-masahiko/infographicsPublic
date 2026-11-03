@@ -31,6 +31,12 @@ GitHub Pages を有効化している場合、以下で公開されます。
 例:
 - `https://nakajima-masahiko.github.io/infographicsPublic/`
 
+## Playwright CLI＋Skills 実践ガイド
+
+- [ガイドを開く](https://nakajima-masahiko.github.io/infographicsPublic/GitHub/playwright-cli-skills/)
+- 保存先: `GitHub/playwright-cli-skills/index.html`
+- Windows / PowerShell、GitHub Copilot、ブラウザ操作、Playwright Test、CIを全15章で解説。
+
 ## ローカル確認
 
 ビルド不要で、静的サーバーで確認できます。
