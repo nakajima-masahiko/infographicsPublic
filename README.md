@@ -37,6 +37,12 @@ GitHub Pages を有効化している場合、以下で公開されます。
 - 保存先: `GitHub/playwright-cli-skills/index.html`
 - Windows / PowerShell、GitHub Copilot、ブラウザ操作、Playwright Test、CIを全15章で解説。
 
+## Playwright MCP＋GitHub Copilot 実践ガイド
+
+- [ガイドを開く](https://nakajima-masahiko.github.io/infographicsPublic/GitHub/playwright-mcp-copilot/)
+- 保存先: `GitHub/playwright-mcp-copilot/index.html`
+- MCPの接続・設定、画面操作、認証、障害調査、回帰テストを全16章で解説。
+
 ## ローカル確認
 
 ビルド不要で、静的サーバーで確認できます。

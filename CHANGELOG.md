@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Playwright MCP＋GitHub Copilotの日本語実践ガイド（全16章）を追加。
+- MCPとCLIのガイドに相互リンクを追加し、一覧・READMEからの導線を整備。
 - Playwright CLI＋Skillsの日本語実践ガイド（全15章）を追加。
 - GitHub / AI開発カテゴリとREADMEにガイドへのリンクを追加。
 - コマンドのコピー・絞り込み、導入チェック保存、印刷レイアウトを追加。
